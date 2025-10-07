@@ -28,6 +28,8 @@ import {
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import CloseIcon from '@mui/icons-material/Close';
 import ThumbDownIcon from '@mui/icons-material/ThumbDown';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import DownloadIcon from '@mui/icons-material/Download';
@@ -42,6 +44,12 @@ const Dashboard = () => {
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [motivoRechazo, setMotivoRechazo] = useState('');
   const [cvToReject, setCvToReject] = useState(null);
+  
+  // Estados para vista previa
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState('');
+  const [previewFileName, setPreviewFileName] = useState('');
+  const [previewLoading, setPreviewLoading] = useState(false);
 
   const fetchCVs = async (status) => {
     const q = query(collection(db, 'cv'), where('estado', '==', status));
@@ -187,6 +195,39 @@ const Dashboard = () => {
     }
   };
 
+  // Función para abrir vista previa
+  const handlePreviewCV = async (cv) => {
+    if (!cv.cv) {
+      showAlert('Error', 'No se encontró el archivo del CV.', 'error');
+      return;
+    }
+
+    try {
+      setPreviewLoading(true);
+      setPreviewOpen(true);
+      
+      console.log('📄 Abriendo vista previa para:', cv.cv);
+      const downloadUrl = await getDownloadUrl(cv.cv);
+      
+      setPreviewUrl(downloadUrl);
+      setPreviewFileName(`${cv.Nombre}_${cv.Apellido}_CV`);
+      setPreviewLoading(false);
+    } catch (error) {
+      console.error('❌ Error al obtener URL de vista previa:', error);
+      showAlert('Error', 'No se pudo cargar la vista previa del CV.', 'error');
+      setPreviewLoading(false);
+      setPreviewOpen(false);
+    }
+  };
+
+  // Función para cerrar vista previa
+  const handleClosePreview = () => {
+    setPreviewOpen(false);
+    setPreviewUrl('');
+    setPreviewFileName('');
+    setPreviewLoading(false);
+  };
+
   return (
     <div>
       <Button onClick={() => setCurrentView('active')}>Activos</Button>
@@ -219,15 +260,28 @@ const Dashboard = () => {
                   </TableCell>
                 )}
                 <TableCell>
-                  <IconButton onClick={() => handleDownload(cv)}><DownloadIcon /></IconButton>
+                  <IconButton onClick={() => handlePreviewCV(cv)} title="Ver CV">
+                    <VisibilityIcon />
+                  </IconButton>
+                  <IconButton onClick={() => handleDownload(cv)} title="Descargar CV">
+                    <DownloadIcon />
+                  </IconButton>
                   {currentView !== 'active' && (
                     <>
-                      <IconButton onClick={() => handleApprove(cv)}><ThumbUpIcon /></IconButton>
-                      <IconButton onClick={() => handleRejectClick(cv)}><ThumbDownIcon /></IconButton>
-                      <IconButton onClick={() => handleEdit(cv)}><EditIcon /></IconButton>
+                      <IconButton onClick={() => handleApprove(cv)} title="Aprobar">
+                        <ThumbUpIcon />
+                      </IconButton>
+                      <IconButton onClick={() => handleRejectClick(cv)} title="Rechazar">
+                        <ThumbDownIcon />
+                      </IconButton>
+                      <IconButton onClick={() => handleEdit(cv)} title="Editar">
+                        <EditIcon />
+                      </IconButton>
                     </>
                   )}
-                  <IconButton onClick={() => handleDelete(cv)}><DeleteForeverIcon /></IconButton>
+                  <IconButton onClick={() => handleDelete(cv)} title="Eliminar">
+                    <DeleteForeverIcon />
+                  </IconButton>
                 </TableCell>
               </TableRow>
             ))}
@@ -261,6 +315,87 @@ const Dashboard = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Modal de Vista Previa */}
+      <Modal
+        open={previewOpen}
+        onClose={handleClosePreview}
+        aria-labelledby="preview-modal-title"
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}
+      >
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '90%',
+            height: '90%',
+            bgcolor: 'background.paper',
+            border: '2px solid #000',
+            boxShadow: 24,
+            p: 4,
+            display: 'flex',
+            flexDirection: 'column'
+          }}
+        >
+          {/* Header del modal */}
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+            <Typography variant="h6" component="h2" id="preview-modal-title">
+              Vista Previa: {previewFileName}
+            </Typography>
+            <IconButton onClick={handleClosePreview} size="small">
+              <CloseIcon />
+            </IconButton>
+          </Box>
+
+          {/* Contenido del modal */}
+          <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            {previewLoading ? (
+              <CircularProgress size={60} />
+            ) : previewUrl ? (
+              <iframe
+                src={previewUrl}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  border: 'none'
+                }}
+                title={`Vista previa de ${previewFileName}`}
+              />
+            ) : (
+              <Typography>No se pudo cargar la vista previa</Typography>
+            )}
+          </Box>
+
+          {/* Botones de acción */}
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2 }}>
+            <Button onClick={handleClosePreview} variant="outlined">
+              Cerrar
+            </Button>
+            {previewUrl && (
+              <Button
+                variant="contained"
+                onClick={() => {
+                  const link = document.createElement('a');
+                  link.href = previewUrl;
+                  link.download = previewFileName;
+                  link.target = '_blank';
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                }}
+              >
+                Descargar
+              </Button>
+            )}
+          </Box>
+        </Box>
+      </Modal>
     </div>
   );
 };
