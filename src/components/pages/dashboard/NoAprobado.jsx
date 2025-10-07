@@ -44,10 +44,16 @@ const NoAprobado = () => {
 
   const handleDownloadCV = async (fileId) => {
     try {
-      // Si es una URL directa (CV antiguo), abrirla directamente
+      // Si es una URL directa (CV antiguo), descargarla directamente
       if (isUrl(fileId)) {
-        console.log('✅ Abriendo URL directa (CV antiguo)');
-        window.open(fileId, "_blank");
+        console.log('✅ Descargando URL directa (CV antiguo)');
+        const link = document.createElement('a');
+        link.href = fileId;
+        link.download = 'CV_Rechazado';
+        link.target = '_blank';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
         return;
       }
 
@@ -66,8 +72,14 @@ const NoAprobado = () => {
       
       Swal.close();
       
-      // Abrir archivo
-      window.open(downloadUrl, "_blank");
+      // Forzar descarga directa del archivo
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = 'CV_Rechazado'; // Nombre genérico para CVs rechazados
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     } catch (error) {
       console.error('❌ Error al obtener URL:', error);
       Swal.fire('Error', 'No se pudo obtener el archivo.', 'error');

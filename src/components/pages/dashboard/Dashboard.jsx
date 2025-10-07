@@ -153,10 +153,16 @@ const Dashboard = () => {
   const handleDownload = async (cv) => {
     if (cv.cv) {
       try {
-        // Si es una URL directa (CV antiguo), abrirla directamente
+        // Si es una URL directa (CV antiguo), descargarla directamente
         if (isUrl(cv.cv)) {
-          console.log('✅ Abriendo URL directa (CV antiguo)');
-          window.open(cv.cv, '_blank');
+          console.log('✅ Descargando URL directa (CV antiguo)');
+          const link = document.createElement('a');
+          link.href = cv.cv;
+          link.download = cv.Nombre + '_' + cv.Apellido + '_CV';
+          link.target = '_blank';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
           return;
         }
 
@@ -175,8 +181,14 @@ const Dashboard = () => {
         
         Swal.close();
         
-        // Abrir archivo en nueva pestaña
-        window.open(downloadUrl, '_blank');
+        // Forzar descarga directa del archivo
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.download = cv.Nombre + '_' + cv.Apellido + '_CV'; // Nombre del archivo
+        link.target = '_blank';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
       } catch (error) {
         console.error('❌ Error al obtener URL de descarga:', error);
         showAlert('Error', 'No se pudo obtener el archivo. Inténtalo nuevamente.', 'error');
