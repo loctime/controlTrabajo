@@ -94,12 +94,20 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
       console.log(`✅ ${type} subido con ID:`, fileId);
       
       // 3. Crear enlace público para que el admin pueda verlo
-      console.log(`🔗 Creando enlace público para ${type}...`);
-      const shareUrl = await createPublicShareLink(fileId, 8760); // 1 año
-      console.log(`✅ Enlace público creado:`, shareUrl);
+      console.log(`🔗 Creando enlace público para ${type} con fileId:`, fileId);
+      try {
+        const shareUrl = await createPublicShareLink(fileId, 8760); // 1 año
+        console.log(`✅ Enlace público creado:`, shareUrl);
+        
+        // Guardar el enlace público en lugar del fileId
+        setNewCv((prevCv) => ({ ...prevCv, [type]: shareUrl }));
+      } catch (shareError) {
+        console.error(`❌ Error creando share link para ${type}:`, shareError);
+        // Si falla el share link, guardar el fileId directamente
+        console.log(`⚠️ Guardando fileId directamente como fallback`);
+        setNewCv((prevCv) => ({ ...prevCv, [type]: fileId }));
+      }
       
-      // Guardar el enlace público en lugar del fileId
-      setNewCv((prevCv) => ({ ...prevCv, [type]: shareUrl }));
       Swal.fire("Carga exitosa", `${type} cargado con éxito.`, "success");
 
       if (type === "Foto") {

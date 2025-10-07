@@ -3,6 +3,8 @@ import { collection, getDocs, deleteDoc, doc, updateDoc } from "firebase/firesto
 import { db } from "../../../firebaseConfig";
 import { getDownloadUrl } from "../../../lib/controlFileStorage";
 import ControlFileAvatar from "../../common/ControlFileAvatar";
+
+const BACKEND = import.meta.env.VITE_CONTROLFILE_BACKEND;
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, IconButton, Grid, Modal, Box } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
@@ -44,20 +46,7 @@ const NoAprobado = () => {
 
   const handleDownloadCV = async (fileId) => {
     try {
-      // Si es una URL directa (CV antiguo), descargarla directamente
-      if (isUrl(fileId)) {
-        console.log('✅ Descargando URL directa (CV antiguo)');
-        const link = document.createElement('a');
-        link.href = fileId;
-        link.download = 'CV_Rechazado';
-        link.target = '_blank';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        return;
-      }
-
-      // Si es un fileId de ControlFile, obtener URL temporal
+      // Mostrar loading
       Swal.fire({
         title: 'Obteniendo archivo...',
         text: 'Por favor espera',
@@ -67,15 +56,15 @@ const NoAprobado = () => {
         }
       });
 
-      console.log('📥 Obteniendo URL de ControlFile para fileId:', fileId);
+      console.log('📥 Obteniendo URL de descarga para:', fileId);
       const downloadUrl = await getDownloadUrl(fileId);
       
       Swal.close();
       
-      // Forzar descarga directa del archivo
+      // Descargar archivo directamente
       const link = document.createElement('a');
       link.href = downloadUrl;
-      link.download = 'CV_Rechazado'; // Nombre genérico para CVs rechazados
+      link.download = 'CV_Rechazado';
       link.target = '_blank';
       document.body.appendChild(link);
       link.click();

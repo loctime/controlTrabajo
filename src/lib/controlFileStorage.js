@@ -76,9 +76,9 @@ export async function uploadFile(file, parentId = null, onProgress) {
 export async function getDownloadUrl(fileIdOrShareUrl) {
   // Si ya es una URL, determinar si es share link o URL directa
   if (isUrl(fileIdOrShareUrl)) {
-    // Si es un enlace de compartido de ControlFile, convertir a descarga directa
-    if (fileIdOrShareUrl.includes('/s/')) {
-      console.log('✅ Es un share link, convirtiendo a descarga directa...');
+    // Si es un enlace de compartido de ControlFile, usar la API correcta
+    if (fileIdOrShareUrl.includes('/s/') || fileIdOrShareUrl.includes('/share/')) {
+      console.log('✅ Es un share link, obteniendo URL de descarga directa...');
       return await getDirectDownloadUrl(fileIdOrShareUrl);
     }
     
@@ -191,17 +191,46 @@ export async function createPublicShareLink(fileId, expiresInHours = 720) {
 export async function getDirectDownloadUrl(shareUrl) {
   try {
     // Extraer el token del enlace de compartido
-    const url = new URL(shareUrl);
-    const shareToken = url.pathname.split('/').pop(); // Última parte de la URL
+    let shareToken;
     
-    // Construir la URL de descarga directa
-    const directDownloadUrl = `${BACKEND}/api/shares/download/${shareToken}`;
+    if (shareUrl.includes('/share/')) {
+      shareToken = shareUrl.split('/share/')[1];
+    } else if (shareUrl.includes('/s/')) {
+      shareToken = shareUrl.split('/s/')[1];
+    } else {
+      throw new Error('Formato de share URL no reconocido');
+    }
     
-    console.log('✅ URL de descarga directa:', directDownloadUrl);
-    return directDownloadUrl;
+    console.log('🔗 Obteniendo URL de descarga para shareToken:', shareToken);
+    
+    // Usar la API correcta: POST /api/shares/{token}/download
+    const response = await fetch(`${BACKEND}/api/shares/${shareToken}/download`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('❌ Error del servidor:', errorText);
+      throw new Error(`Error ${response.status}: ${errorText || 'No se pudo obtener la URL de descarga'}`);
+    }
+    
+    const data = await response.json();
+    
+    if (!data.downloadUrl) {
+      throw new Error('El servidor no devolvió una URL de descarga');
+    }
+    
+    console.log('✅ URL de descarga obtenida:', data.downloadUrl);
+    console.log('📁 Nombre del archivo:', data.fileName);
+    console.log('📏 Tamaño del archivo:', data.fileSize, 'bytes');
+    
+    return data.downloadUrl;
   } catch (error) {
-    console.error('❌ Error al extraer URL de descarga directa:', error);
-    throw new Error('No se pudo extraer la URL de descarga directa');
+    console.error('❌ Error al obtener URL de descarga directa:', error);
+    throw new Error(`No se pudo obtener la URL de descarga: ${error.message}`);
   }
 }
 

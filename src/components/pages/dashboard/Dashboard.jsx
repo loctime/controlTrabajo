@@ -3,6 +3,8 @@ import Swal from 'sweetalert2';
 import { db } from '../../../firebaseConfig';
 import { collection, query, where, getDocs, updateDoc, doc, deleteDoc } from 'firebase/firestore';
 import { getDownloadUrl } from '../../../lib/controlFileStorage';
+
+const BACKEND = import.meta.env.VITE_CONTROLFILE_BACKEND;
 import ControlFileAvatar from '../../common/ControlFileAvatar';
 import { 
   Button, 
@@ -153,20 +155,7 @@ const Dashboard = () => {
   const handleDownload = async (cv) => {
     if (cv.cv) {
       try {
-        // Si es una URL directa (CV antiguo), descargarla directamente
-        if (isUrl(cv.cv)) {
-          console.log('✅ Descargando URL directa (CV antiguo)');
-          const link = document.createElement('a');
-          link.href = cv.cv;
-          link.download = cv.Nombre + '_' + cv.Apellido + '_CV';
-          link.target = '_blank';
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          return;
-        }
-
-        // Si es un fileId de ControlFile, obtener URL temporal
+        // Mostrar loading
         Swal.fire({
           title: 'Obteniendo archivo...',
           text: 'Por favor espera',
@@ -176,15 +165,15 @@ const Dashboard = () => {
           }
         });
 
-        console.log('📥 Obteniendo URL de ControlFile para fileId:', cv.cv);
+        console.log('📥 Obteniendo URL de descarga para:', cv.cv);
         const downloadUrl = await getDownloadUrl(cv.cv);
         
         Swal.close();
         
-        // Forzar descarga directa del archivo
+        // Descargar archivo directamente
         const link = document.createElement('a');
         link.href = downloadUrl;
-        link.download = cv.Nombre + '_' + cv.Apellido + '_CV'; // Nombre del archivo
+        link.download = cv.Nombre + '_' + cv.Apellido + '_CV';
         link.target = '_blank';
         document.body.appendChild(link);
         link.click();
