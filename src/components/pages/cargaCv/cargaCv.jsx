@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Button, TextField, Box, Select, MenuItem, Typography, FormControl, InputLabel, FormHelperText } from "@mui/material";
 import { db } from "../../../firebaseConfig";
 import { auth } from "../../../firebaseAuthControlFile";
-import { uploadFile } from "../../../lib/controlFileStorage";
+import { uploadFile, ensureAppFolder } from "../../../lib/controlFileStorage";
 import { addDoc, collection, query, where, getDocs, setDoc, doc } from "firebase/firestore";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
@@ -80,8 +80,19 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
     if (type === "cv") setLoadingCv(true);
 
     try {
-      let url = await uploadFile(file);
-      setNewCv((prevCv) => ({ ...prevCv, [type]: url }));
+      // 1. Crear/obtener carpeta principal "BolsaTrabajo" (con metadata.source: taskbar)
+      console.log('📁 Obteniendo carpeta BolsaTrabajo...');
+      const folderId = await ensureAppFolder();
+      console.log('✅ Carpeta BolsaTrabajo ID:', folderId);
+      
+      // 2. Subir archivo directamente a la carpeta BolsaTrabajo
+      console.log(`📤 Subiendo ${type} a BolsaTrabajo...`);
+      let fileId = await uploadFile(file, folderId, (progress) => {
+        console.log(`Progreso de ${type}: ${progress}%`);
+      });
+      
+      console.log(`✅ ${type} subido con ID:`, fileId);
+      setNewCv((prevCv) => ({ ...prevCv, [type]: fileId }));
       Swal.fire("Carga exitosa", `${type} cargado con éxito.`, "success");
 
       if (type === "Foto") {

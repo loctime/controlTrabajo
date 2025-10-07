@@ -107,26 +107,81 @@ export async function deleteFile(fileId) {
 }
 
 /**
+ * Busca una carpeta por nombre en un parentId específico
+ * @param {string} name - Nombre de la carpeta a buscar
+ * @param {string|null} parentId - ID de carpeta padre (null para raíz)
+ * @returns {Promise<string|null>} folderId si existe, null si no existe
+ */
+async function findFolderByName(name, parentId = null) {
+  const token = await getToken();
+  
+  try {
+    const response = await fetch(
+      `${BACKEND}/api/files/list?parentId=${parentId || 'null'}&pageSize=200`,
+      {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      }
+    );
+    
+    if (!response.ok) return null;
+    
+    const result = await response.json();
+    const folder = result.items?.find(
+      item => item.type === 'folder' && item.name === name
+    );
+    
+    return folder ? folder.id : null;
+  } catch (error) {
+    console.error('Error buscando carpeta:', error);
+    return null;
+  }
+}
+
+/**
  * Crea o obtiene la carpeta principal de la aplicación
+ * Esta carpeta aparecerá en el taskbar de ControlFile
  * @returns {Promise<string>} folderId de la carpeta principal
  */
 export async function ensureAppFolder() {
   const token = await getToken();
   
-  const response = await fetch(
-    `${BACKEND}/api/folders/root?name=BolsaTrabajo&pin=1`,
-    { 
-      headers: { 
-        'Authorization': `Bearer ${token}` 
-      } 
-    }
-  );
+  // 1. Buscar si ya existe la carpeta "BolsaTrabajo" en la raíz
+  console.log('🔍 Buscando carpeta BolsaTrabajo existente...');
+  const existingFolderId = await findFolderByName('BolsaTrabajo', null);
+  
+  if (existingFolderId) {
+    console.log('✅ Carpeta BolsaTrabajo encontrada:', existingFolderId);
+    return existingFolderId;
+  }
+  
+  // 2. Si no existe, crear con source: "taskbar" en ambos lugares
+  console.log('📁 Creando carpeta BolsaTrabajo con source: taskbar...');
+  const response = await fetch(`${BACKEND}/api/folders/create`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify({
+      name: 'BolsaTrabajo',
+      parentId: null,
+      icon: 'Briefcase',
+      color: 'text-purple-600',
+      source: 'taskbar',  // ← A nivel raíz
+      metadata: {
+        source: 'taskbar'  // ← También dentro de metadata por las dudas
+      }
+    })
+  });
   
   if (!response.ok) {
-    throw new Error(`Failed to create app folder: ${response.status}`);
+    throw new Error(`Failed to create taskbar folder: ${response.status}`);
   }
   
   const { folderId } = await response.json();
+  console.log('✅ Carpeta BolsaTrabajo creada:', folderId);
   return folderId;
 }
 
@@ -147,14 +202,23 @@ export async function listFiles(parentId = null) {
 }
 
 /**
- * Crea una subcarpeta
+ * Crea una subcarpeta (o la retorna si ya existe)
  * @param {string} name - Nombre de la carpeta
  * @param {string|null} parentId - ID de carpeta padre
- * @returns {Promise<string>} folderId de la carpeta creada
+ * @returns {Promise<string>} folderId de la carpeta creada o existente
  */
 export async function createFolder(name, parentId = null) {
   const token = await getToken();
   
+  // 1. Primero buscar si ya existe
+  const existingFolderId = await findFolderByName(name, parentId);
+  if (existingFolderId) {
+    console.log(`✅ Carpeta "${name}" ya existe:`, existingFolderId);
+    return existingFolderId;
+  }
+  
+  // 2. Si no existe, crear nueva
+  console.log(`📁 Creando nueva carpeta "${name}"...`);
   const response = await fetch(`${BACKEND}/api/folders/create`, {
     method: 'POST',
     headers: {
@@ -175,6 +239,7 @@ export async function createFolder(name, parentId = null) {
   }
   
   const result = await response.json();
+  console.log(`✅ Carpeta "${name}" creada:`, result.folderId);
   return result.folderId;
 }
 
