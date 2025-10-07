@@ -70,10 +70,24 @@ export async function uploadFile(file, parentId = null, onProgress) {
 
 /**
  * Obtiene URL temporal de descarga (válida por 5 minutos)
- * @param {string} fileId - ID del archivo
+ * @param {string} fileIdOrShareUrl - ID del archivo o URL de compartido
  * @returns {Promise<string>} URL temporal de descarga
  */
-export async function getDownloadUrl(fileId) {
+export async function getDownloadUrl(fileIdOrShareUrl) {
+  // Si ya es una URL, determinar si es share link o URL directa
+  if (isUrl(fileIdOrShareUrl)) {
+    // Si es un enlace de compartido de ControlFile, convertir a descarga directa
+    if (fileIdOrShareUrl.includes('/s/')) {
+      console.log('✅ Es un share link, convirtiendo a descarga directa...');
+      return await getDirectDownloadUrl(fileIdOrShareUrl);
+    }
+    
+    // Si es una URL directa (Firebase Storage u otra), devolverla directamente
+    console.log('✅ Es una URL directa, devolviendo directamente:', fileIdOrShareUrl);
+    return fileIdOrShareUrl;
+  }
+
+  // Si es un fileId, obtener URL temporal
   const token = await getToken();
   
   const res = await fetch(`${BACKEND}/api/files/presign-get`, {
@@ -82,7 +96,7 @@ export async function getDownloadUrl(fileId) {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ fileId }),
+    body: JSON.stringify({ fileId: fileIdOrShareUrl }),
   });
 
   if (!res.ok) {
@@ -98,6 +112,21 @@ export async function getDownloadUrl(fileId) {
   }
   
   return data.downloadUrl;
+}
+
+/**
+ * Verifica si una cadena es una URL válida
+ * @param {string} str - Cadena a verificar
+ * @returns {boolean} True si es URL válida
+ */
+function isUrl(str) {
+  if (!str) return false;
+  try {
+    new URL(str);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -152,6 +181,28 @@ export async function createPublicShareLink(fileId, expiresInHours = 720) {
   }
   
   return data.shareUrl;
+}
+
+/**
+ * Obtiene la URL de descarga directa desde un enlace de compartido
+ * @param {string} shareUrl - URL de compartido de ControlFile
+ * @returns {Promise<string>} URL de descarga directa
+ */
+export async function getDirectDownloadUrl(shareUrl) {
+  try {
+    // Extraer el token del enlace de compartido
+    const url = new URL(shareUrl);
+    const shareToken = url.pathname.split('/').pop(); // Última parte de la URL
+    
+    // Construir la URL de descarga directa
+    const directDownloadUrl = `${BACKEND}/api/shares/download/${shareToken}`;
+    
+    console.log('✅ URL de descarga directa:', directDownloadUrl);
+    return directDownloadUrl;
+  } catch (error) {
+    console.error('❌ Error al extraer URL de descarga directa:', error);
+    throw new Error('No se pudo extraer la URL de descarga directa');
+  }
 }
 
 /**

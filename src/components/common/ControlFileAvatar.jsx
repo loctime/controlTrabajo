@@ -16,6 +16,13 @@ const isUrl = (str) => {
 };
 
 /**
+ * Verifica si es un share link de ControlFile
+ */
+const isControlFileShareLink = (str) => {
+  return isUrl(str) && str.includes('/s/');
+};
+
+/**
  * Avatar que carga imágenes desde ControlFile o URLs directas
  * @param {string} fileId - ID del archivo en ControlFile o URL directa
  * @param {object} props - Props adicionales para el Avatar de MUI
