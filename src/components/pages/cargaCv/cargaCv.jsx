@@ -255,9 +255,9 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
       });
 
       navigate("/");
-      setIsChange((prev) => !prev);
-      handleClose();
-      updateDashboard();
+      if (setIsChange) setIsChange((prev) => !prev);
+      if (handleClose) handleClose();
+      if (updateDashboard) updateDashboard();
     } catch (error) {
       console.error("Error al procesar el CV:", error);
       Swal.fire("Error", "Hubo un problema al cargar el CV. Inténtalo nuevamente.", "error");

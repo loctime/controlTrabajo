@@ -25,6 +25,8 @@ function Navbar() {
   const [profilePhoto, setProfilePhoto] = useState("");
   const navigate = useNavigate();
   const rolAdmin = import.meta.env.VITE_ROL_ADMIN;
+  const rolAdminEspecial = "eEI7F72asd";
+  const isAdmin = user?.rol === rolAdmin || user?.rol === rolAdminEspecial;
 
   useEffect(() => {
     const fetchProfilePhoto = async () => {
@@ -154,7 +156,7 @@ function Navbar() {
                 {title}
               </Button>
             ))}
-            {user.rol === rolAdmin && (
+            {isAdmin && (
               <Button color="inherit" component={Link} to="/dashboard" sx={{ textTransform: "none", fontSize: { xs: '1rem', md: '1.1rem' }, fontFamily: 'inherit', letterSpacing: 0 }} translate="no">
                 Dashboard
               </Button>

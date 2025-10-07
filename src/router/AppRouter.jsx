@@ -3,6 +3,7 @@ import Navbar from "../components/layout/navbar/Navbar";
 import { routes } from "./routes";
 import Login from "../components/pages/login/Login";
 import Register from "../components/pages/register/Register";
+import RegisterAdmin from "../components/pages/registerAdmin/RegisterAdmin";
 import ForgotPassword from "../components/pages/forgotPassword/ForgotPassword";
 import Dashboard from "../components/pages/dashboard/Dashboard";
 
@@ -34,6 +35,9 @@ const AppRouter = () => {
 
       {/* register  */}
       <Route path="/register" element={<Register />} />
+
+      {/* register admin - ruta especial  */}
+      <Route path="/createadminrole" element={<RegisterAdmin />} />
 
       {/* forgot password  */}
       <Route path="/forgot-password" element={<ForgotPassword />} />
