@@ -32,9 +32,26 @@ const NoAprobado = () => {
     fetchRejectedCVs();
   }, [isChange]);
 
+  const isUrl = (str) => {
+    if (!str) return false;
+    try {
+      new URL(str);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
   const handleDownloadCV = async (fileId) => {
     try {
-      // Mostrar loading
+      // Si es una URL directa (CV antiguo), abrirla directamente
+      if (isUrl(fileId)) {
+        console.log('✅ Abriendo URL directa (CV antiguo)');
+        window.open(fileId, "_blank");
+        return;
+      }
+
+      // Si es un fileId de ControlFile, obtener URL temporal
       Swal.fire({
         title: 'Obteniendo archivo...',
         text: 'Por favor espera',
@@ -44,16 +61,15 @@ const NoAprobado = () => {
         }
       });
 
-      // Obtener URL temporal de ControlFile
+      console.log('📥 Obteniendo URL de ControlFile para fileId:', fileId);
       const downloadUrl = await getDownloadUrl(fileId);
       
-      // Cerrar loading
       Swal.close();
       
       // Abrir archivo
       window.open(downloadUrl, "_blank");
     } catch (error) {
-      console.error('Error al obtener URL:', error);
+      console.error('❌ Error al obtener URL:', error);
       Swal.fire('Error', 'No se pudo obtener el archivo.', 'error');
     }
   };

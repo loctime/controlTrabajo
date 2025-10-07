@@ -140,10 +140,27 @@ const Dashboard = () => {
     }
   };
 
+  const isUrl = (str) => {
+    if (!str) return false;
+    try {
+      new URL(str);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
   const handleDownload = async (cv) => {
     if (cv.cv) {
       try {
-        // Mostrar loading
+        // Si es una URL directa (CV antiguo), abrirla directamente
+        if (isUrl(cv.cv)) {
+          console.log('✅ Abriendo URL directa (CV antiguo)');
+          window.open(cv.cv, '_blank');
+          return;
+        }
+
+        // Si es un fileId de ControlFile, obtener URL temporal
         Swal.fire({
           title: 'Obteniendo archivo...',
           text: 'Por favor espera',
@@ -153,16 +170,15 @@ const Dashboard = () => {
           }
         });
 
-        // Obtener URL temporal de ControlFile (válida por 5 minutos)
+        console.log('📥 Obteniendo URL de ControlFile para fileId:', cv.cv);
         const downloadUrl = await getDownloadUrl(cv.cv);
         
-        // Cerrar loading
         Swal.close();
         
         // Abrir archivo en nueva pestaña
         window.open(downloadUrl, '_blank');
       } catch (error) {
-        console.error('Error al obtener URL de descarga:', error);
+        console.error('❌ Error al obtener URL de descarga:', error);
         showAlert('Error', 'No se pudo obtener el archivo. Inténtalo nuevamente.', 'error');
       }
     } else {

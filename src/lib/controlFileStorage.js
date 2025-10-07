@@ -83,9 +83,21 @@ export async function getDownloadUrl(fileId) {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({ fileId }),
-  }).then(r => r.json());
+  });
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error('❌ Error del servidor:', errorText);
+    throw new Error(`Error ${res.status}: ${errorText || 'No se pudo obtener la URL'}`);
+  }
+
+  const data = await res.json();
   
-  return res.downloadUrl;
+  if (!data.downloadUrl) {
+    throw new Error('El servidor no devolvió una URL de descarga');
+  }
+  
+  return data.downloadUrl;
 }
 
 /**
