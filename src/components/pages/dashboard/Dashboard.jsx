@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import Swal from 'sweetalert2';
 import { db } from '../../../firebaseConfig';
 import { collection, query, where, getDocs, updateDoc, doc, deleteDoc } from 'firebase/firestore';
+import { getDownloadUrl } from '../../../lib/controlFileStorage';
+import ControlFileAvatar from '../../common/ControlFileAvatar';
 import { 
   Button, 
   Paper, 
@@ -11,7 +13,6 @@ import {
   TableContainer, 
   TableHead, 
   TableRow, 
-  Avatar, 
   IconButton, 
   Modal, 
   Box, 
@@ -20,7 +21,8 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  Typography
+  Typography,
+  CircularProgress
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
@@ -138,9 +140,31 @@ const Dashboard = () => {
     }
   };
 
-  const handleDownload = (cv) => {
+  const handleDownload = async (cv) => {
     if (cv.cv) {
-      window.open(cv.cv, '_blank');
+      try {
+        // Mostrar loading
+        Swal.fire({
+          title: 'Obteniendo archivo...',
+          text: 'Por favor espera',
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          }
+        });
+
+        // Obtener URL temporal de ControlFile (válida por 5 minutos)
+        const downloadUrl = await getDownloadUrl(cv.cv);
+        
+        // Cerrar loading
+        Swal.close();
+        
+        // Abrir archivo en nueva pestaña
+        window.open(downloadUrl, '_blank');
+      } catch (error) {
+        console.error('Error al obtener URL de descarga:', error);
+        showAlert('Error', 'No se pudo obtener el archivo. Inténtalo nuevamente.', 'error');
+      }
     } else {
       showAlert('Error', 'No se encontró el archivo del CV.', 'error');
     }
@@ -167,7 +191,7 @@ const Dashboard = () => {
           <TableBody>
             {(currentView === 'active' ? activeCVs : currentView === 'pending' ? pendingCVs : rejectedCVs).map((cv) => (
               <TableRow key={cv.id}>
-                <TableCell><Avatar src={cv.Foto} /></TableCell>
+                <TableCell><ControlFileAvatar fileId={cv.Foto} /></TableCell>
                 <TableCell>{cv.Nombre}</TableCell>
                 <TableCell>{cv.Apellido}</TableCell>
                 <TableCell>{cv.Email}</TableCell>

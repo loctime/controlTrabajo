@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { collection, getDocs, deleteDoc, doc, updateDoc } from "firebase/firestore";
 import { db } from "../../../firebaseConfig";
+import { getDownloadUrl } from "../../../lib/controlFileStorage";
+import ControlFileAvatar from "../../common/ControlFileAvatar";
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, IconButton, Grid, Modal, Box } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
+import Swal from "sweetalert2";
 import CvForm from "./ProductsForm"; // Asegúrate de importar el componente CvForm adecuadamente
 
 const NoAprobado = () => {
@@ -29,8 +32,30 @@ const NoAprobado = () => {
     fetchRejectedCVs();
   }, [isChange]);
 
-  const handleDownloadCV = (cvUrl) => {
-    window.open(cvUrl, "_blank");
+  const handleDownloadCV = async (fileId) => {
+    try {
+      // Mostrar loading
+      Swal.fire({
+        title: 'Obteniendo archivo...',
+        text: 'Por favor espera',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+
+      // Obtener URL temporal de ControlFile
+      const downloadUrl = await getDownloadUrl(fileId);
+      
+      // Cerrar loading
+      Swal.close();
+      
+      // Abrir archivo
+      window.open(downloadUrl, "_blank");
+    } catch (error) {
+      console.error('Error al obtener URL:', error);
+      Swal.fire('Error', 'No se pudo obtener el archivo.', 'error');
+    }
   };
 
   const deleteCV = async (id) => {
@@ -91,7 +116,7 @@ const NoAprobado = () => {
                     <TableCell>{cv.Apellido}</TableCell>
                     <TableCell>{cv.Email}</TableCell>
                     <TableCell component="th" scope="row" align="left">
-                      <img src={cv.Foto} alt="" style={{ width: "80px", height: "80px" }} />
+                      <ControlFileAvatar fileId={cv.Foto} sx={{ width: 80, height: 80 }} />
                     </TableCell>
                     <TableCell>
                       <Button variant="contained" onClick={() => handleDownloadCV(cv.cv)}>
