@@ -18,7 +18,8 @@ import {
   Edit,
   CloudUpload
 } from "@mui/icons-material";
-import { db, auth } from "../../../firebaseConfig";
+import { db } from "../../../firebaseConfig";
+import { auth } from "../../../firebaseAuthControlFile";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";

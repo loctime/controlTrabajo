@@ -14,7 +14,7 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import { AuthContext } from "../../../context/AuthContext";
 import { logout } from "../../../firebaseAuthControlFile";
 import { db } from "../../../firebaseConfig";
-import { deleteFile } from "../../lib/controlFileStorage";
+import { deleteFile } from "../../../lib/controlFileStorage";
 import { collection, query, where, getDocs, deleteDoc, doc } from "firebase/firestore";
 import Swal from "sweetalert2";
 import { menuItems } from "../../../router/navigation";
