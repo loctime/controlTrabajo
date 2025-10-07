@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Button, TextField, Box, Select, MenuItem, Typography, FormControl, InputLabel, FormHelperText } from "@mui/material";
 import { db } from "../../../firebaseConfig";
 import { auth } from "../../../firebaseAuthControlFile";
-import { uploadFile, ensureAppFolder } from "../../../lib/controlFileStorage";
+import { uploadFile, ensureAppFolder, createPublicShareLink } from "../../../lib/controlFileStorage";
 import { addDoc, collection, query, where, getDocs, setDoc, doc } from "firebase/firestore";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
@@ -92,7 +92,14 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
       });
       
       console.log(`✅ ${type} subido con ID:`, fileId);
-      setNewCv((prevCv) => ({ ...prevCv, [type]: fileId }));
+      
+      // 3. Crear enlace público para que el admin pueda verlo
+      console.log(`🔗 Creando enlace público para ${type}...`);
+      const shareUrl = await createPublicShareLink(fileId, 8760); // 1 año
+      console.log(`✅ Enlace público creado:`, shareUrl);
+      
+      // Guardar el enlace público en lugar del fileId
+      setNewCv((prevCv) => ({ ...prevCv, [type]: shareUrl }));
       Swal.fire("Carga exitosa", `${type} cargado con éxito.`, "success");
 
       if (type === "Foto") {

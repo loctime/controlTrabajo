@@ -119,6 +119,42 @@ export async function deleteFile(fileId) {
 }
 
 /**
+ * Crea un enlace público de compartir para un archivo
+ * @param {string} fileId - ID del archivo
+ * @param {number} expiresInHours - Horas hasta que expire (por defecto 720 = 30 días)
+ * @returns {Promise<string>} URL pública del archivo
+ */
+export async function createPublicShareLink(fileId, expiresInHours = 720) {
+  const token = await getToken();
+  
+  const res = await fetch(`${BACKEND}/api/shares/create`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ 
+      fileId,
+      expiresIn: expiresInHours 
+    }),
+  });
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error('❌ Error al crear share link:', errorText);
+    throw new Error(`Error ${res.status}: ${errorText || 'No se pudo crear el enlace'}`);
+  }
+
+  const data = await res.json();
+  
+  if (!data.shareUrl) {
+    throw new Error('El servidor no devolvió una URL de compartir');
+  }
+  
+  return data.shareUrl;
+}
+
+/**
  * Busca una carpeta por nombre en un parentId específico
  * @param {string} name - Nombre de la carpeta a buscar
  * @param {string|null} parentId - ID de carpeta padre (null para raíz)
