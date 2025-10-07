@@ -12,10 +12,10 @@ import MenuItem from "@mui/material/MenuItem";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { AuthContext } from "../../../context/AuthContext";
-import { logout } from "../../../firebaseConfig";
-import { db, storage } from "../../../firebaseConfig";
+import { logout } from "../../../firebaseAuthControlFile";
+import { db } from "../../../firebaseConfig";
+import { deleteFile } from "../../lib/controlFileStorage";
 import { collection, query, where, getDocs, deleteDoc, doc } from "firebase/firestore";
-import { ref, deleteObject } from "firebase/storage";
 import Swal from "sweetalert2";
 import { menuItems } from "../../../router/navigation";
 
@@ -91,37 +91,35 @@ function Navbar() {
         querySnapshot.forEach((docSnap) => {
           const data = docSnap.data();
           
-          // 1. Eliminar la foto de perfil del storage si existe
-          if (data.Foto && data.Foto.startsWith('https://firebasestorage.googleapis.com')) {
-            try {
-              // Obtener la referencia del storage desde la URL
-              const photoRef = ref(storage, data.Foto);
-              deletePromises.push(deleteObject(photoRef).catch(err => {
+          // 1. Eliminar la foto de perfil de ControlFile Storage si existe
+          if (data.Foto) {
+            // Si es URL antigua de Firebase Storage
+            if (data.Foto.startsWith('https://firebasestorage.googleapis.com')) {
+              console.warn("Archivo antiguo de Firebase Storage, no se eliminará automáticamente:", data.Foto);
+            } else {
+              // Es un fileId de ControlFile
+              deletePromises.push(deleteFile(data.Foto).catch(err => {
                 console.error("Error al eliminar la foto de perfil:", err);
                 // Continuar con el proceso aunque falle la eliminación de la foto
               }));
-            } catch (error) {
-              console.error("Error al obtener referencia de la foto:", error);
             }
           }
           
-          // 2. Eliminar el archivo CV del storage si existe
-          if (data.cv && data.cv.startsWith('https://firebasestorage.googleapis.com')) {
-            try {
-              const cvRef = ref(storage, data.cv);
-              deletePromises.push(deleteObject(cvRef).catch(err => {
+          // 2. Eliminar el archivo CV de ControlFile Storage si existe
+          if (data.cv) {
+            // Si es URL antigua de Firebase Storage
+            if (data.cv.startsWith('https://firebasestorage.googleapis.com')) {
+              console.warn("Archivo antiguo de Firebase Storage, no se eliminará automáticamente:", data.cv);
+            } else {
+              // Es un fileId de ControlFile
+              deletePromises.push(deleteFile(data.cv).catch(err => {
                 console.error("Error al eliminar el CV:", err);
                 // Continuar con el proceso aunque falle la eliminación del CV
               }));
-            } catch (error) {
-              console.error("Error al obtener referencia del CV:", error);
             }
           }
           
-          // 3. Eliminar cualquier otro archivo asociado al usuario
-          // Si tienes otros archivos almacenados, agrégalos aquí siguiendo el mismo patrón
-          
-          // 4. Eliminar el documento de Firestore
+          // 3. Eliminar el documento de Firestore
           deletePromises.push(deleteDoc(doc(db, "cv", docSnap.id)));
         });
 

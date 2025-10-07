@@ -1,7 +1,7 @@
 import { Box, Button, Grid, TextField, Typography } from "@mui/material";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { forgotPassword } from "../../../firebaseConfig";
+import { forgotPassword } from "../../../firebaseAuthControlFile";
 import Swal from 'sweetalert2';
 
 const ForgotPassword = () => {

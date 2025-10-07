@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Button, TextField, Box, Select, MenuItem, Typography, FormControl, InputLabel, FormHelperText } from "@mui/material";
-import { db, auth, uploadFile } from "../../../firebaseConfig";
+import { db } from "../../../firebaseConfig";
+import { auth } from "../../../firebaseAuthControlFile";
+import { uploadFile } from "../../../lib/controlFileStorage";
 import { addDoc, collection, query, where, getDocs, setDoc, doc } from "firebase/firestore";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
