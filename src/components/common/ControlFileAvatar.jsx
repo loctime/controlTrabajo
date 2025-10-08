@@ -2,9 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Avatar, CircularProgress, Skeleton } from '@mui/material';
 import { getDownloadUrl } from '../../lib/controlFileStorage';
 import { shareUrlToImageUrl, isControlFileShareUrl } from '../../utils/shareUrl';
-
-// Cache simple para URLs de ControlFile
-const urlCache = new Map();
+import { getCachedImageUrl, setCachedImageUrl } from '../../utils/imageCache';
 
 /**
  * Verifica si una cadena es una URL válida
@@ -80,9 +78,9 @@ const ControlFileAvatar = ({ fileId, ...props }) => {
         // Si es un enlace de ControlFile, convertir a enlace directo de imagen
         if (isControlFileShareLink(fileId)) {
           try {
-            // Verificar cache primero
-            if (urlCache.has(fileId)) {
-              const cachedUrl = urlCache.get(fileId);
+            // Verificar cache persistente primero
+            const cachedUrl = getCachedImageUrl(fileId);
+            if (cachedUrl) {
               if (isMounted.current) {
                 setImageUrl(cachedUrl);
                 setError(false);
@@ -102,8 +100,8 @@ const ControlFileAvatar = ({ fileId, ...props }) => {
             const img = new Image();
             img.onload = () => {
               if (isMounted.current) {
-                // Guardar en cache
-                urlCache.set(fileId, directImageUrl);
+                // Guardar en cache persistente
+                setCachedImageUrl(fileId, directImageUrl);
                 setImageUrl(directImageUrl);
                 setError(false);
                 setLoading(false);

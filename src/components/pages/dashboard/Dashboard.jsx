@@ -5,6 +5,8 @@ import { collection, query, where, getDocs, updateDoc, doc, deleteDoc } from 'fi
 import { getDownloadUrl } from '../../../lib/controlFileStorage';
 import ControlFileAvatar from '../../common/ControlFileAvatar';
 import { preloadCriticalImages } from '../../../utils/imagePreloader';
+import { precacheUrls, clearCache, getCacheStats } from '../../../utils/imageCache';
+import { shareUrlToImageUrl, isControlFileShareUrl } from '../../../utils/shareUrl';
 import { 
   Button, 
   Box, 
@@ -65,7 +67,19 @@ const Dashboard = () => {
     setPendingCVs(pendingData);
     setRejectedCVs(rejectedData);
     
-    // Precargar imágenes críticas de los CVs pendientes (los más importantes)
+    // Precargar y cachear imágenes críticas
+    const allCvs = [...pendingData, ...activeData, ...rejectedData];
+    const controlFileUrls = allCvs
+      .map(cv => cv.Foto)
+      .filter(url => url && isControlFileShareUrl(url));
+    
+    if (controlFileUrls.length > 0) {
+      // Cachear las primeras 5 URLs de ControlFile
+      const criticalUrls = controlFileUrls.slice(0, 5);
+      precacheUrls(criticalUrls, shareUrlToImageUrl);
+    }
+    
+    // También usar el método anterior para compatibilidad
     if (pendingData.length > 0) {
       preloadCriticalImages(pendingData, 3);
     }
@@ -301,6 +315,39 @@ const Dashboard = () => {
               Rechazados ({rejectedCVs.length})
             </Button>
           </Box>
+          
+          {/* Botón de estadísticas de cache (solo en desarrollo) */}
+          {process.env.NODE_ENV === 'development' && (
+            <Button 
+              variant="outlined"
+              onClick={() => {
+                const stats = getCacheStats();
+                Swal.fire({
+                  title: 'Estadísticas de Cache',
+                  html: `
+                    <div style="text-align: left;">
+                      <p><strong>Cache de sesión:</strong> ${stats.sessionCache} URLs</p>
+                      <p><strong>Cache persistente:</strong> ${stats.persistentCache} URLs</p>
+                      <p><strong>Total:</strong> ${stats.total} URLs</p>
+                    </div>
+                  `,
+                  confirmButtonText: 'Limpiar Cache',
+                  showCancelButton: true,
+                  cancelButtonText: 'Cerrar'
+                }).then((result) => {
+                  if (result.isConfirmed) {
+                    clearCache();
+                    Swal.fire('Cache limpiado', 'El cache de imágenes ha sido limpiado.', 'success');
+                  }
+                });
+              }}
+              size="small"
+              color="info"
+              sx={{ alignSelf: 'center' }}
+            >
+              Cache
+            </Button>
+          )}
         </Box>
       </Box>
 
