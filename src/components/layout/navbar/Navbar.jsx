@@ -7,7 +7,6 @@ import Toolbar from "@mui/material/Toolbar";
 import Button from "@mui/material/Button";
 import Avatar from "@mui/material/Avatar";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import DownloadIcon from "@mui/icons-material/Download";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import { Link, Outlet, useNavigate } from "react-router-dom";
@@ -19,7 +18,7 @@ import { deleteFile } from "../../../lib/controlFileStorage";
 import { collection, query, where, getDocs, deleteDoc, doc } from "firebase/firestore";
 import { showAlert } from "../../../utils/swalConfig";
 import { menuItems } from "../../../router/navigation";
-import { usePWAInstall } from "../../../hooks/usePWAInstall";
+import PWAInstallButton from "../../common/PWAInstallButton";
 
 function Navbar() {
   const { logoutContext, user } = useContext(AuthContext);
@@ -29,16 +28,6 @@ function Navbar() {
   const rolAdmin = import.meta.env.VITE_ROL_ADMIN;
   const rolAdminEspecial = "eEI7F72asd";
   const isAdmin = user?.rol === rolAdmin || user?.rol === rolAdminEspecial;
-  
-  // Hook para instalación de PWA
-  const { isInstallable, isInstalled, installPWA } = usePWAInstall();
-
-  const handleInstallPWA = async () => {
-    const success = await installPWA();
-    if (success) {
-      showAlert.success('¡Instalado!', 'La app se ha instalado correctamente');
-    }
-  };
 
   useEffect(() => {
     const fetchProfilePhoto = async () => {
@@ -164,26 +153,8 @@ function Navbar() {
             )}
           </Box>
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            {/* Botón de instalación PWA */}
-            {!isInstalled && isInstallable && (
-              <Button
-                variant="outlined"
-                color="inherit"
-                size="small"
-                startIcon={<DownloadIcon />}
-                onClick={handleInstallPWA}
-                sx={{ 
-                  textTransform: "none",
-                  borderColor: "rgba(255, 255, 255, 0.7)",
-                  "&:hover": {
-                    borderColor: "white",
-                    backgroundColor: "rgba(255, 255, 255, 0.1)"
-                  }
-                }}
-              >
-                Instalar App
-              </Button>
-            )}
+            {/* Botón de instalación PWA con fallback manual */}
+            <PWAInstallButton />
             
             <IconButton onClick={handleAvatarClick} color="inherit">
               {profilePhoto ? (
