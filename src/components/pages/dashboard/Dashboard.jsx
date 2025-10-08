@@ -244,31 +244,44 @@ const Dashboard = () => {
         </Typography>
         
         {/* Botones de navegación entre vistas */}
-        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mt: 3 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 3 }}>
+          {/* Pendientes - siempre arriba */}
           <Button 
             variant={currentView === 'pending' ? 'contained' : 'outlined'}
             onClick={() => setCurrentView('pending')}
             size="large"
-            sx={{ minWidth: { xs: '100%', sm: 'auto' } }}
+            fullWidth
           >
             Pendientes ({pendingCVs.length})
           </Button>
-          <Button 
-            variant={currentView === 'active' ? 'contained' : 'outlined'}
-            onClick={() => setCurrentView('active')}
-            size="large"
-            sx={{ minWidth: { xs: '100%', sm: 'auto' } }}
-          >
-            Activos ({activeCVs.length})
-          </Button>
-          <Button 
-            variant={currentView === 'rejected' ? 'contained' : 'outlined'}
-            onClick={() => setCurrentView('rejected')}
-            size="large"
-            sx={{ minWidth: { xs: '100%', sm: 'auto' } }}
-          >
-            Rechazados ({rejectedCVs.length})
-          </Button>
+          
+          {/* Activos y Rechazados - en la misma fila en móvil */}
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <Button 
+              variant={currentView === 'active' ? 'contained' : 'outlined'}
+              onClick={() => setCurrentView('active')}
+              size="large"
+              sx={{ 
+                flex: 1,
+                fontSize: { xs: '0.875rem', sm: '1rem' },
+                whiteSpace: 'nowrap'
+              }}
+            >
+              Activos ({activeCVs.length})
+            </Button>
+            <Button 
+              variant={currentView === 'rejected' ? 'contained' : 'outlined'}
+              onClick={() => setCurrentView('rejected')}
+              size="large"
+              sx={{ 
+                flex: 1,
+                fontSize: { xs: '0.875rem', sm: '1rem' },
+                whiteSpace: 'nowrap'
+              }}
+            >
+              Rechazados ({rejectedCVs.length})
+            </Button>
+          </Box>
         </Box>
       </Box>
 
@@ -353,7 +366,7 @@ const Dashboard = () => {
                     </Box>
                   </Box>
 
-                  <Divider sx={{ my: 1 }} />
+                  <Divider sx={{ mt: 0.5, mb: 1 }} />
 
                   {/* Información del CV - Categoría y Ubicación en la misma fila */}
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
