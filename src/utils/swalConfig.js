@@ -94,36 +94,6 @@ export const showAlert = {
   close: () => Swal.close(),
 };
 
-// Estilos CSS adicionales para los botones de SweetAlert2
-const swalStyles = `
-  .swal2-popup {
-    border-radius: 12px !important;
-  }
-  
-  .swal2-confirm,
-  .swal2-cancel {
-    border-radius: 8px !important;
-    padding: 10px 24px !important;
-    font-weight: 500 !important;
-    transition: all 0.3s ease !important;
-    cursor: pointer !important;
-  }
-
-  .swal2-confirm:hover {
-    transform: translateY(-2px) !important;
-    box-shadow: 0px 4px 12px rgba(0,0,0,0.15) !important;
-  }
-
-  .swal2-cancel:hover {
-    transform: translateY(-2px) !important;
-    box-shadow: 0px 4px 12px rgba(0,0,0,0.15) !important;
-  }
-`;
-
-// Inyectar estilos en el documento
-if (typeof document !== 'undefined') {
-  const styleSheet = document.createElement('style');
-  styleSheet.textContent = swalStyles;
-  document.head.appendChild(styleSheet);
-}
+// Estilos CSS deshabilitados temporalmente para evitar conflictos
+// const swalStyles = ``;
 
