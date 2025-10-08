@@ -341,8 +341,6 @@ const Dashboard = () => {
                   {/* Header con foto, nombre, email y chip */}
                   <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 2 }}>
                     <Box sx={{ mr: 2 }}>
-                      {/* Debug: Log para ver qué valor tiene cv.Foto */}
-                      {console.log('🔍 Debug Avatar - cv.Foto:', cv.Foto, 'para usuario:', cv.Nombre)}
                       <ControlFileAvatar fileId={cv.Foto} sx={{ width: 64, height: 64 }} />
                     </Box>
                     <Box sx={{ flexGrow: 1, minWidth: 0 }}>

@@ -20,9 +20,7 @@ const isUrl = (str) => {
  * Verifica si es un share link de ControlFile
  */
 const isControlFileShareLink = (str) => {
-  const isShareLink = isControlFileShareUrl(str);
-  console.log('🔍 isControlFileShareLink - str:', str, 'resultado:', isShareLink);
-  return isShareLink;
+  return isControlFileShareUrl(str);
 };
 
 
@@ -42,10 +40,7 @@ const ControlFileAvatar = ({ fileId, ...props }) => {
     isMounted.current = true;
 
     const loadImage = async () => {
-      console.log('🔍 ControlFileAvatar - fileId recibido:', fileId);
-      
       if (!fileId) {
-        console.log('❌ ControlFileAvatar - No hay fileId');
         if (isMounted.current) {
           setLoading(false);
           setError(true);
@@ -57,8 +52,6 @@ const ControlFileAvatar = ({ fileId, ...props }) => {
       if (isUrl(fileId)) {
         // Si es un enlace de ControlFile, convertir a enlace directo de imagen
         if (isControlFileShareLink(fileId)) {
-          console.log('🔗 ControlFileAvatar - Detectado enlace de ControlFile:', fileId);
-          
           try {
             if (isMounted.current) {
               setLoading(true);
@@ -67,8 +60,6 @@ const ControlFileAvatar = ({ fileId, ...props }) => {
             // Convertir enlace de compartido a enlace directo de imagen
             const directImageUrl = shareUrlToImageUrl(fileId);
             
-            console.log('📥 ControlFileAvatar - Convirtiendo a enlace directo:', directImageUrl);
-            
             // Crear una imagen para verificar si el enlace directo funciona
             const img = new Image();
             img.onload = () => {
@@ -76,12 +67,9 @@ const ControlFileAvatar = ({ fileId, ...props }) => {
                 setImageUrl(directImageUrl);
                 setError(false);
                 setLoading(false);
-                console.log('✅ ControlFileAvatar - Enlace directo funciona:', directImageUrl);
               }
             };
             img.onerror = () => {
-              console.log('⚠️ ControlFileAvatar - Enlace directo no funciona, mostrando placeholder');
-              console.log('🔍 URL que falló:', directImageUrl);
               if (isMounted.current) {
                 setError(true);
                 setLoading(false);
@@ -90,7 +78,7 @@ const ControlFileAvatar = ({ fileId, ...props }) => {
             img.src = directImageUrl;
             return;
           } catch (err) {
-            console.error('❌ ControlFileAvatar - Error general:', err.message);
+            console.error('Error al cargar imagen de ControlFile:', err.message);
             if (isMounted.current) {
               setError(true);
               setLoading(false);
@@ -100,7 +88,6 @@ const ControlFileAvatar = ({ fileId, ...props }) => {
         }
         
         // Si es una URL directa (Firebase Storage u otra), usarla directamente
-        console.log('✅ ControlFileAvatar - Usando URL directa:', fileId);
         if (isMounted.current) {
           setImageUrl(fileId);
           setError(false);
@@ -115,16 +102,14 @@ const ControlFileAvatar = ({ fileId, ...props }) => {
           setLoading(true);
         }
         
-        console.log('📥 ControlFileAvatar - Obteniendo URL de ControlFile para fileId:', fileId);
         const url = await getDownloadUrl(fileId);
         
         if (isMounted.current) {
           setImageUrl(url);
           setError(false);
-          console.log('✅ ControlFileAvatar - URL obtenida correctamente:', url);
         }
       } catch (err) {
-        console.error('❌ ControlFileAvatar - Error al cargar imagen de ControlFile:', err.message);
+        console.error('Error al cargar imagen de ControlFile:', err.message);
         if (isMounted.current) {
           setError(true);
         }
