@@ -1,8 +1,9 @@
-import { Box, Button, Grid, TextField, Typography } from "@mui/material";
+import { Box, Grid, TextField, Typography } from "@mui/material";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { forgotPassword } from "../../../firebaseAuthControlFile";
-import Swal from 'sweetalert2';
+import { showAlert } from "../../../utils/swalConfig";
+import { Button } from "../../common/Button";
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
@@ -12,18 +13,16 @@ const ForgotPassword = () => {
     e.preventDefault();
     try {
       await forgotPassword(email);
-      Swal.fire({
-        icon: 'success',
-        title: 'Correo enviado',
-        text: 'Te enviamos un mail, controla tu casilla de correo no deseado. En caso de que no te haya llegado ningún mail, por favor contáctate con nosotros a este mail ccariramallo@gmail.com'
-      });
+      showAlert.success(
+        'Correo enviado',
+        'Te enviamos un mail, controla tu casilla de correo no deseado. En caso de que no te haya llegado ningún mail, por favor contáctate con nosotros a este mail ccariramallo@gmail.com'
+      );
       navigate("/login");
     } catch (error) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Hubo un problema enviando el correo. Por favor intenta nuevamente.'
-      });
+      showAlert.error(
+        'Error',
+        'Hubo un problema enviando el correo. Por favor intenta nuevamente.'
+      );
     }
   };
 
@@ -60,14 +59,15 @@ const ForgotPassword = () => {
               />
             </Grid>
             <Grid item xs={10} md={12}>
-              <Button type="submit" variant="contained" fullWidth>
+              <Button type="submit" variant="contained" color="primary" fullWidth>
                 Recuperar
               </Button>
             </Grid>
             <Grid item xs={10} md={12}>
               <Button
                 type="button"
-                variant="contained"
+                variant="outlined"
+                color="primary"
                 fullWidth
                 onClick={() => navigate("/login")}
               >

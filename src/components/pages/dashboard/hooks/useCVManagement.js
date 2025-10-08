@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import Swal from 'sweetalert2';
+import { showAlert as showAlertUtil } from '../../../../utils/swalConfig';
 import { db } from '../../../../firebaseConfig';
 import { collection, query, where, getDocs, updateDoc, doc, deleteDoc } from 'firebase/firestore';
 import { getDownloadUrl } from '../../../../lib/controlFileStorage';
@@ -20,7 +20,10 @@ export const useCVManagement = () => {
   const [previewLoading, setPreviewLoading] = useState(false);
 
   const showAlert = (title, text, icon) => {
-    Swal.fire({ title, text, icon, confirmButtonText: 'Aceptar' });
+    if (icon === 'success') showAlertUtil.success(title, text);
+    else if (icon === 'error') showAlertUtil.error(title, text);
+    else if (icon === 'warning') showAlertUtil.warning(title, text);
+    else showAlertUtil.info(title, text);
   };
 
   const fetchCVs = async (status) => {
@@ -54,14 +57,10 @@ export const useCVManagement = () => {
   };
 
   const handleDelete = async (cv) => {
-    Swal.fire({
-      title: '¿Está seguro?',
-      text: 'No podrás revertir esto',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar'
-    }).then(async (result) => {
+    showAlertUtil.confirm(
+      '¿Está seguro?',
+      'No podrás revertir esto'
+    ).then(async (result) => {
       if (result.isConfirmed) {
         await deleteDoc(doc(db, 'cv', cv.id));
         fetchData();
@@ -84,11 +83,10 @@ export const useCVManagement = () => {
 
   const handleRejectConfirm = async () => {
     if (!motivoRechazo.trim()) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Motivo requerido',
-        text: 'Debes proporcionar un motivo para el rechazo.',
-      });
+      showAlertUtil.warning(
+        'Motivo requerido',
+        'Debes proporcionar un motivo para el rechazo.'
+      );
       return;
     }
 
@@ -119,19 +117,12 @@ export const useCVManagement = () => {
   const handleDownload = async (cv) => {
     if (cv.cv) {
       try {
-        Swal.fire({
-          title: 'Obteniendo archivo...',
-          text: 'Por favor espera',
-          allowOutsideClick: false,
-          didOpen: () => {
-            Swal.showLoading();
-          }
-        });
+        showAlertUtil.loading('Obteniendo archivo...', 'Por favor espera');
 
         console.log('📥 Obteniendo URL de descarga para:', cv.cv);
         const downloadUrl = await getDownloadUrl(cv.cv);
         
-        Swal.close();
+        showAlertUtil.close();
         
         const link = document.createElement('a');
         link.href = downloadUrl;
@@ -182,24 +173,17 @@ export const useCVManagement = () => {
 
   const handleCacheClick = () => {
     const stats = getCacheStats();
-    Swal.fire({
-      title: 'Cache de Imágenes',
-      html: `
-        <div style="text-align: center;">
-          <p><strong>${stats.total} imágenes cacheadas</strong></p>
-          <p style="color: #666; font-size: 0.9em;">
-            Cache persistente: ${stats.persistentCache}<br/>
-            Cache de sesión: ${stats.sessionCache}
-          </p>
-        </div>
-      `,
-      confirmButtonText: 'Limpiar Cache',
-      showCancelButton: true,
-      cancelButtonText: 'Cerrar'
-    }).then((result) => {
+    showAlertUtil.confirm(
+      'Cache de Imágenes',
+      `${stats.total} imágenes cacheadas\nCache persistente: ${stats.persistentCache}\nCache de sesión: ${stats.sessionCache}`,
+      {
+        confirmButtonText: 'Limpiar Cache',
+        cancelButtonText: 'Cerrar',
+      }
+    ).then((result) => {
       if (result.isConfirmed) {
         clearCache();
-        Swal.fire('Cache limpiado', 'El cache de imágenes ha sido limpiado.', 'success');
+        showAlertUtil.success('Cache limpiado', 'El cache de imágenes ha sido limpiado.');
       }
     });
   };

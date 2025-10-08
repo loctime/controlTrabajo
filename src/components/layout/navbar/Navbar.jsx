@@ -16,7 +16,7 @@ import { logout } from "../../../firebaseAuthControlFile";
 import { db } from "../../../firebaseConfig";
 import { deleteFile } from "../../../lib/controlFileStorage";
 import { collection, query, where, getDocs, deleteDoc, doc } from "firebase/firestore";
-import Swal from "sweetalert2";
+import { showAlert } from "../../../utils/swalConfig";
 import { menuItems } from "../../../router/navigation";
 
 function Navbar() {
@@ -55,26 +55,15 @@ function Navbar() {
   };
 
   const handleDeleteProfile = async () => {
-    const result = await Swal.fire({
-      title: '¿Estás seguro?',
-      text: 'Esta acción eliminará tu perfil permanentemente.',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Eliminar',
-      cancelButtonText: 'Cancelar',
-    });
+    const result = await showAlert.confirm(
+      '¿Estás seguro?',
+      'Esta acción eliminará tu perfil permanentemente.'
+    );
 
     if (result.isConfirmed) {
       try {
         // Mostrar loader mientras se elimina el perfil
-        Swal.fire({
-          title: 'Eliminando perfil...',
-          text: 'Por favor espera',
-          allowOutsideClick: false,
-          didOpen: () => {
-            Swal.showLoading();
-          }
-        });
+        showAlert.loading('Eliminando perfil...', 'Por favor espera');
 
         // Buscar el documento del usuario en Firestore
         const q = query(collection(db, "cv"), where("Email", "==", user.email));
@@ -82,7 +71,7 @@ function Navbar() {
         
         // Si no hay documentos para eliminar
         if (querySnapshot.empty) {
-          Swal.fire('Error', 'No se encontró el perfil para eliminar.', 'error');
+          showAlert.error('Error', 'No se encontró el perfil para eliminar.');
           return;
         }
 
@@ -128,11 +117,11 @@ function Navbar() {
         // Esperar a que todas las operaciones de eliminación terminen
         await Promise.all(deletePromises);
         
-        Swal.fire('Perfil eliminado', 'Tu perfil ha sido eliminado completamente.', 'success');
+        showAlert.success('Perfil eliminado', 'Tu perfil ha sido eliminado completamente.');
         handleLogout();
       } catch (error) {
         console.error("Error al eliminar el perfil:", error);
-        Swal.fire('Error', 'No se pudo eliminar el perfil completamente.', 'error');
+        showAlert.error('Error', 'No se pudo eliminar el perfil completamente.');
       }
     }
   };

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Button, Box, Paper, Typography, Divider } from "@mui/material";
+import { Box, Paper, Typography, Divider } from "@mui/material";
 import { db } from "../../../firebaseConfig";
 import { auth } from "../../../firebaseAuthControlFile";
 import { addDoc, collection, query, where, getDocs, setDoc, doc } from "firebase/firestore";
-import Swal from "sweetalert2";
+import { showAlert } from "../../../utils/swalConfig";
+import { Button } from "../../common/Button";
 import { useNavigate } from "react-router-dom";
 import { getEstadosPorPais } from "../../../constants/locations";
 
@@ -101,7 +102,7 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
         });
       }
     } catch (error) {
-      Swal.fire("Error", "Error al obtener el CV actual.", "error");
+      showAlert.error("Error", "Error al obtener el CV actual.");
     }
   };
 
@@ -166,12 +167,10 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
       // Enviar correos electrónicos
       await sendRegistrationEmails(newCv);
 
-      await Swal.fire({
-        title: "CV Enviado",
-        text: "Su CV está en revisión. Pronto estará disponible.",
-        icon: "info",
-        confirmButtonText: "Aceptar"
-      });
+      await showAlert.success(
+        "CV Enviado",
+        "Su CV está en revisión. Pronto estará disponible."
+      );
 
       navigate("/");
       if (setIsChange) setIsChange((prev) => !prev);
@@ -179,7 +178,7 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
       if (updateDashboard) updateDashboard();
     } catch (error) {
       console.error("Error al procesar el CV:", error);
-      Swal.fire("Error", "Hubo un problema al cargar el CV. Inténtalo nuevamente.", "error");
+      showAlert.error("Error", "Hubo un problema al cargar el CV. Inténtalo nuevamente.");
     } finally {
       setIsLoading(false);
     }

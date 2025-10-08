@@ -1,7 +1,6 @@
 import React, { useContext, useState } from 'react';
 import {
   Box,
-  Button,
   FormControl,
   Grid,
   IconButton,
@@ -21,8 +20,8 @@ import { db } from "../../../firebaseConfig";
 import { loginGoogle, onSigIn } from "../../../firebaseAuthControlFile";
 import { collection, doc, getDoc } from "firebase/firestore";
 import { AuthContext } from "../../../context/AuthContext";
-import Swal from 'sweetalert2';
-import { RingLoader } from "react-spinners"; // Importa RingLoader desde react-spinners
+import { showAlert } from "../../../utils/swalConfig";
+import { Button } from "../../common/Button";
 import placargistro from "../../assets/placargistro.jpeg";
 import conectadoImage from "../../assets/conectado.jpeg";
 
@@ -66,19 +65,17 @@ const Login = () => {
           handleLogin(finalyUser);
           navigate("/");
         } else {
-          Swal.fire({
-            icon: 'error',
-            title: 'Oops...',
-            text: 'Usted no está registrado!, Verifique su contraseña su mail, o regístrese',
-          });
+          showAlert.error(
+            'Oops...',
+            'Usted no está registrado! Verifique su contraseña su mail, o regístrese'
+          );
         }
       } catch (error) {
         console.log(error);
-        Swal.fire({
-          icon: 'error',
-          title: 'Oops...',
-          text: 'Usted no está registrado!, Verifique su contraseña su mail, o regístrese',
-        });
+        showAlert.error(
+          'Oops...',
+          'Usted no está registrado! Verifique su contraseña su mail, o regístrese'
+        );
       } finally {
         setLoading(false); // Desactivar el loader después de completar la autenticación
       }
@@ -107,7 +104,10 @@ const Login = () => {
       navigate("/");
     } catch (error) {
       console.log(error);
-      alert('Error al iniciar sesión con Google. Por favor, inténtelo de nuevo.');
+      showAlert.error(
+        'Error de inicio de sesión',
+        'Error al iniciar sesión con Google. Por favor, inténtelo de nuevo.'
+      );
     } finally {
       setLoading(false); // Desactivar el loader después de intentar iniciar sesión con Google
     }
@@ -173,13 +173,6 @@ const Login = () => {
             boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
           }}
         >
-          {/* Loader mientras se procesa */}
-          {loading && (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '20px' }}>
-              <RingLoader color="#66bb6a" loading={loading} size={50} /> {/* RingLoader */}
-            </Box>
-          )}
-
           <form onSubmit={formik.handleSubmit} style={{ width: "100%" }}>
             <Grid container rowSpacing={2}>
               <Grid item xs={12}>
@@ -223,65 +216,56 @@ const Login = () => {
                 </FormControl>
               </Grid>
               <Grid item xs={12}>
-                <Link to="/forgot-password" style={{ color: "#007bff", marginTop: "10px" }}>
+                <Link to="/forgot-password" style={{ color: "#66bb6a", marginTop: "10px", fontWeight: 500 }}>
                   ¿Olvidaste tu contraseña?
                 </Link>
               </Grid>
               <Grid item xs={12} mt={2}>
                 <Button
                   variant="contained"
+                  color="primary"
                   fullWidth
                   type="submit"
-                  sx={{
-                    color: "white",
-                    textTransform: "none",
-                    textShadow: "2px 2px 2px grey",
-                    backgroundColor: "#66bb6a", // Cambio de color a verde claro
-                  }}
+                  loading={loading}
                 >
-                  Ingresar
+                  {loading ? 'Ingresando...' : 'Ingresar'}
                 </Button>
               </Grid>
               <Grid item xs={12} mt={1}>
                 <Tooltip title="Ingresa con Google">
-                  <Button
-                    variant="contained"
-                    startIcon={<GoogleIcon />}
-                    onClick={googleSingIn}
-                    type="button"
-                    fullWidth
-                    sx={{
-                      color: "white",
-                      textTransform: "none",
-                      textShadow: "2px 2px 2px grey",
-                      backgroundColor: "#66bb6a", // Cambio de color a verde claro
-                    }}
-                  >
-                    Ingresa con Google
-                  </Button>
+                  <span style={{ display: 'block' }}>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      startIcon={<GoogleIcon />}
+                      onClick={googleSingIn}
+                      type="button"
+                      fullWidth
+                      loading={loading}
+                    >
+                      Ingresa con Google
+                    </Button>
+                  </span>
                 </Tooltip>
               </Grid>
               <Grid item xs={12} mt={1}>
-                <Typography color={"secondary.primary"} variant={"h6"} align="center">
+                <Typography color={"text.secondary"} variant={"h6"} align="center">
                   ¿Aún no tienes cuenta?
                 </Typography>
               </Grid>
               <Grid item xs={12} mt={1}>
                 <Tooltip title="Regístrate">
-                  <Button
-                    variant="contained"
-                    fullWidth
-                    onClick={() => navigate("/register")}
-                    type="button"
-                    sx={{
-                      color: "white",
-                      textTransform: "none",
-                      textShadow: "2px 2px 2px grey",
-                      backgroundColor: "#66bb6a", // Cambio de color a verde claro
-                    }}
-                  >
-                    Regístrate
-                  </Button>
+                  <span style={{ display: 'block' }}>
+                    <Button
+                      variant="outlined"
+                      color="primary"
+                      fullWidth
+                      onClick={() => navigate("/register")}
+                      type="button"
+                    >
+                      Regístrate
+                    </Button>
+                  </span>
                 </Tooltip>
               </Grid>
             </Grid>

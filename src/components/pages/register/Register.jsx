@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Button, FormControl, Grid, IconButton, InputAdornment, InputLabel, OutlinedInput, TextField } from "@mui/material";
+import { Box, FormControl, Grid, IconButton, InputAdornment, InputLabel, OutlinedInput, TextField } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { db } from "../../../firebaseConfig";
@@ -7,13 +7,12 @@ import { signUp } from "../../../firebaseAuthControlFile";
 import { setDoc, doc, getDoc } from "firebase/firestore";
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import Swal from 'sweetalert2';
-import { RingLoader } from "react-spinners";
+import { showAlert } from "../../../utils/swalConfig";
+import { Button } from "../../common/Button";
 
 const Register = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
-  const [isButtonVisible, setIsButtonVisible] = useState(true);
   const [loading, setLoading] = useState(false);
 
   const handleClickShowPassword = () => setShowPassword(!showPassword);
@@ -37,12 +36,7 @@ const Register = () => {
         // Verificar si el usuario ya está registrado
         const docSnap = await getDoc(doc(db, "users", values.email));
         if (docSnap.exists()) {
-          Swal.fire({
-            icon: 'error',
-            title: '¡Error!',
-            text: '¡Usted ya está registrado!',
-          });
-          setIsButtonVisible(true);
+          showAlert.error('¡Error!', '¡Usted ya está registrado!');
           return;
         }
         // Si el usuario no está registrado, proceder con el registro
@@ -67,48 +61,38 @@ const Register = () => {
             throw new Error(result.error || 'Error enviando correo');
           }
         } catch (err) {
-          Swal.fire({
-            icon: 'warning',
-            title: 'Registro exitoso, pero hubo un problema al enviar el correo',
-            text: 'Verifica tu correo o contacta al administrador.',
-          });
+          showAlert.warning(
+            'Registro exitoso, pero hubo un problema al enviar el correo',
+            'Verifica tu correo o contacta al administrador.'
+          );
         }
-        Swal.fire({
-          icon: 'success',
-          title: '¡Registro exitoso!',
-          text: 'Se ha enviado un correo a su casilla. Por favor, verifique su bandeja de entrada y/o spam.',
-          timer: 3500,
-          timerProgressBar: true,
-        }).then(() => {
+        showAlert.success(
+          '¡Registro exitoso!',
+          'Se ha enviado un correo a su casilla. Por favor, verifique su bandeja de entrada y/o spam.',
+          { timer: 3500, timerProgressBar: true }
+        ).then(() => {
           navigate("/login");
         });
       } catch (error) {
         // Manejar específicamente el caso de correo electrónico en uso
         if (error.code === 'auth/email-already-in-use') {
-          Swal.fire({
-            icon: 'error',
-            title: '¡Error!',
-            text: '¡No pudiste registrarte, el correo ya está en uso. Intenta con otro correo o inicia sesión!',
-          });
+          showAlert.error(
+            '¡Error!',
+            '¡No pudiste registrarte, el correo ya está en uso. Intenta con otro correo o inicia sesión!'
+          );
         } else {
-          // Mostrar Sweet Alert de error general si hay otros errores
-          Swal.fire({
-            icon: 'error',
-            title: '¡Error!',
-            text: '¡Ha ocurrido un error al registrar!',
-          });
+          // Mostrar error general si hay otros errores
+          showAlert.error('¡Error!', '¡Ha ocurrido un error al registrar!');
           console.error(error);
         }
       } finally {
         setLoading(false); // Desactivar el loader después de completar el registro, incluso si hay errores
-        setIsButtonVisible(true); // Mostrar el botón de registro nuevamente al finalizar
       }
     }
   });
 
   const handleFormSubmit = (event) => {
     event.preventDefault();
-    setIsButtonVisible(false);
     formik.handleSubmit();
   };
 
@@ -221,35 +205,20 @@ const Register = () => {
           </Grid>
           <Grid container justifyContent="center" spacing={3} mt={2}>
             <Grid item xs={10} md={7}>
-              <Box
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  position: 'relative',
-                  height: '56px' // Ajusta la altura según el tamaño del botón
-                }}
+              <Button
+                variant="contained"
+                color="primary"
+                fullWidth
+                type="submit"
+                loading={loading}
               >
-                {loading && <RingLoader color="red" size={50} />} {/* Spinner de carga con color rojo */}
-                {!loading && isButtonVisible && (
-                  <Button
-                    variant="contained"
-                    fullWidth
-                    type="submit"
-                    sx={{
-                      color: "white",
-                      textTransform: "none",
-                      textShadow: "2px 2px 2px grey",
-                    }}
-                  >
-                    Registrarme
-                  </Button>
-                )}
-              </Box>
+                {loading ? 'Registrando...' : 'Registrarme'}
+              </Button>
             </Grid>
             <Grid item xs={10} md={7}>
               <Button
-                variant="contained"
+                variant="outlined"
+                color="primary"
                 fullWidth
                 onClick={() => navigate("/login")}
               >

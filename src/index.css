@@ -1,10 +1,76 @@
-*{
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-/* Animaciones para optimización de carga */
+:root {
+  /* Colores principales */
+  --color-primary: #66bb6a;
+  --color-primary-light: #98ee99;
+  --color-primary-dark: #338a3e;
+  
+  /* Colores de fondo */
+  --bg-default: #f5f5f5;
+  --bg-paper: #ffffff;
+  
+  /* Espaciado */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  
+  /* Bordes */
+  --border-radius-sm: 8px;
+  --border-radius-md: 12px;
+  --border-radius-lg: 16px;
+  
+  /* Sombras */
+  --shadow-sm: 0px 2px 4px rgba(0,0,0,0.05);
+  --shadow-md: 0px 4px 12px rgba(0,0,0,0.1);
+  --shadow-lg: 0px 8px 24px rgba(0,0,0,0.15);
+  
+  /* Transiciones */
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s ease;
+  --transition-slow: 0.5s ease;
+}
+
+/* Animaciones profesionales */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
 @keyframes pulse {
   0%, 100% {
     opacity: 1;
@@ -32,9 +98,104 @@
   }
 }
 
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
+}
+
+/* Clases de utilidad */
+.fade-in {
+  animation: fadeIn 0.5s ease;
+}
+
+.slide-in-left {
+  animation: slideInLeft 0.5s ease;
+}
+
+.slide-in-right {
+  animation: slideInRight 0.5s ease;
+}
+
+.scale-in {
+  animation: scaleIn 0.3s ease;
+}
+
+.bounce {
+  animation: bounce 1s ease;
+}
+
 /* Skeleton loading mejorado */
 .skeleton-shimmer {
   background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
   background-size: 200px 100%;
   animation: shimmer 1.5s infinite;
+  border-radius: var(--border-radius-sm);
+}
+
+/* Scrollbar personalizado */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-primary);
+  border-radius: 10px;
+  transition: background 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary-dark);
+}
+
+/* Mejoras de accesibilidad */
+*:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Smooth scroll */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Efectos de glassmorphism */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+/* Gradientes reutilizables */
+.gradient-primary {
+  background: linear-gradient(135deg, #66bb6a 0%, #4caf50 100%);
+}
+
+.gradient-secondary {
+  background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
 }
