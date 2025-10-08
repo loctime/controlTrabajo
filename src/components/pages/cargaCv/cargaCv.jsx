@@ -38,6 +38,7 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
   const [loadingCv, setLoadingCv] = useState(false);
   const [estadosDisponibles, setEstadosDisponibles] = useState([]);
   const [autoFillApplied, setAutoFillApplied] = useState(false);
+  const [detectingLocation, setDetectingLocation] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -46,7 +47,9 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
         setUser(currentUser);
         fetchCurrentCv(currentUser.uid);
         // Auto-completar datos del usuario de Google
-        autoFillUserData(currentUser);
+        autoFillUserData(currentUser).catch(error => {
+          console.log('Error en auto-completado:', error);
+        });
       } else {
         setUser(null);
       }
@@ -77,8 +80,40 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
     }
   };
 
+  // Función para detectar ubicación manualmente
+  const detectLocationManually = async () => {
+    try {
+      setDetectingLocation(true);
+      if (navigator.geolocation) {
+        const position = await getCurrentPositionPromise();
+        if (position) {
+          const { ciudad, estado, pais } = await reverseGeocode(position.coords.latitude, position.coords.longitude);
+          
+          setNewCv(prevCv => ({
+            ...prevCv,
+            ...(ciudad && { ciudad }),
+            ...(estado && { estadoProvincia: estado }),
+            ...(pais && { pais })
+          }));
+          
+          // Cargar estados si se detectó un país
+          if (pais) {
+            setEstadosDisponibles(getEstadosPorPais(pais));
+          }
+          
+          Swal.fire("Ubicación detectada", `Se detectó: ${ciudad}, ${estado}, ${pais}`, "success");
+        }
+      }
+    } catch (error) {
+      console.log('Error detectando ubicación:', error);
+      Swal.fire("Error", "No se pudo detectar la ubicación. Por favor, complétala manualmente.", "warning");
+    } finally {
+      setDetectingLocation(false);
+    }
+  };
+
   // Nueva función para auto-completar datos del usuario
-  const autoFillUserData = (currentUser) => {
+  const autoFillUserData = async (currentUser) => {
     if (currentUser && !autoFillApplied && !currentCv) {
       const userData = {
         Email: currentUser.email || "",
@@ -87,9 +122,36 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
           Nombre: currentUser.displayName.split(' ')[0] || "",
           Apellido: currentUser.displayName.split(' ').slice(1).join(' ') || ""
         }),
-        // Podríamos agregar más datos si están disponibles
-        // País podría detectarse por idioma o timezone
       };
+
+      // Detectar país por timezone
+      try {
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        const detectedCountry = detectCountryByTimezone(timezone);
+        if (detectedCountry) {
+          userData.pais = detectedCountry;
+        }
+      } catch (error) {
+        console.log('No se pudo detectar país por timezone:', error);
+      }
+
+      // Obtener ubicación por geolocalización (solo si el usuario lo permite)
+      try {
+        if (navigator.geolocation) {
+          setDetectingLocation(true);
+          const position = await getCurrentPositionPromise();
+          if (position) {
+            const { ciudad, estado, pais } = await reverseGeocode(position.coords.latitude, position.coords.longitude);
+            if (ciudad) userData.ciudad = ciudad;
+            if (estado) userData.estadoProvincia = estado;
+            if (pais && !userData.pais) userData.pais = pais;
+          }
+          setDetectingLocation(false);
+        }
+      } catch (error) {
+        console.log('Geolocalización no disponible o denegada:', error);
+        setDetectingLocation(false);
+      }
 
       // Solo actualizar campos vacíos
       setNewCv(prevCv => ({
@@ -100,6 +162,70 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
       }));
       
       setAutoFillApplied(true);
+    }
+  };
+
+  // Función para detectar país por timezone
+  const detectCountryByTimezone = (timezone) => {
+    const timezoneCountryMap = {
+      'America/Argentina/Buenos_Aires': 'Argentina',
+      'America/Argentina/Cordoba': 'Argentina',
+      'America/Argentina/Mendoza': 'Argentina',
+      'America/Argentina/Salta': 'Argentina',
+      'America/Argentina/Tucuman': 'Argentina',
+      'America/Argentina/Ushuaia': 'Argentina',
+      'America/Mexico_City': 'México',
+      'America/Mexico/BajaNorte': 'México',
+      'America/Mexico/BajaSur': 'México',
+      'America/Mexico/General': 'México',
+      'America/New_York': 'Estados Unidos',
+      'America/Los_Angeles': 'Estados Unidos',
+      'America/Chicago': 'Estados Unidos',
+      'America/Denver': 'Estados Unidos',
+      'America/Toronto': 'Canadá',
+      'America/Vancouver': 'Canadá',
+      'Europe/Madrid': 'España',
+      'Europe/Barcelona': 'España',
+      'Europe/London': 'Reino Unido',
+      'Europe/Paris': 'Francia',
+      'Europe/Berlin': 'Alemania',
+      'Europe/Rome': 'Italia',
+      'America/Sao_Paulo': 'Brasil',
+      'America/Bogota': 'Colombia',
+      'America/Caracas': 'Venezuela',
+      'America/Lima': 'Perú',
+      'America/Santiago': 'Chile',
+      'America/Montevideo': 'Uruguay',
+    };
+    
+    return timezoneCountryMap[timezone] || null;
+  };
+
+  // Promisificar geolocation
+  const getCurrentPositionPromise = () => {
+    return new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(
+        (position) => resolve(position),
+        (error) => reject(error),
+        { timeout: 5000, enableHighAccuracy: false }
+      );
+    });
+  };
+
+  // Reverse geocoding usando una API gratuita
+  const reverseGeocode = async (lat, lng) => {
+    try {
+      const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=es`);
+      const data = await response.json();
+      
+      return {
+        ciudad: data.city || data.locality,
+        estado: data.principalSubdivision,
+        pais: data.countryName
+      };
+    } catch (error) {
+      console.log('Error en reverse geocoding:', error);
+      return {};
     }
   };
 
@@ -418,9 +544,25 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
           <Divider sx={{ my: 3 }} />
 
           {/* Ubicación */}
-          <Typography variant="h6" sx={{ mt: 3, mb: 2, color: 'primary.main' }}>
-            📍 Ubicación
-          </Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 3, mb: 2 }}>
+            <Typography variant="h6" sx={{ color: 'primary.main' }}>
+              📍 Ubicación
+              {detectingLocation && (
+                <Typography variant="caption" sx={{ ml: 2, color: 'info.main' }}>
+                  🔍 Detectando ubicación...
+                </Typography>
+              )}
+            </Typography>
+            <Button 
+              variant="outlined" 
+              size="small"
+              onClick={detectLocationManually}
+              disabled={detectingLocation}
+              sx={{ ml: 2 }}
+            >
+              📍 Detectar ubicación
+            </Button>
+          </Box>
           
           <Grid container spacing={3}>
             <Grid item xs={12} sm={6} md={4}>
