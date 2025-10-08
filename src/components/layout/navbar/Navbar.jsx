@@ -405,6 +405,16 @@ function Navbar() {
                   } else {
                     addDebugLog("✅ No está instalado como PWA");
                   }
+                  
+                  // Verificar si hay icono de instalación visible
+                  addDebugLog("🔍 Busca el icono ⬇️ en la barra de direcciones");
+                  addDebugLog("Si lo ves, Chrome detecta que es instalable");
+                  
+                  // Intentar detectar si el navegador muestra opciones de instalación
+                  if (navigator.userAgent.includes('Chrome') && !window.matchMedia('(display-mode: standalone)').matches) {
+                    addDebugLog("💡 SOLUCIÓN: Usa el menú del navegador");
+                    addDebugLog("   ⋮ → Instalar app / Agregar a pantalla");
+                  }
                 }}
                 variant="outlined"
                 size="small"
@@ -425,21 +435,29 @@ function Navbar() {
             <Box sx={{ mt: 1 }}>
               <Button
                 onClick={() => {
-                  addDebugLog("🧪 Forzando beforeinstallprompt...");
+                  addDebugLog("👆 Simulando interacción del usuario...");
                   
-                  // Crear un evento sintético
-                  const fakeEvent = {
-                    preventDefault: () => {},
-                    prompt: async () => {
-                      addDebugLog("📱 Prompt sintético llamado");
-                      return Promise.resolve();
-                    },
-                    userChoice: Promise.resolve({ outcome: 'accepted' })
-                  };
+                  // Simular interacción del usuario (click)
+                  const clickEvent = new MouseEvent('click', {
+                    bubbles: true,
+                    cancelable: true,
+                    view: window
+                  });
+                  document.dispatchEvent(clickEvent);
                   
-                  // Simular el evento
-                  window.dispatchEvent(new CustomEvent('beforeinstallprompt', { detail: fakeEvent }));
-                  addDebugLog("✅ Evento beforeinstallprompt disparado");
+                  // También simular scroll
+                  const scrollEvent = new Event('scroll', {
+                    bubbles: true,
+                    cancelable: true
+                  });
+                  document.dispatchEvent(scrollEvent);
+                  
+                  addDebugLog("✅ Interacciones simuladas");
+                  addDebugLog("🔄 Espera 2 segundos y toca 'Intentar Instalar'");
+                  
+                  setTimeout(() => {
+                    addDebugLog("⏰ Ahora puedes intentar instalar");
+                  }, 2000);
                 }}
                 variant="outlined"
                 size="small"
@@ -453,7 +471,47 @@ function Navbar() {
                   }
                 }}
               >
-                🧪 Forzar Evento
+                👆 Simular Interacción
+              </Button>
+            </Box>
+
+            <Box sx={{ mt: 1 }}>
+              <Button
+                onClick={() => {
+                  addDebugLog("🔧 Instalación manual...");
+                  
+                  // Verificar si hay opciones de instalación en el navegador
+                  addDebugLog("📱 Busca en tu navegador:");
+                  addDebugLog("• Menú ⋮ (3 puntos) → Instalar app");
+                  addDebugLog("• Icono ⬇️ en la barra de direcciones");
+                  addDebugLog("• Menú → Agregar a pantalla de inicio");
+                  
+                  // Mostrar alerta con instrucciones
+                  setTimeout(() => {
+                    alert(`📱 INSTRUCCIONES DE INSTALACIÓN:
+
+1. Toca el menú ⋮ (3 puntos) en Chrome
+2. Busca "Instalar app" o "Agregar a pantalla de inicio"
+3. Toca "Instalar" o "Agregar"
+
+O busca el icono ⬇️ en la barra de direcciones.
+
+¡La app se instalará automáticamente!`);
+                  }, 500);
+                }}
+                variant="outlined"
+                size="small"
+                fullWidth
+                sx={{ 
+                  color: "white",
+                  borderColor: "rgba(255,255,255,0.3)",
+                  "&:hover": { 
+                    borderColor: "rgba(255,255,255,0.5)",
+                    backgroundColor: "rgba(255,255,255,0.1)"
+                  }
+                }}
+              >
+                📱 Instalación Manual
               </Button>
             </Box>
 
