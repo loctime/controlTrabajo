@@ -33,6 +33,14 @@ export function usePWAInstall() {
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
     window.addEventListener('appinstalled', handleAppInstalled)
 
+    // SIEMPRE mostrar el botón (excepto si ya está instalado)
+    setTimeout(() => {
+      if (!isInstalled) {
+        setIsInstallable(true)
+        console.log('PWA: Botón de instalación visible')
+      }
+    }, 500)
+
     // Cleanup
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
@@ -41,43 +49,37 @@ export function usePWAInstall() {
   }, [])
 
   const installPWA = async () => {
-    // SI HAY deferredPrompt: instalar DIRECTAMENTE (es el caso ideal)
+    console.log('PWA: Intentando instalar...')
+    
+    // SI HAY deferredPrompt: instalar con el prompt del navegador
     if (deferredPrompt) {
       try {
-        console.log('PWA: ✅ Instalando directamente con prompt del navegador')
-        // Mostrar el prompt NATIVO del navegador
+        console.log('PWA: Mostrando prompt de instalación')
         await deferredPrompt.prompt()
         const choiceResult = await deferredPrompt.userChoice
         
         if (choiceResult.outcome === 'accepted') {
+          console.log('PWA: ¡Instalado!')
           setIsInstalled(true)
           setIsInstallable(false)
           setDeferredPrompt(null)
-          console.log('PWA: ✅ Instalación exitosa')
-          
-          // Mostrar confirmación
-          await Swal.fire({
-            title: '¡Instalado!',
-            text: 'La app se ha instalado correctamente',
-            icon: 'success',
-            timer: 2000,
-            showConfirmButton: false
-          })
-          
           return true
         }
-        console.log('PWA: Usuario canceló la instalación')
         return false
       } catch (error) {
-        console.error('Error installing PWA:', error)
+        console.error('PWA: Error al instalar:', error)
         return false
       }
     }
 
-    // Si NO HAY deferredPrompt: no podemos forzar instalación
-    // Esto solo pasa en iOS o navegadores que no soportan PWA install prompt
-    console.log('PWA: ⚠️ No hay deferredPrompt disponible')
-    console.log('PWA: El usuario debe instalar manualmente desde el navegador')
+    // Si NO HAY deferredPrompt: mostrar alerta simple
+    console.log('PWA: Sin prompt disponible, mostrando alerta')
+    await Swal.fire({
+      title: 'Instalar App',
+      text: 'Usa el menú de tu navegador para instalar la app',
+      icon: 'info',
+      confirmButtonText: 'OK'
+    })
     
     return false
   }
