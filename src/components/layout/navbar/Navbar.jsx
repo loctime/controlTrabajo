@@ -30,9 +30,33 @@ function Navbar() {
   const rolAdminEspecial = "eEI7F72asd";
   const isAdmin = user?.rol === rolAdmin || user?.rol === rolAdminEspecial;
   
-  // Hook PWA
-  const { isInstallable, isInstalled, installPWA } = usePWAInstall();
   const [showDebug, setShowDebug] = useState(false);
+  const [debugLogs, setDebugLogs] = useState([]);
+
+  // Función para agregar logs visuales
+  const addDebugLog = (message) => {
+    const timestamp = new Date().toLocaleTimeString();
+    setDebugLogs(prev => [...prev.slice(-4), `${timestamp}: ${message}`]);
+  };
+
+  // Hook PWA
+  const { isInstallable, isInstalled, installPWA } = usePWAInstall(addDebugLog);
+
+  // Función de instalación con logs visuales
+  const handleInstallPWA = async () => {
+    addDebugLog("🚀 Iniciando instalación...");
+    
+    try {
+      const result = await installPWA();
+      if (result) {
+        addDebugLog("✅ ¡Instalación exitosa!");
+      } else {
+        addDebugLog("❌ Instalación cancelada/fallida");
+      }
+    } catch (error) {
+      addDebugLog(`❌ Error: ${error.message}`);
+    }
+  };
 
   useEffect(() => {
     const fetchProfilePhoto = async () => {
@@ -53,6 +77,13 @@ function Navbar() {
     };
     fetchProfilePhoto();
   }, [user]);
+
+  // Agregar logs cuando cambie el estado PWA
+  useEffect(() => {
+    if (showDebug) {
+      addDebugLog(`Estado PWA - Instalable: ${isInstallable}, Instalado: ${isInstalled}`);
+    }
+  }, [isInstallable, isInstalled, showDebug]);
 
   const handleLogout = () => {
     logout();
@@ -332,7 +363,7 @@ function Navbar() {
             
             <Box sx={{ mt: 2, pt: 1, borderTop: "1px solid rgba(255,255,255,0.2)" }}>
               <Button
-                onClick={installPWA}
+                onClick={handleInstallPWA}
                 variant="contained"
                 size="small"
                 fullWidth
@@ -344,6 +375,20 @@ function Navbar() {
                 🚀 Intentar Instalar
               </Button>
             </Box>
+
+            {/* Logs visuales */}
+            {debugLogs.length > 0 && (
+              <Box sx={{ mt: 2, pt: 1, borderTop: "1px solid rgba(255,255,255,0.2)" }}>
+                <strong style={{ fontSize: "11px" }}>📋 Logs:</strong>
+                <Box sx={{ mt: 0.5, maxHeight: 100, overflow: "auto" }}>
+                  {debugLogs.map((log, index) => (
+                    <Box key={index} sx={{ fontSize: "10px", color: "#ccc", mb: 0.5 }}>
+                      {log}
+                    </Box>
+                  ))}
+                </Box>
+              </Box>
+            )}
             
             <Box sx={{ mt: 1, fontSize: "10px", color: "#888", fontStyle: "italic" }}>
               Abre la consola del navegador para ver logs detallados

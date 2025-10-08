@@ -1,33 +1,39 @@
 import { useState, useEffect } from 'react'
 
-export function usePWAInstall() {
+export function usePWAInstall(onLog = null) {
   const [deferredPrompt, setDeferredPrompt] = useState(null)
   const [isInstallable, setIsInstallable] = useState(false)
   const [isInstalled, setIsInstalled] = useState(false)
+
+  // Función helper para logs
+  const log = (message) => {
+    console.log(message)
+    if (onLog) onLog(message)
+  }
 
   useEffect(() => {
     // Verificar si ya está instalado
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches
     const isIosStandalone = window.navigator.standalone === true
     
-    console.log('PWA: Checking installation status...')
-    console.log('PWA: - Display mode standalone:', isStandalone)
-    console.log('PWA: - iOS standalone:', isIosStandalone)
+    log('PWA: Checking installation status...')
+    log(`PWA: - Display mode standalone: ${isStandalone}`)
+    log(`PWA: - iOS standalone: ${isIosStandalone}`)
     
     if (isStandalone || isIosStandalone) {
-      console.log('PWA: ✅ App is already installed')
+      log('PWA: ✅ App is already installed')
       setIsInstalled(true)
       return
     }
     
-    console.log('PWA: App not installed yet')
+    log('PWA: App not installed yet')
 
     // Escuchar el evento beforeinstallprompt
     const handleBeforeInstallPrompt = (e) => {
       e.preventDefault()
       setDeferredPrompt(e)
       setIsInstallable(true)
-      console.log('PWA: beforeinstallprompt event captured')
+      log('PWA: beforeinstallprompt event captured')
     }
 
     // Escuchar cuando la app se instala
@@ -35,7 +41,7 @@ export function usePWAInstall() {
       setIsInstalled(true)
       setIsInstallable(false)
       setDeferredPrompt(null)
-      console.log('PWA: App installed successfully')
+      log('PWA: App installed successfully')
     }
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
@@ -46,7 +52,7 @@ export function usePWAInstall() {
     const timer = setTimeout(() => {
       if (!isInstalled) {
         setIsInstallable(true)
-        console.log('PWA: Install button force-enabled')
+        log('PWA: Install button force-enabled')
       }
     }, 500)
 
@@ -58,39 +64,39 @@ export function usePWAInstall() {
   }, [])
 
   const installPWA = async () => {
-    console.log('PWA: installPWA() called')
-    console.log('PWA: - deferredPrompt available:', !!deferredPrompt)
-    console.log('PWA: - isInstallable:', isInstallable)
-    console.log('PWA: - isInstalled:', isInstalled)
+    log('PWA: installPWA() called')
+    log(`PWA: - deferredPrompt available: ${!!deferredPrompt}`)
+    log(`PWA: - isInstallable: ${isInstallable}`)
+    log(`PWA: - isInstalled: ${isInstalled}`)
     
     if (!deferredPrompt) {
-      console.warn('PWA: ⚠️ Cannot install - no deferredPrompt available')
-      console.log('PWA: This usually means:')
-      console.log('  1. App is already installed')
-      console.log('  2. Browser does not support PWA install prompt (iOS Safari)')
-      console.log('  3. Page does not meet PWA criteria')
+      log('PWA: ⚠️ Cannot install - no deferredPrompt available')
+      log('PWA: This usually means:')
+      log('  1. App is already installed')
+      log('  2. Browser does not support PWA install prompt (iOS Safari)')
+      log('  3. Page does not meet PWA criteria')
       return false
     }
 
     try {
-      console.log('PWA: 📱 Showing native install prompt...')
+      log('PWA: 📱 Showing native install prompt...')
       await deferredPrompt.prompt()
       const choiceResult = await deferredPrompt.userChoice
       
-      console.log('PWA: User choice:', choiceResult.outcome)
+      log(`PWA: User choice: ${choiceResult.outcome}`)
       
       if (choiceResult.outcome === 'accepted') {
-        console.log('PWA: ✅ Installation accepted!')
+        log('PWA: ✅ Installation accepted!')
         setIsInstalled(true)
         setIsInstallable(false)
         setDeferredPrompt(null)
         return true
       }
       
-      console.log('PWA: ❌ Installation dismissed by user')
+      log('PWA: ❌ Installation dismissed by user')
       return false
     } catch (error) {
-      console.error('PWA: ❌ Installation error:', error)
+      log(`PWA: ❌ Installation error: ${error.message}`)
       return false
     }
   }
