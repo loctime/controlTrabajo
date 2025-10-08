@@ -11,6 +11,7 @@ import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import LogoutIcon from "@mui/icons-material/Logout";
+import GetAppIcon from "@mui/icons-material/GetApp";
 import { AuthContext } from "../../../context/AuthContext";
 import { logout } from "../../../firebaseAuthControlFile";
 import { db } from "../../../firebaseConfig";
@@ -18,6 +19,7 @@ import { deleteFile } from "../../../lib/controlFileStorage";
 import { collection, query, where, getDocs, deleteDoc, doc } from "firebase/firestore";
 import Swal from "sweetalert2";
 import { menuItems } from "../../../router/navigation";
+import { usePWAInstall } from "../../../hooks/usePWAInstall";
 
 function Navbar() {
   const { logoutContext, user } = useContext(AuthContext);
@@ -27,6 +29,9 @@ function Navbar() {
   const rolAdmin = import.meta.env.VITE_ROL_ADMIN;
   const rolAdminEspecial = "eEI7F72asd";
   const isAdmin = user?.rol === rolAdmin || user?.rol === rolAdminEspecial;
+  
+  // Hook PWA
+  const { isInstallable, isInstalled, installPWA } = usePWAInstall();
 
   useEffect(() => {
     const fetchProfilePhoto = async () => {
@@ -163,6 +168,26 @@ function Navbar() {
             )}
           </Box>
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            {/* Botón de instalación PWA */}
+            {!isInstalled && isInstallable && (
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<GetAppIcon />}
+                onClick={installPWA}
+                sx={{
+                  color: "white",
+                  borderColor: "white",
+                  "&:hover": {
+                    borderColor: "white",
+                    backgroundColor: "rgba(255, 255, 255, 0.1)"
+                  }
+                }}
+              >
+                Instalar App
+              </Button>
+            )}
+            
             <IconButton onClick={handleAvatarClick} color="inherit">
               {profilePhoto ? (
                 <Avatar src={profilePhoto} alt="Usuario" />
