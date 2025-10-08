@@ -11,7 +11,6 @@ import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import LogoutIcon from "@mui/icons-material/Logout";
-import GetAppIcon from "@mui/icons-material/GetApp";
 import { AuthContext } from "../../../context/AuthContext";
 import { logout } from "../../../firebaseAuthControlFile";
 import { db } from "../../../firebaseConfig";
@@ -19,7 +18,6 @@ import { deleteFile } from "../../../lib/controlFileStorage";
 import { collection, query, where, getDocs, deleteDoc, doc } from "firebase/firestore";
 import Swal from "sweetalert2";
 import { menuItems } from "../../../router/navigation";
-import { usePWAInstall } from "../../../hooks/usePWAInstall";
 
 function Navbar() {
   const { logoutContext, user } = useContext(AuthContext);
@@ -29,34 +27,6 @@ function Navbar() {
   const rolAdmin = import.meta.env.VITE_ROL_ADMIN;
   const rolAdminEspecial = "eEI7F72asd";
   const isAdmin = user?.rol === rolAdmin || user?.rol === rolAdminEspecial;
-  
-  const [showDebug, setShowDebug] = useState(false);
-  const [debugLogs, setDebugLogs] = useState([]);
-
-  // Función para agregar logs visuales
-  const addDebugLog = (message) => {
-    const timestamp = new Date().toLocaleTimeString();
-    setDebugLogs(prev => [...prev.slice(-4), `${timestamp}: ${message}`]);
-  };
-
-  // Hook PWA
-  const { isInstallable, isInstalled, installPWA } = usePWAInstall(addDebugLog);
-
-  // Función de instalación con logs visuales
-  const handleInstallPWA = async () => {
-    addDebugLog("🚀 Iniciando instalación...");
-    
-    try {
-      const result = await installPWA();
-      if (result) {
-        addDebugLog("✅ ¡Instalación exitosa!");
-      } else {
-        addDebugLog("❌ Instalación cancelada/fallida");
-      }
-    } catch (error) {
-      addDebugLog(`❌ Error: ${error.message}`);
-    }
-  };
 
   useEffect(() => {
     const fetchProfilePhoto = async () => {
@@ -77,13 +47,6 @@ function Navbar() {
     };
     fetchProfilePhoto();
   }, [user]);
-
-  // Agregar logs cuando cambie el estado PWA
-  useEffect(() => {
-    if (showDebug) {
-      addDebugLog(`Estado PWA - Instalable: ${isInstallable}, Instalado: ${isInstalled}`);
-    }
-  }, [isInstallable, isInstalled, showDebug]);
 
   const handleLogout = () => {
     logout();
@@ -200,53 +163,6 @@ function Navbar() {
             )}
           </Box>
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            {/* Botón DEBUG PWA */}
-            <IconButton
-              onClick={() => setShowDebug(!showDebug)}
-              sx={{
-                width: 40,
-                height: 40,
-                backgroundColor: "rgba(255, 255, 255, 0.15)",
-                color: "white",
-                fontSize: "14px",
-                fontWeight: "bold",
-                "&:hover": {
-                  backgroundColor: "rgba(255, 255, 255, 0.25)"
-                }
-              }}
-              title="PWA Debug Info"
-            >
-              🔍
-            </IconButton>
-
-            {/* Botón de instalación PWA redondo y moderno */}
-            {!isInstalled && isInstallable && (
-              <IconButton
-                onClick={installPWA}
-                sx={{
-                  width: 48,
-                  height: 48,
-                  backgroundColor: "rgba(255, 255, 255, 0.2)",
-                  color: "white",
-                  border: "2px solid rgba(255, 255, 255, 0.4)",
-                  backdropFilter: "blur(10px)",
-                  boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-                  "&:hover": {
-                    backgroundColor: "rgba(255, 255, 255, 0.3)",
-                    transform: "scale(1.05)",
-                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)"
-                  },
-                  "&:active": {
-                    transform: "scale(0.95)"
-                  },
-                  transition: "all 0.2s ease"
-                }}
-                title="Instalar App"
-              >
-                <GetAppIcon sx={{ fontSize: 24 }} />
-              </IconButton>
-            )}
-            
             <IconButton onClick={handleAvatarClick} color="inherit">
               {profilePhoto ? (
                 <Avatar src={profilePhoto} alt="Usuario" />
@@ -286,159 +202,6 @@ function Navbar() {
           </Box>
         </Toolbar>
       </AppBar>
-      
-      {/* Panel de Debug PWA */}
-      {showDebug && (
-        <Box
-          sx={{
-            position: "fixed",
-            top: 70,
-            right: 10,
-            zIndex: 9999,
-            backgroundColor: "rgba(0, 0, 0, 0.95)",
-            color: "white",
-            padding: 2,
-            borderRadius: 2,
-            minWidth: 280,
-            maxWidth: "90vw",
-            boxShadow: "0 4px 20px rgba(0, 0, 0, 0.5)",
-            fontSize: "12px",
-            fontFamily: "monospace",
-            maxHeight: "80vh",
-            overflow: "auto"
-          }}
-        >
-          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1, pb: 1, borderBottom: "1px solid rgba(255,255,255,0.2)" }}>
-            <strong style={{ fontSize: "14px" }}>🔍 PWA Debug</strong>
-            <Button 
-              onClick={() => setShowDebug(false)} 
-              size="small"
-              sx={{ color: "white", minWidth: 30, padding: 0 }}
-            >
-              ✕
-            </Button>
-          </Box>
-          
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
-            <Box>
-              <strong>Estado:</strong>
-            </Box>
-            <Box sx={{ pl: 1, color: isInstalled ? "#4caf50" : "#ff9800" }}>
-              • Instalado: {isInstalled ? "✅ SÍ" : "❌ NO"}
-            </Box>
-            <Box sx={{ pl: 1, color: isInstallable ? "#4caf50" : "#f44336" }}>
-              • Instalable: {isInstallable ? "✅ SÍ" : "❌ NO"}
-            </Box>
-            
-            <Box sx={{ mt: 1 }}>
-              <strong>Navegador:</strong>
-            </Box>
-            <Box sx={{ pl: 1, fontSize: "11px", color: "#bbb" }}>
-              {navigator.userAgent.substring(0, 80)}...
-            </Box>
-            
-            <Box sx={{ mt: 1 }}>
-              <strong>Display Mode:</strong>
-            </Box>
-            <Box sx={{ pl: 1 }}>
-              • Standalone: {window.matchMedia('(display-mode: standalone)').matches ? "✅" : "❌"}
-            </Box>
-            <Box sx={{ pl: 1 }}>
-              • iOS Standalone: {window.navigator.standalone ? "✅" : "❌"}
-            </Box>
-            
-            <Box sx={{ mt: 1 }}>
-              <strong>Service Worker:</strong>
-            </Box>
-            <Box sx={{ pl: 1 }}>
-              • Registrado: {navigator.serviceWorker?.controller ? "✅" : "❌"}
-            </Box>
-            
-            <Box sx={{ mt: 1 }}>
-              <strong>Manifest:</strong>
-            </Box>
-            <Box sx={{ pl: 1, fontSize: "11px", wordBreak: "break-all", color: "#bbb" }}>
-              {document.querySelector('link[rel="manifest"]')?.href || "❌ No encontrado"}
-            </Box>
-            
-            <Box sx={{ mt: 2, pt: 1, borderTop: "1px solid rgba(255,255,255,0.2)" }}>
-              <Button
-                onClick={handleInstallPWA}
-                variant="contained"
-                size="small"
-                fullWidth
-                sx={{ 
-                  backgroundColor: "#4caf50",
-                  "&:hover": { backgroundColor: "#45a049" }
-                }}
-              >
-                🚀 Intentar Instalar
-              </Button>
-            </Box>
-
-            {/* Logs visuales */}
-            {debugLogs.length > 0 && (
-              <Box sx={{ mt: 2, pt: 1, borderTop: "1px solid rgba(255,255,255,0.2)" }}>
-                <strong style={{ fontSize: "11px" }}>📋 Logs:</strong>
-                <Box sx={{ mt: 0.5, maxHeight: 100, overflow: "auto" }}>
-                  {debugLogs.map((log, index) => (
-                    <Box key={index} sx={{ fontSize: "10px", color: "#ccc", mb: 0.5 }}>
-                      {log}
-                    </Box>
-                  ))}
-                </Box>
-              </Box>
-            )}
-            
-            <Box sx={{ mt: 1, pt: 1, borderTop: "1px solid rgba(255,255,255,0.2)" }}>
-              <Button
-                onClick={() => {
-                  addDebugLog("🔍 Verificando estado completo...");
-                  addDebugLog(`URL actual: ${window.location.href}`);
-                  addDebugLog(`HTTPS: ${location.protocol === 'https:' ? 'SÍ' : 'NO'}`);
-                  addDebugLog(`Service Worker: ${navigator.serviceWorker ? 'Disponible' : 'NO disponible'}`);
-                  addDebugLog(`beforeinstallprompt soportado: ${'onbeforeinstallprompt' in window ? 'SÍ' : 'NO'}`);
-                  
-                  // Verificar si ya está en pantalla de inicio
-                  if (window.matchMedia('(display-mode: standalone)').matches) {
-                    addDebugLog("⚠️ YA ESTÁ INSTALADO como PWA");
-                  } else {
-                    addDebugLog("✅ No está instalado como PWA");
-                  }
-                  
-                  // Verificar si hay icono de instalación visible
-                  addDebugLog("🔍 Busca el icono ⬇️ en la barra de direcciones");
-                  addDebugLog("Si lo ves, Chrome detecta que es instalable");
-                  
-                  // Intentar detectar si el navegador muestra opciones de instalación
-                  if (navigator.userAgent.includes('Chrome') && !window.matchMedia('(display-mode: standalone)').matches) {
-                    addDebugLog("💡 SOLUCIÓN: Usa el menú del navegador");
-                    addDebugLog("   ⋮ → Instalar app / Agregar a pantalla");
-                  }
-                }}
-                variant="outlined"
-                size="small"
-                fullWidth
-                sx={{ 
-                  color: "white",
-                  borderColor: "rgba(255,255,255,0.3)",
-                  "&:hover": { 
-                    borderColor: "rgba(255,255,255,0.5)",
-                    backgroundColor: "rgba(255,255,255,0.1)"
-                  }
-                }}
-              >
-                🔍 Verificar Estado
-              </Button>
-            </Box>
-
-
-            <Box sx={{ mt: 1, fontSize: "10px", color: "#888", fontStyle: "italic" }}>
-              Abre la consola del navegador para ver logs detallados
-            </Box>
-          </Box>
-        </Box>
-      )}
       
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <Toolbar />
