@@ -18,7 +18,6 @@ import { deleteFile } from "../../../lib/controlFileStorage";
 import { collection, query, where, getDocs, deleteDoc, doc } from "firebase/firestore";
 import { showAlert } from "../../../utils/swalConfig";
 import { menuItems } from "../../../router/navigation";
-import PWAInstallButton from "../../common/PWAInstallButton";
 
 function Navbar() {
   const { logoutContext, user } = useContext(AuthContext);
@@ -153,9 +152,6 @@ function Navbar() {
             )}
           </Box>
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            {/* Botón de instalación PWA con fallback manual */}
-            <PWAInstallButton />
-            
             <IconButton onClick={handleAvatarClick} color="inherit">
               {profilePhoto ? (
                 <Avatar src={profilePhoto} alt="Usuario" />
