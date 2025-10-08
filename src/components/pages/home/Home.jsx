@@ -1,16 +1,24 @@
 import React, { useEffect } from 'react';
 import { Box } from '@mui/material';
-import { showAlert } from '../../../utils/swalConfig';
+import Swal from 'sweetalert2';
 import placa1 from '../../assets/placa1.jpeg';
 import placa2 from '../../assets/placa2.jpeg';
 
 const Home = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
-    showAlert.info(
-      'Aviso importante',
-      'La Coalición Cívica ofrece esta herramienta de búsqueda laboral como un servicio gratuito y comunitario. No asume ninguna responsabilidad sobre el proceso de contratación, ni mantiene ningún tipo de relación laboral con las partes involucradas (contratante y contratado).'
-    );
+    Swal.fire({
+      title: 'Aviso importante',
+      text: 'La Coalición Cívica ofrece esta herramienta de búsqueda laboral como un servicio gratuito y comunitario. No asume ninguna responsabilidad sobre el proceso de contratación, ni mantiene ningún tipo de relación laboral con las partes involucradas (contratante y contratado).',
+      icon: 'info',
+      confirmButtonText: 'Entendido',
+      confirmButtonColor: '#66bb6a',
+      allowOutsideClick: true,
+      allowEscapeKey: true,
+      customClass: {
+        popup: 'scale-in'
+      }
+    });
   }, []);
 
   return (
