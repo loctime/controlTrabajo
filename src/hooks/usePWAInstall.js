@@ -189,18 +189,99 @@ export function usePWAInstall(onLog = null) {
         log('PWA: ✅ Custom modal - User confirmed')
         document.body.removeChild(modal)
         
-        // Mostrar instrucciones de instalación manual
+        // Intentar forzar que Chrome detecte la app como instalable
+        log('PWA: 🔧 Attempting to trigger browser install menu...')
+        
+        // Crear un evento beforeinstallprompt sintético más convincente
+        try {
+          const syntheticEvent = new Event('beforeinstallprompt', {
+            bubbles: true,
+            cancelable: true
+          })
+          
+          // Agregar propiedades del evento
+          syntheticEvent.preventDefault = () => {}
+          syntheticEvent.prompt = async () => {
+            log('PWA: Synthetic prompt called')
+            // Intentar abrir el menú de instalación del navegador
+            window.open('', '_self')
+          }
+          syntheticEvent.userChoice = Promise.resolve({ outcome: 'accepted' })
+          
+          // Disparar el evento
+          window.dispatchEvent(syntheticEvent)
+          log('PWA: Synthetic beforeinstallprompt event dispatched')
+          
+          // También intentar otras técnicas
+          setTimeout(() => {
+            // Intentar mostrar el menú de instalación
+            if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+              log('PWA: Service worker detected, attempting install trigger')
+            }
+          }, 500)
+          
+        } catch (error) {
+          log(`PWA: Error with synthetic event: ${error.message}`)
+        }
+        
+        // Crear un modal más directo con instrucciones visuales
         setTimeout(() => {
-          alert(`📱 INSTRUCCIONES DE INSTALACIÓN:
-
-1. Toca el menú ⋮ (3 puntos) en Chrome
-2. Busca "Instalar app" o "Agregar a pantalla de inicio"
-3. Toca "Instalar" o "Agregar"
-
-O busca el icono ⬇️ en la barra de direcciones.
-
-¡La app se instalará automáticamente!`)
-        }, 300)
+          const instructionModal = document.createElement('div')
+          instructionModal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10001;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          `
+          
+          instructionModal.innerHTML = `
+            <div style="
+              background: white;
+              border-radius: 16px;
+              padding: 24px;
+              max-width: 350px;
+              width: 90%;
+              text-align: center;
+            ">
+              <div style="font-size: 40px; margin-bottom: 16px;">⬇️</div>
+              <h3 style="margin: 0 0 16px 0; color: #333; font-size: 20px;">¡Casi listo!</h3>
+              <p style="margin: 0 0 20px 0; color: #666; font-size: 14px; line-height: 1.4;">
+                <strong>Busca el icono ⬇️ en la barra de direcciones</strong> o toca el menú ⋮ del navegador
+              </p>
+              <div style="
+                background: #f0f8ff;
+                border: 2px solid #1976d2;
+                border-radius: 8px;
+                padding: 12px;
+                margin: 16px 0;
+                font-size: 13px;
+                color: #1976d2;
+              ">
+                💡 Si ves el icono ⬇️, tócalo para instalar directamente
+              </div>
+              <button onclick="document.body.removeChild(this.closest('div').parentNode)" style="
+                background: #1976d2;
+                border: none;
+                padding: 12px 24px;
+                border-radius: 8px;
+                font-size: 16px;
+                cursor: pointer;
+                color: white;
+                font-weight: 600;
+                width: 100%;
+              ">Entendido</button>
+            </div>
+          `
+          
+          document.body.appendChild(instructionModal)
+        }, 200)
         
         resolve(true)
       }
