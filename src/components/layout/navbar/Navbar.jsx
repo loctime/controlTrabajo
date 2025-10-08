@@ -32,6 +32,7 @@ function Navbar() {
   
   // Hook PWA
   const { isInstallable, isInstalled, installPWA } = usePWAInstall();
+  const [showDebug, setShowDebug] = useState(false);
 
   useEffect(() => {
     const fetchProfilePhoto = async () => {
@@ -168,6 +169,25 @@ function Navbar() {
             )}
           </Box>
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            {/* Botón DEBUG PWA */}
+            <IconButton
+              onClick={() => setShowDebug(!showDebug)}
+              sx={{
+                width: 40,
+                height: 40,
+                backgroundColor: "rgba(255, 255, 255, 0.15)",
+                color: "white",
+                fontSize: "14px",
+                fontWeight: "bold",
+                "&:hover": {
+                  backgroundColor: "rgba(255, 255, 255, 0.25)"
+                }
+              }}
+              title="PWA Debug Info"
+            >
+              🔍
+            </IconButton>
+
             {/* Botón de instalación PWA redondo y moderno */}
             {!isInstalled && isInstallable && (
               <IconButton
@@ -235,6 +255,103 @@ function Navbar() {
           </Box>
         </Toolbar>
       </AppBar>
+      
+      {/* Panel de Debug PWA */}
+      {showDebug && (
+        <Box
+          sx={{
+            position: "fixed",
+            top: 70,
+            right: 10,
+            zIndex: 9999,
+            backgroundColor: "rgba(0, 0, 0, 0.95)",
+            color: "white",
+            padding: 2,
+            borderRadius: 2,
+            minWidth: 280,
+            maxWidth: "90vw",
+            boxShadow: "0 4px 20px rgba(0, 0, 0, 0.5)",
+            fontSize: "12px",
+            fontFamily: "monospace",
+            maxHeight: "80vh",
+            overflow: "auto"
+          }}
+        >
+          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1, pb: 1, borderBottom: "1px solid rgba(255,255,255,0.2)" }}>
+            <strong style={{ fontSize: "14px" }}>🔍 PWA Debug</strong>
+            <Button 
+              onClick={() => setShowDebug(false)} 
+              size="small"
+              sx={{ color: "white", minWidth: 30, padding: 0 }}
+            >
+              ✕
+            </Button>
+          </Box>
+          
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+            <Box>
+              <strong>Estado:</strong>
+            </Box>
+            <Box sx={{ pl: 1, color: isInstalled ? "#4caf50" : "#ff9800" }}>
+              • Instalado: {isInstalled ? "✅ SÍ" : "❌ NO"}
+            </Box>
+            <Box sx={{ pl: 1, color: isInstallable ? "#4caf50" : "#f44336" }}>
+              • Instalable: {isInstallable ? "✅ SÍ" : "❌ NO"}
+            </Box>
+            
+            <Box sx={{ mt: 1 }}>
+              <strong>Navegador:</strong>
+            </Box>
+            <Box sx={{ pl: 1, fontSize: "11px", color: "#bbb" }}>
+              {navigator.userAgent.substring(0, 80)}...
+            </Box>
+            
+            <Box sx={{ mt: 1 }}>
+              <strong>Display Mode:</strong>
+            </Box>
+            <Box sx={{ pl: 1 }}>
+              • Standalone: {window.matchMedia('(display-mode: standalone)').matches ? "✅" : "❌"}
+            </Box>
+            <Box sx={{ pl: 1 }}>
+              • iOS Standalone: {window.navigator.standalone ? "✅" : "❌"}
+            </Box>
+            
+            <Box sx={{ mt: 1 }}>
+              <strong>Service Worker:</strong>
+            </Box>
+            <Box sx={{ pl: 1 }}>
+              • Registrado: {navigator.serviceWorker?.controller ? "✅" : "❌"}
+            </Box>
+            
+            <Box sx={{ mt: 1 }}>
+              <strong>Manifest:</strong>
+            </Box>
+            <Box sx={{ pl: 1, fontSize: "11px", wordBreak: "break-all", color: "#bbb" }}>
+              {document.querySelector('link[rel="manifest"]')?.href || "❌ No encontrado"}
+            </Box>
+            
+            <Box sx={{ mt: 2, pt: 1, borderTop: "1px solid rgba(255,255,255,0.2)" }}>
+              <Button
+                onClick={installPWA}
+                variant="contained"
+                size="small"
+                fullWidth
+                sx={{ 
+                  backgroundColor: "#4caf50",
+                  "&:hover": { backgroundColor: "#45a049" }
+                }}
+              >
+                🚀 Intentar Instalar
+              </Button>
+            </Box>
+            
+            <Box sx={{ mt: 1, fontSize: "10px", color: "#888", fontStyle: "italic" }}>
+              Abre la consola del navegador para ver logs detallados
+            </Box>
+          </Box>
+        </Box>
+      )}
+      
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <Toolbar />
         <Outlet />
