@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Button, TextField, Box, Select, MenuItem, Typography, FormControl, InputLabel, FormHelperText } from "@mui/material";
+import { Button, TextField, Box, Select, MenuItem, Typography, FormControl, InputLabel, FormHelperText, Grid, Paper, Divider } from "@mui/material";
 import { db } from "../../../firebaseConfig";
 import { auth } from "../../../firebaseAuthControlFile";
 import { uploadFile, ensureAppFolder, createPublicShareLink } from "../../../lib/controlFileStorage";
@@ -37,6 +37,7 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
   const [loadingImage, setLoadingImage] = useState(false);
   const [loadingCv, setLoadingCv] = useState(false);
   const [estadosDisponibles, setEstadosDisponibles] = useState([]);
+  const [autoFillApplied, setAutoFillApplied] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -44,6 +45,8 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
       if (currentUser) {
         setUser(currentUser);
         fetchCurrentCv(currentUser.uid);
+        // Auto-completar datos del usuario de Google
+        autoFillUserData(currentUser);
       } else {
         setUser(null);
       }
@@ -71,6 +74,32 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
       }
     } catch (error) {
       Swal.fire("Error", "Error al obtener el CV actual.", "error");
+    }
+  };
+
+  // Nueva función para auto-completar datos del usuario
+  const autoFillUserData = (currentUser) => {
+    if (currentUser && !autoFillApplied && !currentCv) {
+      const userData = {
+        Email: currentUser.email || "",
+        // Intentar extraer nombre y apellido del displayName
+        ...(currentUser.displayName && {
+          Nombre: currentUser.displayName.split(' ')[0] || "",
+          Apellido: currentUser.displayName.split(' ').slice(1).join(' ') || ""
+        }),
+        // Podríamos agregar más datos si están disponibles
+        // País podría detectarse por idioma o timezone
+      };
+
+      // Solo actualizar campos vacíos
+      setNewCv(prevCv => ({
+        ...prevCv,
+        ...Object.fromEntries(
+          Object.entries(userData).filter(([key, value]) => value && !prevCv[key])
+        )
+      }));
+      
+      setAutoFillApplied(true);
     }
   };
 
@@ -282,122 +311,240 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
   };
 
   return (
-    <Box component="form" onSubmit={handleSubmit} sx={{ width: "100%", display: "flex", flexDirection: "column", gap: "20px", alignItems: "center", justifyContent: "center" }}>
-      <Typography variant="h4">{currentCv ? "Actualizar tu perfil y CV" : "Cargar perfil y tu CV"}</Typography>
-      
-      {/* Datos personales */}
-      <TextField variant="outlined" label="Nombre" name="Nombre" value={newCv.Nombre} onChange={handleChange} required fullWidth />
-      <TextField variant="outlined" label="Apellido" name="Apellido" value={newCv.Apellido} onChange={handleChange} required fullWidth />
-      <TextField variant="outlined" label="Edad" name="Edad" value={newCv.Edad} onChange={handleChange} required fullWidth />
-      <TextField type="email" label="Correo Electrónico" name="Email" value={newCv.Email} onChange={handleChange} required fullWidth />
-      
-      {/* Categoría profesional */}
-      <FormControl fullWidth required>
-        <InputLabel id="categoria-general-label">Categoría Profesional</InputLabel>
-        <Select
-          labelId="categoria-general-label"
-          name="categoriaGeneral"
-          value={newCv.categoriaGeneral || ""}
-          onChange={handleChange}
-          label="Categoría Profesional"
-        >
-          <MenuItem value="" disabled>Seleccione una categoría</MenuItem>
-          {CATEGORIAS_GENERALES.map((categoria, index) => (
-            <MenuItem key={index} value={categoria}>{categoria}</MenuItem>
-          ))}
-        </Select>
-        <FormHelperText>Obligatorio</FormHelperText>
-      </FormControl>
-      
-      <TextField 
-        variant="outlined" 
-        label="Profesión Específica (opcional)" 
-        name="categoriaEspecifica" 
-        value={newCv.categoriaEspecifica} 
-        onChange={handleChange} 
-        fullWidth 
-        helperText="Ejemplo: Desarrollador Frontend, Cirujano, etc."
-      />
-      
-      {/* Ubicación */}
-      <FormControl fullWidth required>
-        <InputLabel id="pais-label">País</InputLabel>
-        <Select
-          labelId="pais-label"
-          name="pais"
-          value={newCv.pais || ""}
-          onChange={handlePaisChange}
-          label="País"
-        >
-          <MenuItem value="" disabled>Seleccione un país</MenuItem>
-          {PAISES.map((pais, index) => (
-            <MenuItem key={index} value={pais}>{pais}</MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-      
-      <FormControl fullWidth required disabled={!newCv.pais}>
-        <InputLabel id="estado-label">Estado/Provincia</InputLabel>
-        <Select
-          labelId="estado-label"
-          name="estadoProvincia"
-          value={newCv.estadoProvincia || ""}
-          onChange={handleEstadoChange}
-          label="Estado/Provincia"
-        >
-          <MenuItem value="" disabled>Seleccione estado/provincia</MenuItem>
-          {estadosDisponibles.length > 0 ? (
-            estadosDisponibles.map((estadoItem, index) => (
-              <MenuItem key={index} value={estadoItem}>{estadoItem}</MenuItem>
-            ))
-          ) : (
-            <MenuItem value="" disabled>Primero seleccione un país</MenuItem>
+    <Box sx={{ 
+      width: "100%", 
+      maxWidth: 1200,
+      mx: "auto",
+      p: 3
+    }}>
+      <Paper elevation={3} sx={{ p: 4 }}>
+        <Typography variant="h4" gutterBottom align="center">
+          {currentCv ? "Actualizar tu perfil y CV" : "Cargar perfil y tu CV"}
+        </Typography>
+
+        <Box component="form" onSubmit={handleSubmit}>
+          {/* Datos Personales */}
+          <Typography variant="h6" sx={{ mt: 3, mb: 2, color: 'primary.main' }}>
+            📋 Datos Personales
+          </Typography>
+          
+          <Grid container spacing={3}>
+            <Grid item xs={12} sm={6} md={4}>
+              <TextField 
+                variant="outlined" 
+                label="Nombre *" 
+                name="Nombre" 
+                value={newCv.Nombre} 
+                onChange={handleChange} 
+                required 
+                fullWidth 
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={4}>
+              <TextField 
+                variant="outlined" 
+                label="Apellido *" 
+                name="Apellido" 
+                value={newCv.Apellido} 
+                onChange={handleChange} 
+                required 
+                fullWidth 
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={4}>
+              <TextField 
+                variant="outlined" 
+                label="Edad *" 
+                name="Edad" 
+                value={newCv.Edad} 
+                onChange={handleChange} 
+                required 
+                fullWidth 
+                type="number"
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={4}>
+              <TextField 
+                type="email" 
+                label="Correo Electrónico *" 
+                name="Email" 
+                value={newCv.Email} 
+                onChange={handleChange} 
+                required 
+                fullWidth 
+              />
+            </Grid>
+          </Grid>
+
+          <Divider sx={{ my: 3 }} />
+
+          {/* Información Profesional */}
+          <Typography variant="h6" sx={{ mt: 3, mb: 2, color: 'primary.main' }}>
+            💼 Información Profesional
+          </Typography>
+          
+          <Grid container spacing={3}>
+            <Grid item xs={12} sm={6} md={4}>
+              <FormControl fullWidth required>
+                <InputLabel id="categoria-general-label">Categoría Profesional *</InputLabel>
+                <Select
+                  labelId="categoria-general-label"
+                  name="categoriaGeneral"
+                  value={newCv.categoriaGeneral || ""}
+                  onChange={handleChange}
+                  label="Categoría Profesional *"
+                >
+                  <MenuItem value="" disabled>Seleccione una categoría</MenuItem>
+                  {CATEGORIAS_GENERALES.map((categoria, index) => (
+                    <MenuItem key={index} value={categoria}>{categoria}</MenuItem>
+                  ))}
+                </Select>
+                <FormHelperText>Obligatorio</FormHelperText>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6} md={8}>
+              <TextField 
+                variant="outlined" 
+                label="Profesión Específica (opcional)" 
+                name="categoriaEspecifica" 
+                value={newCv.categoriaEspecifica} 
+                onChange={handleChange} 
+                fullWidth 
+                helperText="Ejemplo: Desarrollador Frontend, Cirujano, etc."
+              />
+            </Grid>
+          </Grid>
+
+          <Divider sx={{ my: 3 }} />
+
+          {/* Ubicación */}
+          <Typography variant="h6" sx={{ mt: 3, mb: 2, color: 'primary.main' }}>
+            📍 Ubicación
+          </Typography>
+          
+          <Grid container spacing={3}>
+            <Grid item xs={12} sm={6} md={4}>
+              <FormControl fullWidth required>
+                <InputLabel id="pais-label">País *</InputLabel>
+                <Select
+                  labelId="pais-label"
+                  name="pais"
+                  value={newCv.pais || ""}
+                  onChange={handlePaisChange}
+                  label="País *"
+                >
+                  <MenuItem value="" disabled>Seleccione un país</MenuItem>
+                  {PAISES.map((pais, index) => (
+                    <MenuItem key={index} value={pais}>{pais}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            
+            <Grid item xs={12} sm={6} md={4}>
+              {newCv.pais && estadosDisponibles.length > 0 ? (
+                <FormControl fullWidth required>
+                  <InputLabel id="estado-label">Estado/Provincia *</InputLabel>
+                  <Select
+                    labelId="estado-label"
+                    name="estadoProvincia"
+                    value={newCv.estadoProvincia || ""}
+                    onChange={handleEstadoChange}
+                    label="Estado/Provincia *"
+                  >
+                    <MenuItem value="" disabled>Seleccione estado/provincia</MenuItem>
+                    {estadosDisponibles.map((estadoItem, index) => (
+                      <MenuItem key={index} value={estadoItem}>{estadoItem}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              ) : (
+                <TextField 
+                  variant="outlined" 
+                  label="Estado/Provincia *" 
+                  name="estadoProvincia" 
+                  value={newCv.estadoProvincia} 
+                  onChange={handleChange} 
+                  required 
+                  fullWidth 
+                />
+              )}
+            </Grid>
+            
+            <Grid item xs={12} sm={6} md={4}>
+              <TextField 
+                variant="outlined" 
+                label="Ciudad *" 
+                name="ciudad" 
+                value={newCv.ciudad} 
+                onChange={handleChange} 
+                required 
+                fullWidth 
+              />
+            </Grid>
+            
+            <Grid item xs={12} sm={6} md={4}>
+              <TextField 
+                variant="outlined" 
+                label="Localidad/Barrio (opcional)" 
+                name="localidad" 
+                value={newCv.localidad} 
+                onChange={handleChange} 
+                fullWidth 
+              />
+            </Grid>
+          </Grid>
+
+          <Divider sx={{ my: 3 }} />
+
+          {/* Archivos */}
+          <Typography variant="h6" sx={{ mt: 3, mb: 2, color: 'primary.main' }}>
+            📎 Documentos
+          </Typography>
+          
+          <Grid container spacing={3}>
+            <Grid item xs={12} sm={6}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                <TextField 
+                  type="file" 
+                  onChange={(e) => handleFileChange(e, "Foto")} 
+                  helperText="Cargar foto de perfil" 
+                  required 
+                  fullWidth 
+                  inputProps={{ accept: "image/*" }}
+                />
+                {loadingImage && <RingLoader color="#36D7B7" size={40} />}
+              </Box>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                <TextField 
+                  type="file" 
+                  onChange={(e) => handleFileChange(e, "cv")} 
+                  helperText="Cargar curriculum vitae" 
+                  required 
+                  fullWidth 
+                  inputProps={{ accept: ".pdf,.doc,.docx" }}
+                />
+                {loadingCv && <RingLoader color="#36D7B7" size={40} />}
+              </Box>
+            </Grid>
+          </Grid>
+          
+          {!isLoading && isImageLoaded && isCvLoaded && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+              <Button 
+                variant="contained" 
+                type="submit" 
+                size="large"
+                sx={{ px: 6, py: 1.5 }}
+              >
+                Finalizar Carga
+              </Button>
+            </Box>
           )}
-        </Select>
-        <FormHelperText>{estadosDisponibles.length === 0 && newCv.pais ? "Ingrese el estado manualmente en el siguiente campo" : ""}</FormHelperText>
-      </FormControl>
-      
-      {/* Si no hay estados predefinidos, permitir ingreso manual */}
-      {newCv.pais && estadosDisponibles.length === 0 && (
-        <TextField 
-          variant="outlined" 
-          label="Estado/Provincia" 
-          name="estadoProvincia" 
-          value={newCv.estadoProvincia} 
-          onChange={handleChange} 
-          required 
-          fullWidth 
-        />
-      )}
-      
-      <TextField 
-        variant="outlined" 
-        label="Ciudad" 
-        name="ciudad" 
-        value={newCv.ciudad} 
-        onChange={handleChange} 
-        required 
-        fullWidth 
-      />
-      
-      <TextField 
-        variant="outlined" 
-        label="Localidad/Barrio (opcional)" 
-        name="localidad" 
-        value={newCv.localidad} 
-        onChange={handleChange} 
-        fullWidth 
-      />
-      
-      {/* Archivos */}
-      <TextField type="file" onChange={(e) => handleFileChange(e, "Foto")} helperText="Cargar foto de perfil" required fullWidth />
-      {loadingImage && <RingLoader color="#36D7B7" size={40} />}
-      <TextField type="file" onChange={(e) => handleFileChange(e, "cv")} helperText="Cargar curriculum vitae" required fullWidth />
-      {loadingCv && <RingLoader color="#36D7B7" size={40} />}
-      
-      {!isLoading && isImageLoaded && isCvLoaded && (
-        <Button variant="contained" type="submit">Finalizar Carga</Button>
-      )}
+        </Box>
+      </Paper>
     </Box>
   );
 };

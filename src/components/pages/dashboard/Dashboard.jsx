@@ -244,38 +244,51 @@ const Dashboard = () => {
         </Typography>
         
         {/* Botones de navegación entre vistas */}
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 3 }}>
-          {/* Pendientes - siempre arriba */}
+        <Box sx={{ 
+          display: 'flex', 
+          flexDirection: { xs: 'column', md: 'row' }, 
+          gap: 2, 
+          mt: 3 
+        }}>
+          {/* Móvil: Pendientes arriba */}
           <Button 
             variant={currentView === 'pending' ? 'contained' : 'outlined'}
             onClick={() => setCurrentView('pending')}
             size="large"
-            fullWidth
+            sx={{ 
+              width: { xs: '100%', md: 'auto' },
+              fontSize: { xs: '1rem', md: '1rem' }
+            }}
           >
             Pendientes ({pendingCVs.length})
           </Button>
           
-          {/* Activos y Rechazados - en la misma fila en móvil */}
-          <Box sx={{ display: 'flex', gap: 2 }}>
+          {/* Móvil: Activos y Rechazados abajo en una fila */}
+          <Box sx={{ 
+            display: 'flex', 
+            gap: 2,
+            width: { xs: '100%', md: 'auto' }
+          }}>
             <Button 
               variant={currentView === 'active' ? 'contained' : 'outlined'}
               onClick={() => setCurrentView('active')}
               size="large"
               sx={{ 
-                flex: 1,
-                fontSize: { xs: '0.875rem', sm: '1rem' },
+                flex: { xs: 1, md: 'none' },
+                fontSize: { xs: '0.875rem', md: '1rem' },
                 whiteSpace: 'nowrap'
               }}
             >
               Activos ({activeCVs.length})
             </Button>
+            
             <Button 
               variant={currentView === 'rejected' ? 'contained' : 'outlined'}
               onClick={() => setCurrentView('rejected')}
               size="large"
               sx={{ 
-                flex: 1,
-                fontSize: { xs: '0.875rem', sm: '1rem' },
+                flex: { xs: 1, md: 'none' },
+                fontSize: { xs: '0.875rem', md: '1rem' },
                 whiteSpace: 'nowrap'
               }}
             >
