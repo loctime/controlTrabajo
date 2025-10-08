@@ -390,6 +390,73 @@ function Navbar() {
               </Box>
             )}
             
+            <Box sx={{ mt: 1, pt: 1, borderTop: "1px solid rgba(255,255,255,0.2)" }}>
+              <Button
+                onClick={() => {
+                  addDebugLog("🔍 Verificando estado completo...");
+                  addDebugLog(`URL actual: ${window.location.href}`);
+                  addDebugLog(`HTTPS: ${location.protocol === 'https:' ? 'SÍ' : 'NO'}`);
+                  addDebugLog(`Service Worker: ${navigator.serviceWorker ? 'Disponible' : 'NO disponible'}`);
+                  addDebugLog(`beforeinstallprompt soportado: ${'onbeforeinstallprompt' in window ? 'SÍ' : 'NO'}`);
+                  
+                  // Verificar si ya está en pantalla de inicio
+                  if (window.matchMedia('(display-mode: standalone)').matches) {
+                    addDebugLog("⚠️ YA ESTÁ INSTALADO como PWA");
+                  } else {
+                    addDebugLog("✅ No está instalado como PWA");
+                  }
+                }}
+                variant="outlined"
+                size="small"
+                fullWidth
+                sx={{ 
+                  color: "white",
+                  borderColor: "rgba(255,255,255,0.3)",
+                  "&:hover": { 
+                    borderColor: "rgba(255,255,255,0.5)",
+                    backgroundColor: "rgba(255,255,255,0.1)"
+                  }
+                }}
+              >
+                🔍 Verificar Estado
+              </Button>
+            </Box>
+
+            <Box sx={{ mt: 1 }}>
+              <Button
+                onClick={() => {
+                  addDebugLog("🧪 Forzando beforeinstallprompt...");
+                  
+                  // Crear un evento sintético
+                  const fakeEvent = {
+                    preventDefault: () => {},
+                    prompt: async () => {
+                      addDebugLog("📱 Prompt sintético llamado");
+                      return Promise.resolve();
+                    },
+                    userChoice: Promise.resolve({ outcome: 'accepted' })
+                  };
+                  
+                  // Simular el evento
+                  window.dispatchEvent(new CustomEvent('beforeinstallprompt', { detail: fakeEvent }));
+                  addDebugLog("✅ Evento beforeinstallprompt disparado");
+                }}
+                variant="outlined"
+                size="small"
+                fullWidth
+                sx={{ 
+                  color: "white",
+                  borderColor: "rgba(255,255,255,0.3)",
+                  "&:hover": { 
+                    borderColor: "rgba(255,255,255,0.5)",
+                    backgroundColor: "rgba(255,255,255,0.1)"
+                  }
+                }}
+              >
+                🧪 Forzar Evento
+              </Button>
+            </Box>
+
             <Box sx={{ mt: 1, fontSize: "10px", color: "#888", fontStyle: "italic" }}>
               Abre la consola del navegador para ver logs detallados
             </Box>
