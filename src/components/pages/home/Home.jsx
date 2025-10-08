@@ -22,14 +22,26 @@ const Home = () => {
         component="img"
         src={placa2}
         alt="placa2"
-        sx={{ width: '100%', maxWidth: 1800, height: '100vh' }}
+        sx={{ 
+          width: '100%', 
+          maxWidth: 1800, 
+          height: 'auto',
+          objectFit: 'contain',
+          display: 'block'
+        }}
       />
       <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
         <Box
           component="img"
           src={placa1}
           alt="placa1"
-          sx={{ width: '100%', maxWidth: 1800, height: '100vh' }}
+          sx={{ 
+            width: '100%', 
+            maxWidth: 1800, 
+            height: 'auto',
+            objectFit: 'contain',
+            display: 'block'
+          }}
         />
       </Box>
     </Box>

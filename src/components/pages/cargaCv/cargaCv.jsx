@@ -1,15 +1,25 @@
 import React, { useState, useEffect } from "react";
-import { Button, TextField, Box, Select, MenuItem, Typography, FormControl, InputLabel, FormHelperText, Grid, Paper, Divider } from "@mui/material";
+import { Button, Box, Paper, Typography, Divider } from "@mui/material";
 import { db } from "../../../firebaseConfig";
 import { auth } from "../../../firebaseAuthControlFile";
-import { uploadFile, ensureAppFolder, createPublicShareLink } from "../../../lib/controlFileStorage";
 import { addDoc, collection, query, where, getDocs, setDoc, doc } from "firebase/firestore";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
-import { RingLoader } from "react-spinners";
-import emailjs from '@emailjs/browser';
-import { CATEGORIAS_GENERALES, CATEGORIAS_ESPECIFICAS } from "../../../constants/categories";
-import { PAISES, getEstadosPorPais } from "../../../constants/locations";
+import { getEstadosPorPais } from "../../../constants/locations";
+
+// Hooks personalizados
+import { useGeolocation } from "./hooks/useGeolocation";
+import { useFileUpload } from "./hooks/useFileUpload";
+import { useAutoFillUserData } from "./hooks/useAutoFillUserData";
+
+// Servicios
+import { sendRegistrationEmails } from "./services/emailService";
+
+// Componentes de formulario
+import { PersonalDataForm } from "./components/PersonalDataForm";
+import { ProfessionalDataForm } from "./components/ProfessionalDataForm";
+import { LocationForm } from "./components/LocationForm";
+import { FilesForm } from "./components/FilesForm";
 
 const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -32,24 +42,40 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
     versionCV: 1,
   });
 
-  const [isImageLoaded, setIsImageLoaded] = useState(false);
-  const [isCvLoaded, setIsCvLoaded] = useState(false);
-  const [loadingImage, setLoadingImage] = useState(false);
-  const [loadingCv, setLoadingCv] = useState(false);
   const [estadosDisponibles, setEstadosDisponibles] = useState([]);
-  const [autoFillApplied, setAutoFillApplied] = useState(false);
-  const [detectingLocation, setDetectingLocation] = useState(false);
   const navigate = useNavigate();
 
+  // Usar hooks personalizados
+  const { detectingLocation, detectLocationManually } = useGeolocation();
+  const { 
+    isImageLoaded, 
+    isCvLoaded, 
+    loadingImage, 
+    loadingCv, 
+    handleFileChange 
+  } = useFileUpload();
+  const { autoFillData } = useAutoFillUserData(user, currentCv);
+
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+    const unsubscribe = auth.onAuthStateChanged(async (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
-        fetchCurrentCv(currentUser.uid);
-        // Auto-completar datos del usuario de Google
-        autoFillUserData(currentUser).catch(error => {
-          console.log('Error en auto-completado:', error);
-        });
+        await fetchCurrentCv(currentUser.uid);
+        
+        // Auto-completar datos del usuario si no tiene CV
+        if (!currentCv) {
+          try {
+            const userData = await autoFillData();
+            setNewCv(prevCv => ({
+              ...prevCv,
+              ...Object.fromEntries(
+                Object.entries(userData).filter(([key, value]) => value && !prevCv[key])
+              )
+            }));
+          } catch (error) {
+            console.log('Error en auto-completado:', error);
+          }
+        }
       } else {
         setUser(null);
       }
@@ -69,7 +95,6 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
           const cvData = doc.data();
           setCurrentCv({ id: doc.id, ...cvData });
           setNewCv({ ...cvData, estado: "pendiente" });
-          // Cargar estados si hay un país seleccionado
           if (cvData.pais) {
             setEstadosDisponibles(getEstadosPorPais(cvData.pais));
           }
@@ -80,341 +105,46 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
     }
   };
 
-  // Función para detectar ubicación manualmente
-  const detectLocationManually = async () => {
-    try {
-      setDetectingLocation(true);
-      
-      if (!navigator.geolocation) {
-        Swal.fire("No soportado", "Tu navegador no soporta geolocalización.", "warning");
-        return;
-      }
-
-      const position = await getCurrentPositionPromise();
-      if (position) {
-        const { ciudad, estado, pais } = await reverseGeocode(position.coords.latitude, position.coords.longitude);
-        
-        if (ciudad || estado || pais) {
-          setNewCv(prevCv => ({
-            ...prevCv,
-            ...(ciudad && { ciudad }),
-            ...(estado && { estadoProvincia: estado }),
-            ...(pais && { pais })
-          }));
-          
-          // Cargar estados si se detectó un país
-          if (pais) {
-            setEstadosDisponibles(getEstadosPorPais(pais));
-          }
-          
-          Swal.fire("Ubicación detectada", `Se detectó: ${ciudad || 'N/A'}, ${estado || 'N/A'}, ${pais || 'N/A'}`, "success");
-        } else {
-          Swal.fire("Sin datos", "No se pudo obtener información de ubicación.", "info");
-        }
-      }
-    } catch (error) {
-      console.log('Error detectando ubicación:', error.message);
-      
-      // Mostrar mensaje específico según el tipo de error
-      let errorMessage = "No se pudo detectar la ubicación. ";
-      if (error.message.includes('denegados')) {
-        errorMessage += "Por favor, permite el acceso a la ubicación en tu navegador.";
-      } else if (error.message.includes('no disponible')) {
-        errorMessage += "La información de ubicación no está disponible.";
-      } else if (error.message.includes('tiempo')) {
-        errorMessage += "La solicitud tardó demasiado tiempo.";
-      } else {
-        errorMessage += "Por favor, complétala manualmente.";
-      }
-      
-      Swal.fire("Error de ubicación", errorMessage, "warning");
-    } finally {
-      setDetectingLocation(false);
-    }
-  };
-
-  // Nueva función para auto-completar datos del usuario
-  const autoFillUserData = async (currentUser) => {
-    if (currentUser && !autoFillApplied && !currentCv) {
-      const userData = {
-        Email: currentUser.email || "",
-        // Intentar extraer nombre y apellido del displayName
-        ...(currentUser.displayName && {
-          Nombre: currentUser.displayName.split(' ')[0] || "",
-          Apellido: currentUser.displayName.split(' ').slice(1).join(' ') || ""
-        }),
-      };
-
-      // Detectar país por timezone
-      try {
-        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        const detectedCountry = detectCountryByTimezone(timezone);
-        if (detectedCountry) {
-          userData.pais = detectedCountry;
-        }
-      } catch (error) {
-        console.log('No se pudo detectar país por timezone:', error);
-      }
-
-      // Obtener ubicación por geolocalización (solo si el usuario lo permite)
-      try {
-        if (navigator.geolocation) {
-          setDetectingLocation(true);
-          const position = await getCurrentPositionPromise();
-          if (position) {
-            const { ciudad, estado, pais } = await reverseGeocode(position.coords.latitude, position.coords.longitude);
-            if (ciudad) userData.ciudad = ciudad;
-            if (estado) userData.estadoProvincia = estado;
-            if (pais && !userData.pais) userData.pais = pais;
-          }
-        }
-      } catch (error) {
-        console.log('Geolocalización no disponible:', error.message);
-        // No mostrar error al usuario en auto-completado, es silencioso
-      } finally {
-        setDetectingLocation(false);
-      }
-
-      // Solo actualizar campos vacíos
-      setNewCv(prevCv => ({
-        ...prevCv,
-        ...Object.fromEntries(
-          Object.entries(userData).filter(([key, value]) => value && !prevCv[key])
-        )
-      }));
-      
-      setAutoFillApplied(true);
-    }
-  };
-
-  // Función para detectar país por timezone
-  const detectCountryByTimezone = (timezone) => {
-    const timezoneCountryMap = {
-      'America/Argentina/Buenos_Aires': 'Argentina',
-      'America/Argentina/Cordoba': 'Argentina',
-      'America/Argentina/Mendoza': 'Argentina',
-      'America/Argentina/Salta': 'Argentina',
-      'America/Argentina/Tucuman': 'Argentina',
-      'America/Argentina/Ushuaia': 'Argentina',
-      'America/Mexico_City': 'México',
-      'America/Mexico/BajaNorte': 'México',
-      'America/Mexico/BajaSur': 'México',
-      'America/Mexico/General': 'México',
-      'America/New_York': 'Estados Unidos',
-      'America/Los_Angeles': 'Estados Unidos',
-      'America/Chicago': 'Estados Unidos',
-      'America/Denver': 'Estados Unidos',
-      'America/Toronto': 'Canadá',
-      'America/Vancouver': 'Canadá',
-      'Europe/Madrid': 'España',
-      'Europe/Barcelona': 'España',
-      'Europe/London': 'Reino Unido',
-      'Europe/Paris': 'Francia',
-      'Europe/Berlin': 'Alemania',
-      'Europe/Rome': 'Italia',
-      'America/Sao_Paulo': 'Brasil',
-      'America/Bogota': 'Colombia',
-      'America/Caracas': 'Venezuela',
-      'America/Lima': 'Perú',
-      'America/Santiago': 'Chile',
-      'America/Montevideo': 'Uruguay',
-    };
-    
-    return timezoneCountryMap[timezone] || null;
-  };
-
-  // Promisificar geolocation con mejor manejo de errores
-  const getCurrentPositionPromise = () => {
-    return new Promise((resolve, reject) => {
-      if (!navigator.geolocation) {
-        reject(new Error('Geolocalización no soportada por este navegador'));
-        return;
-      }
-
-      navigator.geolocation.getCurrentPosition(
-        (position) => resolve(position),
-        (error) => {
-          // Mapear códigos de error a mensajes más claros
-          let errorMessage = '';
-          switch (error.code) {
-            case error.PERMISSION_DENIED:
-              errorMessage = 'Permisos de ubicación denegados';
-              break;
-            case error.POSITION_UNAVAILABLE:
-              errorMessage = 'Información de ubicación no disponible';
-              break;
-            case error.TIMEOUT:
-              errorMessage = 'Tiempo de espera agotado para obtener ubicación';
-              break;
-            default:
-              errorMessage = 'Error desconocido al obtener ubicación';
-              break;
-          }
-          reject(new Error(errorMessage));
-        },
-        { 
-          timeout: 10000, 
-          enableHighAccuracy: false,
-          maximumAge: 300000 // 5 minutos
-        }
-      );
-    });
-  };
-
-  // Reverse geocoding usando una API gratuita
-  const reverseGeocode = async (lat, lng) => {
-    try {
-      const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=es`);
-      const data = await response.json();
-      
-      return {
-        ciudad: data.city || data.locality,
-        estado: data.principalSubdivision,
-        pais: data.countryName
-      };
-    } catch (error) {
-      console.log('Error en reverse geocoding:', error);
-      return {};
-    }
-  };
-
-  const handleFileUpload = async (file, type) => {
-    if (!file) return;
-    if (type === "Foto") setLoadingImage(true);
-    if (type === "cv") setLoadingCv(true);
-
-    try {
-      // 1. Crear/obtener carpeta principal "BolsaTrabajo" (con metadata.source: taskbar)
-      console.log('📁 Obteniendo carpeta BolsaTrabajo...');
-      const folderId = await ensureAppFolder();
-      console.log('✅ Carpeta BolsaTrabajo ID:', folderId);
-      
-      // 2. Subir archivo directamente a la carpeta BolsaTrabajo
-      console.log(`📤 Subiendo ${type} a BolsaTrabajo...`);
-      let fileId = await uploadFile(file, folderId, (progress) => {
-        console.log(`Progreso de ${type}: ${progress}%`);
-      });
-      
-      console.log(`✅ ${type} subido con ID:`, fileId);
-      
-      // 3. Crear enlace público para que el admin pueda verlo
-      console.log(`🔗 Creando enlace público para ${type} con fileId:`, fileId);
-      try {
-        const shareUrl = await createPublicShareLink(fileId, 8760); // 1 año
-        console.log(`✅ Enlace público creado:`, shareUrl);
-        
-        // Guardar el enlace público en lugar del fileId
-        setNewCv((prevCv) => ({ ...prevCv, [type]: shareUrl }));
-      } catch (shareError) {
-        console.error(`❌ Error creando share link para ${type}:`, shareError);
-        // Si falla el share link, guardar el fileId directamente
-        console.log(`⚠️ Guardando fileId directamente como fallback`);
-        setNewCv((prevCv) => ({ ...prevCv, [type]: fileId }));
-      }
-      
-      Swal.fire("Carga exitosa", `${type} cargado con éxito.`, "success");
-
-      if (type === "Foto") {
-        setIsImageLoaded(true);
-        setLoadingImage(false);
-      }
-      if (type === "cv") {
-        setIsCvLoaded(true);
-        setLoadingCv(false);
-      }
-    } catch (error) {
-      console.error(`Error al cargar ${type}:`, error);
-      Swal.fire("Error", `Error al cargar ${type}. Inténtalo nuevamente.`, "error");
-      if (type === "Foto") setLoadingImage(false);
-      if (type === "cv") setLoadingCv(false);
-    }
-  };
-
-  const handleFileChange = (e, type) => {
-    const file = e.target.files[0];
-    handleFileUpload(file, type);
-  };
-
   const handleChange = (e) => {
     setNewCv({ ...newCv, [e.target.name]: e.target.value });
   };
 
-  // Manejar cambio de país para actualizar estados disponibles
   const handlePaisChange = (e) => {
     const selectedPais = e.target.value;
     setNewCv({ ...newCv, pais: selectedPais, estadoProvincia: "", ciudad: "", localidad: "" });
     setEstadosDisponibles(getEstadosPorPais(selectedPais));
   };
 
-  // Manejar cambio de estado/provincia
   const handleEstadoChange = (e) => {
     setNewCv({ ...newCv, estadoProvincia: e.target.value, ciudad: "", localidad: "" });
   };
 
-  // Función para enviar correo electrónico al usuario
-  const sendUserEmail = async (userEmail, userName) => {
-    try {
-      const templateParams = {
-        to_email: userEmail,
-        to_name: userName,
-        message: 'Su registro ha sido realizado con éxito. Su CV está en revisión y pronto estará disponible.',
-        subject: 'Registro exitoso en Bolsa de Trabajo CCF',
-      };
-
-      // Obtener las variables de entorno
-      const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
-      const templateId = import.meta.env.VITE_EMAILJS_USER_TEMPLATE_ID;
-      const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+  const handleDetectLocation = async () => {
+    const locationData = await detectLocationManually();
+    if (locationData) {
+      setNewCv(prevCv => ({
+        ...prevCv,
+        ...(locationData.ciudad && { ciudad: locationData.ciudad }),
+        ...(locationData.estado && { estadoProvincia: locationData.estado }),
+        ...(locationData.pais && { pais: locationData.pais })
+      }));
       
-      // Verificar si las variables están definidas
-      if (serviceId && templateId && publicKey) {
-        await emailjs.send(
-          serviceId,
-          templateId,
-          templateParams,
-          publicKey
-        );
-      } else {
-        console.log('Configuración de EmailJS no completada. Saltando envío de correo al usuario.');
+      if (locationData.pais) {
+        setEstadosDisponibles(getEstadosPorPais(locationData.pais));
       }
-
-      console.log('Correo enviado al usuario exitosamente');
-    } catch (error) {
-      console.error('Error al enviar correo al usuario:', error);
     }
   };
 
-  // Función para enviar correo electrónico al administrador
-  const sendAdminEmail = async (userName, userProfession, userLocation) => {
-    try {
-      const templateParams = {
-        to_email: 'ccariramallo@gmail.com',
-        to_name: 'Administrador',
-        message: `Hay un nuevo registro para aprobar:\n\nNombre: ${userName} ${newCv.Apellido}\nProfesión: ${userProfession}\nUbicación: ${userLocation}\nEmail: ${newCv.Email}`,
-        subject: 'Nuevo registro en Bolsa de Trabajo CCF',
-      };
+  const handleImageChange = (e) => {
+    handleFileChange(e, "Foto", (url) => {
+      setNewCv(prevCv => ({ ...prevCv, Foto: url }));
+    });
+  };
 
-      // Obtener las variables de entorno
-      const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
-      const templateId = import.meta.env.VITE_EMAILJS_ADMIN_TEMPLATE_ID;
-      const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
-      
-      // Verificar si las variables están definidas
-      if (serviceId && templateId && publicKey) {
-        await emailjs.send(
-          serviceId,
-          templateId,
-          templateParams,
-          publicKey
-        );
-      } else {
-        console.log('Configuración de EmailJS no completada. Saltando envío de correo al administrador.');
-      }
-
-      console.log('Correo enviado al administrador exitosamente');
-    } catch (error) {
-      console.error('Error al enviar correo al administrador:', error);
-    }
+  const handleCvChange = (e) => {
+    handleFileChange(e, "cv", (url) => {
+      setNewCv(prevCv => ({ ...prevCv, cv: url }));
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -433,38 +163,8 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
         docRef = docSnap;
       }
 
-      try {
-        // Verificar si EmailJS está configurado
-        const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
-        const userTemplateId = import.meta.env.VITE_EMAILJS_USER_TEMPLATE_ID;
-        const adminTemplateId = import.meta.env.VITE_EMAILJS_ADMIN_TEMPLATE_ID;
-        const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
-        
-        // Comprobar si tenemos la configuración completa
-        const emailConfigured = serviceId && 
-                              userTemplateId && userTemplateId !== 'template_id_usuario' && 
-                              adminTemplateId && adminTemplateId !== 'template_id_admin' && 
-                              publicKey && publicKey !== 'public_key';
-        
-        if (emailConfigured) {
-          // Enviar correo al usuario
-          await sendUserEmail(newCv.Email, newCv.Nombre);
-          
-          // Enviar correo al administrador con la ubicación completa
-          const ubicacionCompleta = `${newCv.ciudad}, ${newCv.estadoProvincia}, ${newCv.pais}`;
-          await sendAdminEmail(newCv.Nombre, newCv.categoriaGeneral, ubicacionCompleta);
-          
-          console.log('Correos enviados exitosamente');
-        } else {
-          console.log('EmailJS no está completamente configurado. No se enviarán correos.');
-          console.log('Para configurar EmailJS, completa los valores en el archivo .env');
-        }
-      } catch (emailError) {
-        console.error("Error al enviar correos:", emailError);
-        // Continuamos con el proceso aunque falle el envío de correos
-      }
-      // Para San Nicolás, por ahora solo enviamos al usuario
-      // Cuando tengas el correo del administrador de San Nicolás, puedes agregar la lógica aquí
+      // Enviar correos electrónicos
+      await sendRegistrationEmails(newCv);
 
       await Swal.fire({
         title: "CV Enviado",
@@ -498,237 +198,32 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
         </Typography>
 
         <Box component="form" onSubmit={handleSubmit}>
-          {/* Datos Personales */}
-          <Typography variant="h6" sx={{ mt: 3, mb: 2, color: 'primary.main' }}>
-            📋 Datos Personales
-          </Typography>
+          <PersonalDataForm newCv={newCv} handleChange={handleChange} />
           
-          <Grid container spacing={3}>
-            <Grid item xs={12} sm={6} md={4}>
-              <TextField 
-                variant="outlined" 
-                label="Nombre *" 
-                name="Nombre" 
-                value={newCv.Nombre} 
-                onChange={handleChange} 
-                required 
-                fullWidth 
-              />
-            </Grid>
-            <Grid item xs={12} sm={6} md={4}>
-              <TextField 
-                variant="outlined" 
-                label="Apellido *" 
-                name="Apellido" 
-                value={newCv.Apellido} 
-                onChange={handleChange} 
-                required 
-                fullWidth 
-              />
-            </Grid>
-            <Grid item xs={12} sm={6} md={4}>
-              <TextField 
-                variant="outlined" 
-                label="Edad *" 
-                name="Edad" 
-                value={newCv.Edad} 
-                onChange={handleChange} 
-                required 
-                fullWidth 
-                type="number"
-              />
-            </Grid>
-            <Grid item xs={12} sm={6} md={4}>
-              <TextField 
-                type="email" 
-                label="Correo Electrónico *" 
-                name="Email" 
-                value={newCv.Email} 
-                onChange={handleChange} 
-                required 
-                fullWidth 
-              />
-            </Grid>
-          </Grid>
-
           <Divider sx={{ my: 3 }} />
-
-          {/* Información Profesional */}
-          <Typography variant="h6" sx={{ mt: 3, mb: 2, color: 'primary.main' }}>
-            💼 Información Profesional
-          </Typography>
           
-          <Grid container spacing={3}>
-            <Grid item xs={12} sm={6} md={4}>
-              <FormControl fullWidth required>
-                <InputLabel id="categoria-general-label">Categoría Profesional *</InputLabel>
-                <Select
-                  labelId="categoria-general-label"
-                  name="categoriaGeneral"
-                  value={newCv.categoriaGeneral || ""}
-                  onChange={handleChange}
-                  label="Categoría Profesional *"
-                >
-                  <MenuItem value="" disabled>Seleccione una categoría</MenuItem>
-                  {CATEGORIAS_GENERALES.map((categoria, index) => (
-                    <MenuItem key={index} value={categoria}>{categoria}</MenuItem>
-                  ))}
-                </Select>
-                <FormHelperText>Obligatorio</FormHelperText>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} sm={6} md={8}>
-              <TextField 
-                variant="outlined" 
-                label="Profesión Específica (opcional)" 
-                name="categoriaEspecifica" 
-                value={newCv.categoriaEspecifica} 
-                onChange={handleChange} 
-                fullWidth 
-                helperText="Ejemplo: Desarrollador Frontend, Cirujano, etc."
-              />
-            </Grid>
-          </Grid>
-
+          <ProfessionalDataForm newCv={newCv} handleChange={handleChange} />
+          
           <Divider sx={{ my: 3 }} />
-
-          {/* Ubicación */}
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 3, mb: 2 }}>
-            <Box>
-              <Typography variant="h6" sx={{ color: 'primary.main' }}>
-                📍 Ubicación
-                {detectingLocation && (
-                  <Typography variant="caption" sx={{ ml: 2, color: 'info.main' }}>
-                    🔍 Detectando ubicación...
-                  </Typography>
-                )}
-              </Typography>
-              <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block' }}>
-                {navigator.geolocation 
-                  ? "💡 Se detectará automáticamente por timezone y opcionalmente por GPS" 
-                  : "⚠️ Geolocalización no disponible - completa manualmente"
-                }
-              </Typography>
-            </Box>
-            <Button 
-              variant="outlined" 
-              size="small"
-              onClick={detectLocationManually}
-              disabled={detectingLocation || !navigator.geolocation}
-              sx={{ ml: 2 }}
-            >
-              {detectingLocation ? '🔍 Detectando...' : '📍 Detectar ubicación'}
-            </Button>
-          </Box>
           
-          <Grid container spacing={3}>
-            <Grid item xs={12} sm={6} md={4}>
-              <FormControl fullWidth required>
-                <InputLabel id="pais-label">País *</InputLabel>
-                <Select
-                  labelId="pais-label"
-                  name="pais"
-                  value={newCv.pais || ""}
-                  onChange={handlePaisChange}
-                  label="País *"
-                >
-                  <MenuItem value="" disabled>Seleccione un país</MenuItem>
-                  {PAISES.map((pais, index) => (
-                    <MenuItem key={index} value={pais}>{pais}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-            
-            <Grid item xs={12} sm={6} md={4}>
-              {newCv.pais && estadosDisponibles.length > 0 ? (
-                <FormControl fullWidth required>
-                  <InputLabel id="estado-label">Estado/Provincia *</InputLabel>
-                  <Select
-                    labelId="estado-label"
-                    name="estadoProvincia"
-                    value={newCv.estadoProvincia || ""}
-                    onChange={handleEstadoChange}
-                    label="Estado/Provincia *"
-                  >
-                    <MenuItem value="" disabled>Seleccione estado/provincia</MenuItem>
-                    {estadosDisponibles.map((estadoItem, index) => (
-                      <MenuItem key={index} value={estadoItem}>{estadoItem}</MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              ) : (
-                <TextField 
-                  variant="outlined" 
-                  label="Estado/Provincia *" 
-                  name="estadoProvincia" 
-                  value={newCv.estadoProvincia} 
-                  onChange={handleChange} 
-                  required 
-                  fullWidth 
-                />
-              )}
-            </Grid>
-            
-            <Grid item xs={12} sm={6} md={4}>
-              <TextField 
-                variant="outlined" 
-                label="Ciudad *" 
-                name="ciudad" 
-                value={newCv.ciudad} 
-                onChange={handleChange} 
-                required 
-                fullWidth 
-              />
-            </Grid>
-            
-            <Grid item xs={12} sm={6} md={4}>
-              <TextField 
-                variant="outlined" 
-                label="Localidad/Barrio (opcional)" 
-                name="localidad" 
-                value={newCv.localidad} 
-                onChange={handleChange} 
-                fullWidth 
-              />
-            </Grid>
-          </Grid>
-
+          <LocationForm
+            newCv={newCv}
+            handleChange={handleChange}
+            handlePaisChange={handlePaisChange}
+            handleEstadoChange={handleEstadoChange}
+            estadosDisponibles={estadosDisponibles}
+            detectingLocation={detectingLocation}
+            onDetectLocation={handleDetectLocation}
+          />
+          
           <Divider sx={{ my: 3 }} />
-
-          {/* Archivos */}
-          <Typography variant="h6" sx={{ mt: 3, mb: 2, color: 'primary.main' }}>
-            📎 Documentos
-          </Typography>
           
-          <Grid container spacing={3}>
-            <Grid item xs={12} sm={6}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
-                <TextField 
-                  type="file" 
-                  onChange={(e) => handleFileChange(e, "Foto")} 
-                  helperText="Cargar foto de perfil" 
-                  required 
-                  fullWidth 
-                  inputProps={{ accept: "image/*" }}
-                />
-                {loadingImage && <RingLoader color="#36D7B7" size={40} />}
-              </Box>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
-                <TextField 
-                  type="file" 
-                  onChange={(e) => handleFileChange(e, "cv")} 
-                  helperText="Cargar curriculum vitae" 
-                  required 
-                  fullWidth 
-                  inputProps={{ accept: ".pdf,.doc,.docx" }}
-                />
-                {loadingCv && <RingLoader color="#36D7B7" size={40} />}
-              </Box>
-            </Grid>
-          </Grid>
+          <FilesForm
+            onImageChange={handleImageChange}
+            onCvChange={handleCvChange}
+            loadingImage={loadingImage}
+            loadingCv={loadingCv}
+          />
           
           {!isLoading && isImageLoaded && isCvLoaded && (
             <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
