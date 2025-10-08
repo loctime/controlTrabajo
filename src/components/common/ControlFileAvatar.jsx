@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Avatar, CircularProgress } from '@mui/material';
+import { Avatar, CircularProgress, Skeleton } from '@mui/material';
 import { getDownloadUrl } from '../../lib/controlFileStorage';
 import { shareUrlToImageUrl, isControlFileShareUrl } from '../../utils/shareUrl';
+
+// Cache simple para URLs de ControlFile
+const urlCache = new Map();
 
 /**
  * Verifica si una cadena es una URL válida
@@ -25,7 +28,8 @@ const isControlFileShareLink = (str) => {
 
 
 /**
- * Avatar que carga imágenes desde ControlFile o URLs directas
+ * Avatar optimizado que carga imágenes desde ControlFile o URLs directas
+ * Incluye lazy loading, cache y estados de carga mejorados
  * @param {string} fileId - ID del archivo en ControlFile o URL directa
  * @param {object} props - Props adicionales para el Avatar de MUI
  */
@@ -33,15 +37,38 @@ const ControlFileAvatar = ({ fileId, ...props }) => {
   const [imageUrl, setImageUrl] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+  const avatarRef = useRef(null);
   const isMounted = useRef(true);
 
+  // Intersection Observer para lazy loading
   useEffect(() => {
-    // Reset mounted flag
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { 
+        rootMargin: '50px', // Cargar cuando esté a 50px de ser visible
+        threshold: 0.1 
+      }
+    );
+
+    if (avatarRef.current) {
+      observer.observe(avatarRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
     isMounted.current = true;
 
     const loadImage = async () => {
-      if (!fileId) {
-        if (isMounted.current) {
+      if (!fileId || !isVisible) {
+        if (isMounted.current && !fileId) {
           setLoading(false);
           setError(true);
         }
@@ -53,6 +80,17 @@ const ControlFileAvatar = ({ fileId, ...props }) => {
         // Si es un enlace de ControlFile, convertir a enlace directo de imagen
         if (isControlFileShareLink(fileId)) {
           try {
+            // Verificar cache primero
+            if (urlCache.has(fileId)) {
+              const cachedUrl = urlCache.get(fileId);
+              if (isMounted.current) {
+                setImageUrl(cachedUrl);
+                setError(false);
+                setLoading(false);
+              }
+              return;
+            }
+
             if (isMounted.current) {
               setLoading(true);
             }
@@ -64,6 +102,8 @@ const ControlFileAvatar = ({ fileId, ...props }) => {
             const img = new Image();
             img.onload = () => {
               if (isMounted.current) {
+                // Guardar en cache
+                urlCache.set(fileId, directImageUrl);
                 setImageUrl(directImageUrl);
                 setError(false);
                 setLoading(false);
@@ -122,29 +162,36 @@ const ControlFileAvatar = ({ fileId, ...props }) => {
 
     loadImage();
 
-    // Cleanup para evitar bucles infinitos
     return () => {
       isMounted.current = false;
     };
-  }, [fileId]);
+  }, [fileId, isVisible]);
 
   if (loading) {
     return (
-      <Avatar {...props}>
-        <CircularProgress size={24} />
+      <Avatar ref={avatarRef} {...props}>
+        <Skeleton 
+          variant="circular" 
+          width="100%" 
+          height="100%" 
+          sx={{ 
+            bgcolor: 'grey.200',
+            animation: 'pulse 1.5s ease-in-out infinite'
+          }} 
+        />
       </Avatar>
     );
   }
 
   if (error || !imageUrl) {
     return (
-      <Avatar {...props} sx={{ bgcolor: 'grey.400', ...props.sx }}>
+      <Avatar ref={avatarRef} {...props} sx={{ bgcolor: 'grey.400', ...props.sx }}>
         ?
       </Avatar>
     );
   }
 
-  return <Avatar src={imageUrl} {...props} />;
+  return <Avatar ref={avatarRef} src={imageUrl} {...props} />;
 };
 
 export default ControlFileAvatar;

@@ -4,6 +4,7 @@ import { db } from '../../../firebaseConfig';
 import { collection, query, where, getDocs, updateDoc, doc, deleteDoc } from 'firebase/firestore';
 import { getDownloadUrl } from '../../../lib/controlFileStorage';
 import ControlFileAvatar from '../../common/ControlFileAvatar';
+import { preloadCriticalImages } from '../../../utils/imagePreloader';
 import { 
   Button, 
   Box, 
@@ -63,6 +64,11 @@ const Dashboard = () => {
     setActiveCVs(activeData);
     setPendingCVs(pendingData);
     setRejectedCVs(rejectedData);
+    
+    // Precargar imágenes críticas de los CVs pendientes (los más importantes)
+    if (pendingData.length > 0) {
+      preloadCriticalImages(pendingData, 3);
+    }
   };
 
   useEffect(() => {
