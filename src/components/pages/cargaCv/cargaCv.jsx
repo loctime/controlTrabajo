@@ -84,11 +84,17 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
   const detectLocationManually = async () => {
     try {
       setDetectingLocation(true);
-      if (navigator.geolocation) {
-        const position = await getCurrentPositionPromise();
-        if (position) {
-          const { ciudad, estado, pais } = await reverseGeocode(position.coords.latitude, position.coords.longitude);
-          
+      
+      if (!navigator.geolocation) {
+        Swal.fire("No soportado", "Tu navegador no soporta geolocalización.", "warning");
+        return;
+      }
+
+      const position = await getCurrentPositionPromise();
+      if (position) {
+        const { ciudad, estado, pais } = await reverseGeocode(position.coords.latitude, position.coords.longitude);
+        
+        if (ciudad || estado || pais) {
           setNewCv(prevCv => ({
             ...prevCv,
             ...(ciudad && { ciudad }),
@@ -101,12 +107,27 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
             setEstadosDisponibles(getEstadosPorPais(pais));
           }
           
-          Swal.fire("Ubicación detectada", `Se detectó: ${ciudad}, ${estado}, ${pais}`, "success");
+          Swal.fire("Ubicación detectada", `Se detectó: ${ciudad || 'N/A'}, ${estado || 'N/A'}, ${pais || 'N/A'}`, "success");
+        } else {
+          Swal.fire("Sin datos", "No se pudo obtener información de ubicación.", "info");
         }
       }
     } catch (error) {
-      console.log('Error detectando ubicación:', error);
-      Swal.fire("Error", "No se pudo detectar la ubicación. Por favor, complétala manualmente.", "warning");
+      console.log('Error detectando ubicación:', error.message);
+      
+      // Mostrar mensaje específico según el tipo de error
+      let errorMessage = "No se pudo detectar la ubicación. ";
+      if (error.message.includes('denegados')) {
+        errorMessage += "Por favor, permite el acceso a la ubicación en tu navegador.";
+      } else if (error.message.includes('no disponible')) {
+        errorMessage += "La información de ubicación no está disponible.";
+      } else if (error.message.includes('tiempo')) {
+        errorMessage += "La solicitud tardó demasiado tiempo.";
+      } else {
+        errorMessage += "Por favor, complétala manualmente.";
+      }
+      
+      Swal.fire("Error de ubicación", errorMessage, "warning");
     } finally {
       setDetectingLocation(false);
     }
@@ -146,10 +167,11 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
             if (estado) userData.estadoProvincia = estado;
             if (pais && !userData.pais) userData.pais = pais;
           }
-          setDetectingLocation(false);
         }
       } catch (error) {
-        console.log('Geolocalización no disponible o denegada:', error);
+        console.log('Geolocalización no disponible:', error.message);
+        // No mostrar error al usuario en auto-completado, es silencioso
+      } finally {
         setDetectingLocation(false);
       }
 
@@ -201,13 +223,40 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
     return timezoneCountryMap[timezone] || null;
   };
 
-  // Promisificar geolocation
+  // Promisificar geolocation con mejor manejo de errores
   const getCurrentPositionPromise = () => {
     return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) {
+        reject(new Error('Geolocalización no soportada por este navegador'));
+        return;
+      }
+
       navigator.geolocation.getCurrentPosition(
         (position) => resolve(position),
-        (error) => reject(error),
-        { timeout: 5000, enableHighAccuracy: false }
+        (error) => {
+          // Mapear códigos de error a mensajes más claros
+          let errorMessage = '';
+          switch (error.code) {
+            case error.PERMISSION_DENIED:
+              errorMessage = 'Permisos de ubicación denegados';
+              break;
+            case error.POSITION_UNAVAILABLE:
+              errorMessage = 'Información de ubicación no disponible';
+              break;
+            case error.TIMEOUT:
+              errorMessage = 'Tiempo de espera agotado para obtener ubicación';
+              break;
+            default:
+              errorMessage = 'Error desconocido al obtener ubicación';
+              break;
+          }
+          reject(new Error(errorMessage));
+        },
+        { 
+          timeout: 10000, 
+          enableHighAccuracy: false,
+          maximumAge: 300000 // 5 minutos
+        }
       );
     });
   };
@@ -545,22 +594,30 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
 
           {/* Ubicación */}
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 3, mb: 2 }}>
-            <Typography variant="h6" sx={{ color: 'primary.main' }}>
-              📍 Ubicación
-              {detectingLocation && (
-                <Typography variant="caption" sx={{ ml: 2, color: 'info.main' }}>
-                  🔍 Detectando ubicación...
-                </Typography>
-              )}
-            </Typography>
+            <Box>
+              <Typography variant="h6" sx={{ color: 'primary.main' }}>
+                📍 Ubicación
+                {detectingLocation && (
+                  <Typography variant="caption" sx={{ ml: 2, color: 'info.main' }}>
+                    🔍 Detectando ubicación...
+                  </Typography>
+                )}
+              </Typography>
+              <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block' }}>
+                {navigator.geolocation 
+                  ? "💡 Se detectará automáticamente por timezone y opcionalmente por GPS" 
+                  : "⚠️ Geolocalización no disponible - completa manualmente"
+                }
+              </Typography>
+            </Box>
             <Button 
               variant="outlined" 
               size="small"
               onClick={detectLocationManually}
-              disabled={detectingLocation}
+              disabled={detectingLocation || !navigator.geolocation}
               sx={{ ml: 2 }}
             >
-              📍 Detectar ubicación
+              {detectingLocation ? '🔍 Detectando...' : '📍 Detectar ubicación'}
             </Button>
           </Box>
           

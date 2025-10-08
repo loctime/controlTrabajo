@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Avatar, CircularProgress } from '@mui/material';
 import { getDownloadUrl } from '../../lib/controlFileStorage';
+import { shareUrlToImageUrl, isControlFileShareUrl } from '../../utils/shareUrl';
 
 /**
  * Verifica si una cadena es una URL válida
@@ -19,8 +20,11 @@ const isUrl = (str) => {
  * Verifica si es un share link de ControlFile
  */
 const isControlFileShareLink = (str) => {
-  return isUrl(str) && str.includes('/s/');
+  const isShareLink = isControlFileShareUrl(str);
+  console.log('🔍 isControlFileShareLink - str:', str, 'resultado:', isShareLink);
+  return isShareLink;
 };
+
 
 /**
  * Avatar que carga imágenes desde ControlFile o URLs directas
@@ -38,7 +42,10 @@ const ControlFileAvatar = ({ fileId, ...props }) => {
     isMounted.current = true;
 
     const loadImage = async () => {
+      console.log('🔍 ControlFileAvatar - fileId recibido:', fileId);
+      
       if (!fileId) {
+        console.log('❌ ControlFileAvatar - No hay fileId');
         if (isMounted.current) {
           setLoading(false);
           setError(true);
@@ -46,9 +53,54 @@ const ControlFileAvatar = ({ fileId, ...props }) => {
         return;
       }
 
-      // Si es una URL directa (CVs viejos), usarla directamente
+      // Si es una URL directa
       if (isUrl(fileId)) {
-        console.log('✅ Usando URL directa (CV antiguo):', fileId);
+        // Si es un enlace de ControlFile, convertir a enlace directo de imagen
+        if (isControlFileShareLink(fileId)) {
+          console.log('🔗 ControlFileAvatar - Detectado enlace de ControlFile:', fileId);
+          
+          try {
+            if (isMounted.current) {
+              setLoading(true);
+            }
+            
+            // Convertir enlace de compartido a enlace directo de imagen
+            const directImageUrl = shareUrlToImageUrl(fileId);
+            
+            console.log('📥 ControlFileAvatar - Convirtiendo a enlace directo:', directImageUrl);
+            
+            // Crear una imagen para verificar si el enlace directo funciona
+            const img = new Image();
+            img.onload = () => {
+              if (isMounted.current) {
+                setImageUrl(directImageUrl);
+                setError(false);
+                setLoading(false);
+                console.log('✅ ControlFileAvatar - Enlace directo funciona:', directImageUrl);
+              }
+            };
+            img.onerror = () => {
+              console.log('⚠️ ControlFileAvatar - Enlace directo no funciona, mostrando placeholder');
+              console.log('🔍 URL que falló:', directImageUrl);
+              if (isMounted.current) {
+                setError(true);
+                setLoading(false);
+              }
+            };
+            img.src = directImageUrl;
+            return;
+          } catch (err) {
+            console.error('❌ ControlFileAvatar - Error general:', err.message);
+            if (isMounted.current) {
+              setError(true);
+              setLoading(false);
+            }
+            return;
+          }
+        }
+        
+        // Si es una URL directa (Firebase Storage u otra), usarla directamente
+        console.log('✅ ControlFileAvatar - Usando URL directa:', fileId);
         if (isMounted.current) {
           setImageUrl(fileId);
           setError(false);
@@ -57,22 +109,22 @@ const ControlFileAvatar = ({ fileId, ...props }) => {
         return;
       }
 
-      // Si es un fileId de ControlFile, obtener URL temporal
+      // Si es un fileId de ControlFile (no URL), obtener URL temporal
       try {
         if (isMounted.current) {
           setLoading(true);
         }
         
-        console.log('📥 Obteniendo URL de ControlFile para fileId:', fileId);
+        console.log('📥 ControlFileAvatar - Obteniendo URL de ControlFile para fileId:', fileId);
         const url = await getDownloadUrl(fileId);
         
         if (isMounted.current) {
           setImageUrl(url);
           setError(false);
-          console.log('✅ URL obtenida correctamente');
+          console.log('✅ ControlFileAvatar - URL obtenida correctamente:', url);
         }
       } catch (err) {
-        console.error('❌ Error al cargar imagen de ControlFile:', err.message);
+        console.error('❌ ControlFileAvatar - Error al cargar imagen de ControlFile:', err.message);
         if (isMounted.current) {
           setError(true);
         }

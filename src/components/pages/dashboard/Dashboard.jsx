@@ -341,6 +341,8 @@ const Dashboard = () => {
                   {/* Header con foto, nombre, email y chip */}
                   <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 2 }}>
                     <Box sx={{ mr: 2 }}>
+                      {/* Debug: Log para ver qué valor tiene cv.Foto */}
+                      {console.log('🔍 Debug Avatar - cv.Foto:', cv.Foto, 'para usuario:', cv.Nombre)}
                       <ControlFileAvatar fileId={cv.Foto} sx={{ width: 64, height: 64 }} />
                     </Box>
                     <Box sx={{ flexGrow: 1, minWidth: 0 }}>
@@ -596,13 +598,13 @@ const Dashboard = () => {
 
           {/* Botones de acción */}
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2, flexDirection: { xs: 'column', sm: 'row' } }}>
-            <Button onClick={handleClosePreview} variant="outlined" fullWidth={{ xs: true, sm: false }}>
+            <Button onClick={handleClosePreview} variant="outlined" sx={{ width: { xs: '100%', sm: 'auto' } }}>
               Cerrar
             </Button>
             {previewUrl && (
               <Button
                 variant="contained"
-                fullWidth={{ xs: true, sm: false }}
+                sx={{ width: { xs: '100%', sm: 'auto' } }}
                 onClick={() => {
                   const link = document.createElement('a');
                   link.href = previewUrl;
