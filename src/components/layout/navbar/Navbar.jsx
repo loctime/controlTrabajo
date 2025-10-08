@@ -173,22 +173,26 @@ function Navbar() {
               <IconButton
                 onClick={installPWA}
                 sx={{
-                  width: 45,
-                  height: 45,
-                  backgroundColor: "rgba(255, 255, 255, 0.15)",
+                  width: 48,
+                  height: 48,
+                  backgroundColor: "rgba(255, 255, 255, 0.2)",
                   color: "white",
-                  border: "2px solid rgba(255, 255, 255, 0.3)",
+                  border: "2px solid rgba(255, 255, 255, 0.4)",
                   backdropFilter: "blur(10px)",
+                  boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
                   "&:hover": {
-                    backgroundColor: "rgba(255, 255, 255, 0.25)",
-                    transform: "scale(1.1)",
-                    boxShadow: "0 6px 20px rgba(0, 0, 0, 0.2)"
+                    backgroundColor: "rgba(255, 255, 255, 0.3)",
+                    transform: "scale(1.05)",
+                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)"
                   },
-                  transition: "all 0.3s ease"
+                  "&:active": {
+                    transform: "scale(0.95)"
+                  },
+                  transition: "all 0.2s ease"
                 }}
                 title="Instalar App"
               >
-                <GetAppIcon />
+                <GetAppIcon sx={{ fontSize: 24 }} />
               </IconButton>
             )}
             
