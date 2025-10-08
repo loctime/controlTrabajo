@@ -53,10 +53,16 @@ const Login = () => {
           const userCollection = collection(db, "users");
           const userRef = doc(userCollection, res.user.uid);
           const userDoc = await getDoc(userRef);
+          
+          // Combinar información de Firebase Auth con Firestore
           let finalyUser = {
             email: res.user.email,
-            rol: userDoc.data().rol,
+            uid: res.user.uid,
+            displayName: res.user.displayName,
+            photoURL: res.user.photoURL,
+            rol: userDoc.data()?.rol || "user", // Rol desde Firestore
           };
+          
           handleLogin(finalyUser);
           navigate("/");
         } else {
@@ -83,10 +89,20 @@ const Login = () => {
     setLoading(true); // Activar el loader al iniciar sesión con Google
     try {
       let res = await loginGoogle();
+      
+      // Obtener el rol desde Firestore si existe
+      const userCollection = collection(db, "users");
+      const userRef = doc(userCollection, res.user.uid);
+      const userDoc = await getDoc(userRef);
+      
       let finalyUser = {
         email: res.user.email,
-        rol: "user"
+        uid: res.user.uid,
+        displayName: res.user.displayName,
+        photoURL: res.user.photoURL,
+        rol: userDoc.exists() ? userDoc.data().rol : "user"
       };
+      
       handleLogin(finalyUser);
       navigate("/");
     } catch (error) {

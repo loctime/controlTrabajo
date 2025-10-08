@@ -316,38 +316,53 @@ const Dashboard = () => {
             </Button>
           </Box>
           
-          {/* Botón de estadísticas de cache (solo en desarrollo) */}
-          {process.env.NODE_ENV === 'development' && (
-            <Button 
-              variant="outlined"
-              onClick={() => {
-                const stats = getCacheStats();
-                Swal.fire({
-                  title: 'Estadísticas de Cache',
-                  html: `
-                    <div style="text-align: left;">
-                      <p><strong>Cache de sesión:</strong> ${stats.sessionCache} URLs</p>
-                      <p><strong>Cache persistente:</strong> ${stats.persistentCache} URLs</p>
-                      <p><strong>Total:</strong> ${stats.total} URLs</p>
-                    </div>
-                  `,
-                  confirmButtonText: 'Limpiar Cache',
-                  showCancelButton: true,
-                  cancelButtonText: 'Cerrar'
-                }).then((result) => {
-                  if (result.isConfirmed) {
-                    clearCache();
-                    Swal.fire('Cache limpiado', 'El cache de imágenes ha sido limpiado.', 'success');
-                  }
-                });
-              }}
-              size="small"
-              color="info"
-              sx={{ alignSelf: 'center' }}
-            >
-              Cache
-            </Button>
-          )}
+          {/* Botón de cache compacto */}
+          <Button 
+            variant="contained"
+            onClick={() => {
+              const stats = getCacheStats();
+              Swal.fire({
+                title: 'Cache de Imágenes',
+                html: `
+                  <div style="text-align: center;">
+                    <p><strong>${stats.total} imágenes cacheadas</strong></p>
+                    <p style="color: #666; font-size: 0.9em;">
+                      Cache persistente: ${stats.persistentCache}<br/>
+                      Cache de sesión: ${stats.sessionCache}
+                    </p>
+                  </div>
+                `,
+                confirmButtonText: 'Limpiar Cache',
+                showCancelButton: true,
+                cancelButtonText: 'Cerrar'
+              }).then((result) => {
+                if (result.isConfirmed) {
+                  clearCache();
+                  Swal.fire('Cache limpiado', 'El cache de imágenes ha sido limpiado.', 'success');
+                }
+              });
+            }}
+            size="small"
+            color="primary"
+            sx={{ 
+              alignSelf: 'center',
+              minWidth: '45px',
+              width: '45px',
+              height: '45px',
+              borderRadius: '50%',
+              padding: 0,
+              backgroundColor: '#1976d2',
+              color: 'white',
+              fontSize: '18px',
+              '&:hover': {
+                backgroundColor: '#1565c0',
+                transform: 'scale(1.1)'
+              },
+              transition: 'all 0.2s ease'
+            }}
+          >
+            📱
+          </Button>
         </Box>
       </Box>
 

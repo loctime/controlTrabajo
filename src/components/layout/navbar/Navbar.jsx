@@ -168,24 +168,28 @@ function Navbar() {
             )}
           </Box>
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            {/* Botón de instalación PWA */}
+            {/* Botón de instalación PWA redondo y moderno */}
             {!isInstalled && isInstallable && (
-              <Button
-                variant="outlined"
-                size="small"
-                startIcon={<GetAppIcon />}
+              <IconButton
                 onClick={installPWA}
                 sx={{
+                  width: 45,
+                  height: 45,
+                  backgroundColor: "rgba(255, 255, 255, 0.15)",
                   color: "white",
-                  borderColor: "white",
+                  border: "2px solid rgba(255, 255, 255, 0.3)",
+                  backdropFilter: "blur(10px)",
                   "&:hover": {
-                    borderColor: "white",
-                    backgroundColor: "rgba(255, 255, 255, 0.1)"
-                  }
+                    backgroundColor: "rgba(255, 255, 255, 0.25)",
+                    transform: "scale(1.1)",
+                    boxShadow: "0 6px 20px rgba(0, 0, 0, 0.2)"
+                  },
+                  transition: "all 0.3s ease"
                 }}
+                title="Instalar App"
               >
-                Instalar App
-              </Button>
+                <GetAppIcon />
+              </IconButton>
             )}
             
             <IconButton onClick={handleAvatarClick} color="inherit">

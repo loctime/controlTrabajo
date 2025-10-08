@@ -6,7 +6,9 @@ import {
   signInWithPopup, 
   GoogleAuthProvider, 
   createUserWithEmailAndPassword, 
-  sendPasswordResetEmail 
+  sendPasswordResetEmail,
+  setPersistence,
+  browserLocalPersistence
 } from "firebase/auth";
 
 // Configuración del Auth Central de ControlFile
@@ -19,6 +21,11 @@ const authConfig = {
 
 export const authApp = initializeApp(authConfig, 'controlfileAuth');
 export const auth = getAuth(authApp);
+
+// Configurar persistencia LOCAL para que la sesión se mantenga al refrescar
+setPersistence(auth, browserLocalPersistence).catch((error) => {
+  console.error("Error setting persistence:", error);
+});
 
 // SERVICIOS DE AUTENTICACIÓN
 

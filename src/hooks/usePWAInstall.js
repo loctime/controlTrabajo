@@ -30,6 +30,22 @@ export function usePWAInstall() {
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
     window.addEventListener('appinstalled', handleAppInstalled)
 
+    // En desarrollo, mostrar el botón después de 3 segundos si no aparece automáticamente
+    if (process.env.NODE_ENV === 'development') {
+      const timer = setTimeout(() => {
+        if (!isInstallable && !isInstalled) {
+          console.log('PWA: Forzando botón de instalación en desarrollo')
+          setIsInstallable(true)
+        }
+      }, 3000)
+
+      return () => {
+        clearTimeout(timer)
+        window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+        window.removeEventListener('appinstalled', handleAppInstalled)
+      }
+    }
+
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
       window.removeEventListener('appinstalled', handleAppInstalled)
