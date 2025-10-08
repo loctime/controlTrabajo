@@ -3,20 +3,9 @@ import Swal from 'sweetalert2';
 import { db } from '../../../firebaseConfig';
 import { collection, query, where, getDocs, updateDoc, doc, deleteDoc } from 'firebase/firestore';
 import { getDownloadUrl } from '../../../lib/controlFileStorage';
-
-const BACKEND = import.meta.env.VITE_CONTROLFILE_BACKEND;
 import ControlFileAvatar from '../../common/ControlFileAvatar';
 import { 
   Button, 
-  Paper, 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableContainer, 
-  TableHead, 
-  TableRow, 
-  IconButton, 
-  Modal, 
   Box, 
   TextField,
   Dialog,
@@ -24,23 +13,33 @@ import {
   DialogContent,
   DialogActions,
   Typography,
-  CircularProgress
+  CircularProgress,
+  Card,
+  CardContent,
+  CardActions,
+  Grid,
+  Chip,
+  Container,
+  Divider,
+  IconButton,
+  Modal,
+  Avatar
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import CloseIcon from '@mui/icons-material/Close';
 import ThumbDownIcon from '@mui/icons-material/ThumbDown';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import DownloadIcon from '@mui/icons-material/Download';
+import EmailIcon from '@mui/icons-material/Email';
+import PhoneIcon from '@mui/icons-material/Phone';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import CloseIcon from '@mui/icons-material/Close';
 
 const Dashboard = () => {
   const [activeCVs, setActiveCVs] = useState([]);
   const [pendingCVs, setPendingCVs] = useState([]);
   const [rejectedCVs, setRejectedCVs] = useState([]);
-  const [open, setOpen] = useState(false);
-  const [selectedCV, setSelectedCV] = useState(null);
-  const [currentView, setCurrentView] = useState('active');
+  const [currentView, setCurrentView] = useState('pending');
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [motivoRechazo, setMotivoRechazo] = useState('');
   const [cvToReject, setCvToReject] = useState(null);
@@ -81,6 +80,7 @@ const Dashboard = () => {
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
     }).then(async (result) => {
       if (result.isConfirmed) {
         await deleteDoc(doc(db, 'cv', cv.id));
@@ -134,30 +134,6 @@ const Dashboard = () => {
     setRejectDialogOpen(false);
     setCvToReject(null);
     setMotivoRechazo('');
-  };
-
-  const handleEdit = (cv) => {
-    setSelectedCV({ ...cv });
-    setOpen(true);
-  };
-
-  const handleSave = async () => {
-    if (selectedCV && selectedCV.id) {
-      await updateDoc(doc(db, 'cv', selectedCV.id), selectedCV);
-      fetchData();
-      setOpen(false);
-      showAlert('Actualizado', 'El CV ha sido actualizado.', 'success');
-    }
-  };
-
-  const isUrl = (str) => {
-    if (!str) return false;
-    try {
-      new URL(str);
-      return true;
-    } catch {
-      return false;
-    }
   };
 
   const handleDownload = async (cv) => {
@@ -228,66 +204,286 @@ const Dashboard = () => {
     setPreviewLoading(false);
   };
 
+  // Obtener los CVs actuales según la vista
+  const getCurrentCVs = () => {
+    switch (currentView) {
+      case 'active':
+        return activeCVs;
+      case 'pending':
+        return pendingCVs;
+      case 'rejected':
+        return rejectedCVs;
+      default:
+        return [];
+    }
+  };
+
+  // Obtener chip de estado
+  const getStatusChip = (view) => {
+    switch (view) {
+      case 'active':
+        return { label: 'Aprobado', color: 'success' };
+      case 'pending':
+        return { label: 'Pendiente', color: 'warning' };
+      case 'rejected':
+        return { label: 'Rechazado', color: 'error' };
+      default:
+        return { label: 'Desconocido', color: 'default' };
+    }
+  };
+
+  const currentCVs = getCurrentCVs();
+  const statusChip = getStatusChip(currentView);
+
   return (
-    <div>
-      <Button onClick={() => setCurrentView('active')}>Activos</Button>
-      <Button onClick={() => setCurrentView('pending')}>Pendientes</Button>
-      <Button onClick={() => setCurrentView('rejected')}>Rechazados</Button>
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Foto</TableCell>
-              <TableCell>Nombre</TableCell>
-              <TableCell>Apellido</TableCell>
-              <TableCell>Email</TableCell>
-              <TableCell>Teléfono</TableCell>
-              {currentView === 'rejected' && <TableCell>Motivo Rechazo</TableCell>}
-              <TableCell>Acciones</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {(currentView === 'active' ? activeCVs : currentView === 'pending' ? pendingCVs : rejectedCVs).map((cv) => (
-              <TableRow key={cv.id}>
-                <TableCell><ControlFileAvatar fileId={cv.Foto} /></TableCell>
-                <TableCell>{cv.Nombre}</TableCell>
-                <TableCell>{cv.Apellido}</TableCell>
-                <TableCell>{cv.Email}</TableCell>
-                <TableCell>{cv.Telefono}</TableCell>
-                {currentView === 'rejected' && (
-                  <TableCell>
-                    {cv.motivoRechazo || 'No especificado'}
-                  </TableCell>
-                )}
-                <TableCell>
-                  <IconButton onClick={() => handlePreviewCV(cv)} title="Ver CV">
+    <Container maxWidth="xl" sx={{ py: 4 }}>
+      {/* Header con título y botones de vista */}
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold' }}>
+          Panel de Administración de CVs
+        </Typography>
+        
+        {/* Botones de navegación entre vistas */}
+        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mt: 3 }}>
+          <Button 
+            variant={currentView === 'pending' ? 'contained' : 'outlined'}
+            onClick={() => setCurrentView('pending')}
+            size="large"
+            sx={{ minWidth: { xs: '100%', sm: 'auto' } }}
+          >
+            Pendientes ({pendingCVs.length})
+          </Button>
+          <Button 
+            variant={currentView === 'active' ? 'contained' : 'outlined'}
+            onClick={() => setCurrentView('active')}
+            size="large"
+            sx={{ minWidth: { xs: '100%', sm: 'auto' } }}
+          >
+            Activos ({activeCVs.length})
+          </Button>
+          <Button 
+            variant={currentView === 'rejected' ? 'contained' : 'outlined'}
+            onClick={() => setCurrentView('rejected')}
+            size="large"
+            sx={{ minWidth: { xs: '100%', sm: 'auto' } }}
+          >
+            Rechazados ({rejectedCVs.length})
+          </Button>
+        </Box>
+      </Box>
+
+      {/* Grid de Cards */}
+      {currentCVs.length === 0 ? (
+        <Box sx={{ textAlign: 'center', py: 8 }}>
+          <Typography variant="h6" color="text.secondary">
+            No hay CVs {currentView === 'active' ? 'aprobados' : currentView === 'pending' ? 'pendientes' : 'rechazados'}
+          </Typography>
+        </Box>
+      ) : (
+        <Grid container spacing={3}>
+          {currentCVs.map((cv) => (
+            <Grid item xs={12} sm={6} md={4} key={cv.id}>
+              <Box sx={{ position: 'relative' }}>
+                {/* Chip de estado en la esquina */}
+                <Chip 
+                  label={statusChip.label} 
+                  color={statusChip.color} 
+                  size="small"
+                  sx={{ 
+                    position: 'absolute',
+                    top: -8,
+                    right: -8,
+                    zIndex: 1,
+                    fontWeight: 'bold',
+                    boxShadow: 2
+                  }}
+                />
+                
+                <Card 
+                  sx={{ 
+                    height: '100%', 
+                    display: 'flex', 
+                    flexDirection: 'column',
+                    transition: 'transform 0.2s, box-shadow 0.2s',
+                    '&:hover': {
+                      transform: 'translateY(-4px)',
+                      boxShadow: 6
+                    }
+                  }}
+                >
+                <CardContent sx={{ flexGrow: 1 }}>
+                  {/* Header con foto, nombre, email y chip */}
+                  <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 2 }}>
+                    <Box sx={{ mr: 2 }}>
+                      <ControlFileAvatar fileId={cv.Foto} sx={{ width: 64, height: 64 }} />
+                    </Box>
+                    <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+                      <Typography variant="h6" component="div" sx={{ fontWeight: 'bold', lineHeight: 1.2, mb: 1 }}>
+                        {cv.Nombre} {cv.Apellido}
+                      </Typography>
+                      
+                      {/* Email */}
+                      {cv.Email && (
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1 }}>
+                          <EmailIcon fontSize="small" color="action" />
+                          <Typography 
+                            variant="body2" 
+                            color="text.secondary" 
+                            sx={{ 
+                              wordBreak: 'break-word',
+                              fontSize: '0.75rem',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis'
+                            }}
+                          >
+                            {cv.Email}
+                          </Typography>
+                        </Box>
+                      )}
+
+                      {/* Teléfono si existe */}
+                      {cv.Telefono && (
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          <PhoneIcon fontSize="small" color="action" />
+                          <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+                            {cv.Telefono}
+                          </Typography>
+                        </Box>
+                      )}
+                    </Box>
+                  </Box>
+
+                  <Divider sx={{ my: 1 }} />
+
+                  {/* Información del CV - Categoría y Ubicación en la misma fila */}
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    {/* Categoría y Ubicación en la misma fila */}
+                    <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                      {(cv.categoriaGeneral || cv.Profesion) && (
+                        <Box sx={{ flex: 1, minWidth: '120px' }}>
+                          <Typography variant="body2" fontWeight="medium" sx={{ fontSize: '0.8rem' }}>
+                            {cv.categoriaGeneral || cv.Profesion}
+                          </Typography>
+                        </Box>
+                      )}
+
+                      {(cv.ciudad || cv.Ciudad) && (
+                        <Box sx={{ flex: 1, minWidth: '120px' }}>
+                          <Typography variant="body2" fontWeight="medium" sx={{ fontSize: '0.8rem' }}>
+                            {cv.ciudad && cv.estadoProvincia && cv.pais
+                              ? `${cv.ciudad}, ${cv.estadoProvincia}, ${cv.pais}`
+                              : cv.Ciudad || 'No especificada'}
+                          </Typography>
+                        </Box>
+                      )}
+                    </Box>
+
+                    {/* Motivo de rechazo si aplica */}
+                    {currentView === 'rejected' && cv.motivoRechazo && (
+                      <Box 
+                        sx={{ 
+                          mt: 1, 
+                          p: 1.5, 
+                          bgcolor: 'error.light', 
+                          borderRadius: 1,
+                          border: '1px solid',
+                          borderColor: 'error.main'
+                        }}
+                      >
+                        <Typography variant="caption" color="error.dark" display="block" fontWeight="bold">
+                          Motivo de rechazo:
+                        </Typography>
+                        <Typography variant="body2" color="error.dark" sx={{ mt: 0.5 }}>
+                          {cv.motivoRechazo}
+                        </Typography>
+                      </Box>
+                    )}
+                  </Box>
+                </CardContent>
+
+                {/* Acciones */}
+                <CardActions sx={{ p: 2, pt: 0, justifyContent: 'center', gap: 1 }}>
+                  {/* Botón de vista previa */}
+                  <IconButton 
+                    onClick={() => handlePreviewCV(cv)} 
+                    title="Ver CV"
+                    color="primary"
+                    sx={{ 
+                      bgcolor: 'primary.light', 
+                      color: 'primary.contrastText',
+                      '&:hover': { bgcolor: 'primary.main' }
+                    }}
+                  >
                     <VisibilityIcon />
                   </IconButton>
-                  <IconButton onClick={() => handleDownload(cv)} title="Descargar CV">
+                  
+                  {/* Botón de descarga */}
+                  <IconButton 
+                    onClick={() => handleDownload(cv)} 
+                    title="Descargar CV"
+                    color="info"
+                    sx={{ 
+                      bgcolor: 'info.light', 
+                      color: 'info.contrastText',
+                      '&:hover': { bgcolor: 'info.main' }
+                    }}
+                  >
                     <DownloadIcon />
                   </IconButton>
+
+                  {/* Botones de acción para pendientes y rechazados */}
                   {currentView !== 'active' && (
                     <>
-                      <IconButton onClick={() => handleApprove(cv)} title="Aprobar">
+                      {/* Botón de aprobar */}
+                      <IconButton 
+                        onClick={() => handleApprove(cv)} 
+                        title="Aprobar CV"
+                        color="success"
+                        sx={{ 
+                          bgcolor: 'success.light', 
+                          color: 'success.contrastText',
+                          '&:hover': { bgcolor: 'success.main' }
+                        }}
+                      >
                         <ThumbUpIcon />
                       </IconButton>
-                      <IconButton onClick={() => handleRejectClick(cv)} title="Rechazar">
+                      
+                      {/* Botón de rechazar */}
+                      <IconButton 
+                        onClick={() => handleRejectClick(cv)} 
+                        title="Rechazar CV"
+                        color="error"
+                        sx={{ 
+                          bgcolor: 'error.light', 
+                          color: 'error.contrastText',
+                          '&:hover': { bgcolor: 'error.main' }
+                        }}
+                      >
                         <ThumbDownIcon />
-                      </IconButton>
-                      <IconButton onClick={() => handleEdit(cv)} title="Editar">
-                        <EditIcon />
                       </IconButton>
                     </>
                   )}
-                  <IconButton onClick={() => handleDelete(cv)} title="Eliminar">
+
+                  {/* Botón de eliminar */}
+                  <IconButton 
+                    onClick={() => handleDelete(cv)} 
+                    title="Eliminar CV"
+                    color="error"
+                    sx={{ 
+                      bgcolor: 'error.light', 
+                      color: 'error.contrastText',
+                      '&:hover': { bgcolor: 'error.main' }
+                    }}
+                  >
                     <DeleteForeverIcon />
                   </IconButton>
-                </TableCell>
-              </TableRow>
+                </CardActions>
+                </Card>
+              </Box>
+            </Grid>
             ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+        </Grid>
+      )}
 
       {/* Dialog para rechazar CV */}
       <Dialog open={rejectDialogOpen} onClose={handleRejectCancel} maxWidth="sm" fullWidth>
@@ -333,19 +529,19 @@ const Dashboard = () => {
             top: '50%',
             left: '50%',
             transform: 'translate(-50%, -50%)',
-            width: '90%',
-            height: '90%',
+            width: { xs: '95%', sm: '90%' },
+            height: { xs: '95%', sm: '90%' },
             bgcolor: 'background.paper',
             border: '2px solid #000',
             boxShadow: 24,
-            p: 4,
+            p: { xs: 2, sm: 4 },
             display: 'flex',
             flexDirection: 'column'
           }}
         >
           {/* Header del modal */}
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-            <Typography variant="h6" component="h2" id="preview-modal-title">
+            <Typography variant="h6" component="h2" id="preview-modal-title" sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }}>
               Vista Previa: {previewFileName}
             </Typography>
             <IconButton onClick={handleClosePreview} size="small">
@@ -373,13 +569,14 @@ const Dashboard = () => {
           </Box>
 
           {/* Botones de acción */}
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2 }}>
-            <Button onClick={handleClosePreview} variant="outlined">
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2, flexDirection: { xs: 'column', sm: 'row' } }}>
+            <Button onClick={handleClosePreview} variant="outlined" fullWidth={{ xs: true, sm: false }}>
               Cerrar
             </Button>
             {previewUrl && (
               <Button
                 variant="contained"
+                fullWidth={{ xs: true, sm: false }}
                 onClick={() => {
                   const link = document.createElement('a');
                   link.href = previewUrl;
@@ -396,7 +593,7 @@ const Dashboard = () => {
           </Box>
         </Box>
       </Modal>
-    </div>
+    </Container>
   );
 };
 
