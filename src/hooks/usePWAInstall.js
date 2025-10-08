@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import Swal from 'sweetalert2'
 
 export function usePWAInstall() {
   const [deferredPrompt, setDeferredPrompt] = useState(null)
@@ -19,7 +18,7 @@ export function usePWAInstall() {
       e.preventDefault()
       setDeferredPrompt(e)
       setIsInstallable(true)
-      console.log('PWA: beforeinstallprompt recibido')
+      console.log('PWA: beforeinstallprompt event captured')
     }
 
     // Escuchar cuando la app se instala
@@ -27,61 +26,53 @@ export function usePWAInstall() {
       setIsInstalled(true)
       setIsInstallable(false)
       setDeferredPrompt(null)
-      console.log('PWA: App instalada')
+      console.log('PWA: App installed successfully')
     }
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
     window.addEventListener('appinstalled', handleAppInstalled)
 
-    // SIEMPRE mostrar el botón (excepto si ya está instalado)
-    setTimeout(() => {
+    // FORZAR que el botón aparezca siempre (excepto si ya está instalado)
+    // Esto permite que el botón se vea incluso sin beforeinstallprompt
+    const timer = setTimeout(() => {
       if (!isInstalled) {
         setIsInstallable(true)
-        console.log('PWA: Botón de instalación visible')
+        console.log('PWA: Install button force-enabled')
       }
     }, 500)
 
-    // Cleanup
     return () => {
+      clearTimeout(timer)
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
       window.removeEventListener('appinstalled', handleAppInstalled)
     }
   }, [])
 
   const installPWA = async () => {
-    console.log('PWA: Intentando instalar...')
-    
-    // SI HAY deferredPrompt: instalar con el prompt del navegador
-    if (deferredPrompt) {
-      try {
-        console.log('PWA: Mostrando prompt de instalación')
-        await deferredPrompt.prompt()
-        const choiceResult = await deferredPrompt.userChoice
-        
-        if (choiceResult.outcome === 'accepted') {
-          console.log('PWA: ¡Instalado!')
-          setIsInstalled(true)
-          setIsInstallable(false)
-          setDeferredPrompt(null)
-          return true
-        }
-        return false
-      } catch (error) {
-        console.error('PWA: Error al instalar:', error)
-        return false
-      }
+    if (!deferredPrompt) {
+      console.log('PWA: No prompt available yet')
+      return false
     }
 
-    // Si NO HAY deferredPrompt: mostrar alerta simple
-    console.log('PWA: Sin prompt disponible, mostrando alerta')
-    await Swal.fire({
-      title: 'Instalar App',
-      text: 'Usa el menú de tu navegador para instalar la app',
-      icon: 'info',
-      confirmButtonText: 'OK'
-    })
-    
-    return false
+    try {
+      console.log('PWA: Showing install prompt')
+      await deferredPrompt.prompt()
+      const choiceResult = await deferredPrompt.userChoice
+      
+      if (choiceResult.outcome === 'accepted') {
+        console.log('PWA: Installation accepted')
+        setIsInstalled(true)
+        setIsInstallable(false)
+        setDeferredPrompt(null)
+        return true
+      }
+      
+      console.log('PWA: Installation dismissed')
+      return false
+    } catch (error) {
+      console.error('PWA: Installation error:', error)
+      return false
+    }
   }
 
   return {
