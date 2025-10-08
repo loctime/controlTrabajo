@@ -4,7 +4,6 @@ import InfoIcon from '@mui/icons-material/Info';
 import CloseIcon from '@mui/icons-material/Close';
 import placa1 from '../../assets/placa1.jpeg';
 import placa2 from '../../assets/placa2.jpeg';
-import PWADebug from '../../common/PWADebug';
 
 const Home = () => {
   const [open, setOpen] = useState(true);
@@ -71,9 +70,6 @@ const Home = () => {
           </Button>
         </DialogActions>
       </Dialog>
-
-      {/* Panel de Debug PWA (TEMPORAL) */}
-      <PWADebug />
 
       {/* Contenido principal */}
       <Box sx={{ 
