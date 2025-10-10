@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo, useCallback } from 'react';
 import { 
   Grid, 
   TextField, 
@@ -12,10 +12,10 @@ import {
 import { Add, Delete } from '@mui/icons-material';
 import { v4 as uuidv4 } from 'uuid';
 
-export const CertificationsForm = ({ newCv, handleChange }) => {
+export const CertificationsForm = memo(({ newCv, handleChange }) => {
   const certificaciones = newCv.certificaciones || [];
 
-  const addCertificacion = () => {
+  const addCertificacion = useCallback(() => {
     const nuevaCertificacion = {
       id: uuidv4(),
       nombre: "",
@@ -30,9 +30,9 @@ export const CertificationsForm = ({ newCv, handleChange }) => {
         value: [...certificaciones, nuevaCertificacion]
       }
     });
-  };
+  }, [certificaciones, handleChange]);
 
-  const removeCertificacion = (id) => {
+  const removeCertificacion = useCallback((id) => {
     const nuevasCertificaciones = certificaciones.filter(cert => cert.id !== id);
     handleChange({
       target: {
@@ -40,9 +40,9 @@ export const CertificationsForm = ({ newCv, handleChange }) => {
         value: nuevasCertificaciones
       }
     });
-  };
+  }, [certificaciones, handleChange]);
 
-  const updateCertificacion = (id, field, value) => {
+  const updateCertificacion = useCallback((id, field, value) => {
     const nuevasCertificaciones = certificaciones.map(cert => 
       cert.id === id ? { ...cert, [field]: value } : cert
     );
@@ -52,7 +52,7 @@ export const CertificationsForm = ({ newCv, handleChange }) => {
         value: nuevasCertificaciones
       }
     });
-  };
+  }, [certificaciones, handleChange]);
 
   return (
     <>
@@ -179,4 +179,6 @@ export const CertificationsForm = ({ newCv, handleChange }) => {
       </Box>
     </>
   );
-};
+});
+
+CertificationsForm.displayName = 'CertificationsForm';

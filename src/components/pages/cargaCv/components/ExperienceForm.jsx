@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo, useCallback } from 'react';
 import { 
   Grid, 
   TextField, 
@@ -15,10 +15,10 @@ import {
 import { Add, Delete } from '@mui/icons-material';
 import { v4 as uuidv4 } from 'uuid';
 
-export const ExperienceForm = ({ newCv, handleChange }) => {
+export const ExperienceForm = memo(({ newCv, handleChange }) => {
   const experiencias = newCv.experiencias || [];
 
-  const addExperiencia = () => {
+  const addExperiencia = useCallback(() => {
     const nuevaExperiencia = {
       id: uuidv4(),
       cargo: "",
@@ -36,9 +36,9 @@ export const ExperienceForm = ({ newCv, handleChange }) => {
         value: [...experiencias, nuevaExperiencia]
       }
     });
-  };
+  }, [experiencias, handleChange]);
 
-  const removeExperiencia = (id) => {
+  const removeExperiencia = useCallback((id) => {
     const nuevasExperiencias = experiencias.filter(exp => exp.id !== id);
     handleChange({
       target: {
@@ -46,9 +46,9 @@ export const ExperienceForm = ({ newCv, handleChange }) => {
         value: nuevasExperiencias
       }
     });
-  };
+  }, [experiencias, handleChange]);
 
-  const updateExperiencia = (id, field, value) => {
+  const updateExperiencia = useCallback((id, field, value) => {
     const nuevasExperiencias = experiencias.map(exp => 
       exp.id === id ? { ...exp, [field]: value } : exp
     );
@@ -58,7 +58,7 @@ export const ExperienceForm = ({ newCv, handleChange }) => {
         value: nuevasExperiencias
       }
     });
-  };
+  }, [experiencias, handleChange]);
 
   return (
     <>
@@ -221,4 +221,6 @@ export const ExperienceForm = ({ newCv, handleChange }) => {
       )}
     </>
   );
-};
+});
+
+ExperienceForm.displayName = 'ExperienceForm';

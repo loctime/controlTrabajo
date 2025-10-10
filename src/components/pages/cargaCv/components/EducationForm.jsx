@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo, useCallback } from 'react';
 import { 
   Grid, 
   TextField, 
@@ -12,10 +12,10 @@ import {
 import { Add, Delete } from '@mui/icons-material';
 import { v4 as uuidv4 } from 'uuid';
 
-export const EducationForm = ({ newCv, handleChange }) => {
+export const EducationForm = memo(({ newCv, handleChange }) => {
   const educacion = newCv.educacion || [];
 
-  const addEducacion = () => {
+  const addEducacion = useCallback(() => {
     const nuevaEducacion = {
       id: uuidv4(),
       titulo: "",
@@ -32,9 +32,9 @@ export const EducationForm = ({ newCv, handleChange }) => {
         value: [...educacion, nuevaEducacion]
       }
     });
-  };
+  }, [educacion, handleChange]);
 
-  const removeEducacion = (id) => {
+  const removeEducacion = useCallback((id) => {
     const nuevaEducacion = educacion.filter(edu => edu.id !== id);
     handleChange({
       target: {
@@ -42,9 +42,9 @@ export const EducationForm = ({ newCv, handleChange }) => {
         value: nuevaEducacion
       }
     });
-  };
+  }, [educacion, handleChange]);
 
-  const updateEducacion = (id, field, value) => {
+  const updateEducacion = useCallback((id, field, value) => {
     const nuevaEducacion = educacion.map(edu => 
       edu.id === id ? { ...edu, [field]: value } : edu
     );
@@ -54,7 +54,7 @@ export const EducationForm = ({ newCv, handleChange }) => {
         value: nuevaEducacion
       }
     });
-  };
+  }, [educacion, handleChange]);
 
   return (
     <>
@@ -182,4 +182,6 @@ export const EducationForm = ({ newCv, handleChange }) => {
       )}
     </>
   );
-};
+});
+
+EducationForm.displayName = 'EducationForm';

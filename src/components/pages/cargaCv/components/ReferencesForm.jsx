@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo, useCallback } from 'react';
 import { 
   Grid, 
   TextField, 
@@ -12,10 +12,10 @@ import {
 import { Add, Delete } from '@mui/icons-material';
 import { v4 as uuidv4 } from 'uuid';
 
-export const ReferencesForm = ({ newCv, handleChange }) => {
+export const ReferencesForm = memo(({ newCv, handleChange }) => {
   const referencias = newCv.referencias || [];
 
-  const addReferencia = () => {
+  const addReferencia = useCallback(() => {
     const nuevaReferencia = {
       id: uuidv4(),
       nombre: "",
@@ -31,9 +31,9 @@ export const ReferencesForm = ({ newCv, handleChange }) => {
         value: [...referencias, nuevaReferencia]
       }
     });
-  };
+  }, [referencias, handleChange]);
 
-  const removeReferencia = (id) => {
+  const removeReferencia = useCallback((id) => {
     const nuevasReferencias = referencias.filter(ref => ref.id !== id);
     handleChange({
       target: {
@@ -41,9 +41,9 @@ export const ReferencesForm = ({ newCv, handleChange }) => {
         value: nuevasReferencias
       }
     });
-  };
+  }, [referencias, handleChange]);
 
-  const updateReferencia = (id, field, value) => {
+  const updateReferencia = useCallback((id, field, value) => {
     const nuevasReferencias = referencias.map(ref => 
       ref.id === id ? { ...ref, [field]: value } : ref
     );
@@ -53,7 +53,7 @@ export const ReferencesForm = ({ newCv, handleChange }) => {
         value: nuevasReferencias
       }
     });
-  };
+  }, [referencias, handleChange]);
 
   return (
     <>
@@ -191,4 +191,6 @@ export const ReferencesForm = ({ newCv, handleChange }) => {
       </Box>
     </>
   );
-};
+});
+
+ReferencesForm.displayName = 'ReferencesForm';

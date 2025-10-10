@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Box, Paper, Typography, Divider, Tabs, Tab } from "@mui/material";
 import { db } from "../../../firebaseConfig";
 import { auth } from "../../../firebaseAuthControlFile";
@@ -30,6 +30,13 @@ import { ReferencesForm } from "./components/ReferencesForm";
 import { TemplateSelector } from "./components/TemplateSelector";
 import CVPreview from "./components/CVPreview";
 import { useFormValidation } from "./hooks/useFormValidation";
+
+// Componente TabPanel fuera del componente principal para evitar recreaciones
+const TabPanel = ({ children, value, index }) => (
+  <div hidden={value !== index}>
+    {value === index && <Box sx={{ pt: 3 }}>{children}</Box>}
+  </div>
+);
 
 const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -134,37 +141,31 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
     }
   };
 
-  const handleChange = (e) => {
-    setNewCv({ ...newCv, [e.target.name]: e.target.value });
-  };
+  // Memoizar handleChange para evitar recreaciones y pérdida de foco
+  const handleChange = useCallback((e) => {
+    setNewCv(prevCv => ({ ...prevCv, [e.target.name]: e.target.value }));
+  }, []);
 
-  const handleTabChange = (event, newValue) => {
+  const handleTabChange = useCallback((event, newValue) => {
     setTabValue(newValue);
-  };
+  }, []);
 
-  const handleTemplateChange = (template) => {
+  const handleTemplateChange = useCallback((template) => {
     setSelectedTemplate(template);
     setNewCv(prev => ({ ...prev, plantillaSeleccionada: template }));
-  };
+  }, []);
 
-  // Componente TabPanel
-  const TabPanel = ({ children, value, index }) => (
-    <div hidden={value !== index}>
-      {value === index && <Box sx={{ pt: 3 }}>{children}</Box>}
-    </div>
-  );
-
-  const handleImageChange = (e) => {
+  const handleImageChange = useCallback((e) => {
     handleFileChange(e, "Foto", (url) => {
       setNewCv(prevCv => ({ ...prevCv, Foto: url }));
     });
-  };
+  }, [handleFileChange]);
 
-  const handleCvChange = (e) => {
+  const handleCvChange = useCallback((e) => {
     handleFileChange(e, "cv", (url) => {
       setNewCv(prevCv => ({ ...prevCv, cv: url }));
     });
-  };
+  }, [handleFileChange]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

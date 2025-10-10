@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Grid, TextField, Typography } from '@mui/material';
 
-export const PersonalDataForm = ({ newCv, handleChange }) => {
+export const PersonalDataForm = memo(({ newCv, handleChange }) => {
   return (
     <>
       <Typography variant="h6" sx={{ mt: 3, mb: 2, color: 'primary.main' }}>
@@ -57,6 +57,7 @@ export const PersonalDataForm = ({ newCv, handleChange }) => {
       </Grid>
     </>
   );
-};
+});
 
+PersonalDataForm.displayName = 'PersonalDataForm';
 

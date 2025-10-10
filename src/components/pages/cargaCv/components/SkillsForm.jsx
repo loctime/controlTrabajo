@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, memo, useCallback } from 'react';
 import { 
   Grid, 
   TextField, 
@@ -32,13 +32,13 @@ const SKILLS_SUGERIDAS = [
   'Inglés', 'Francés', 'Alemán', 'Portugués', 'Italiano'
 ];
 
-export const SkillsForm = ({ newCv, handleChange }) => {
+export const SkillsForm = memo(({ newCv, handleChange }) => {
   const [nuevaHabilidad, setNuevaHabilidad] = useState('');
   const [nivelHabilidad, setNivelHabilidad] = useState('Intermedio');
   
   const habilidades = newCv.habilidades || [];
 
-  const addHabilidad = () => {
+  const addHabilidad = useCallback(() => {
     if (nuevaHabilidad.trim()) {
       const habilidad = {
         id: uuidv4(),
@@ -55,9 +55,9 @@ export const SkillsForm = ({ newCv, handleChange }) => {
       
       setNuevaHabilidad('');
     }
-  };
+  }, [nuevaHabilidad, nivelHabilidad, habilidades, handleChange]);
 
-  const removeHabilidad = (id) => {
+  const removeHabilidad = useCallback((id) => {
     const nuevasHabilidades = habilidades.filter(h => h.id !== id);
     handleChange({
       target: {
@@ -65,9 +65,9 @@ export const SkillsForm = ({ newCv, handleChange }) => {
         value: nuevasHabilidades
       }
     });
-  };
+  }, [habilidades, handleChange]);
 
-  const getNivelColor = (nivel) => {
+  const getNivelColor = useCallback((nivel) => {
     switch (nivel) {
       case 'Básico': return 'default';
       case 'Intermedio': return 'primary';
@@ -75,7 +75,7 @@ export const SkillsForm = ({ newCv, handleChange }) => {
       case 'Experto': return 'success';
       default: return 'default';
     }
-  };
+  }, []);
 
   return (
     <>
@@ -190,4 +190,6 @@ export const SkillsForm = ({ newCv, handleChange }) => {
       </Box>
     </>
   );
-};
+});
+
+SkillsForm.displayName = 'SkillsForm';

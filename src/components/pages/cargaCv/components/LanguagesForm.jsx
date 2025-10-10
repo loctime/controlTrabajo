@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, memo, useCallback } from 'react';
 import { 
   Grid, 
   TextField, 
@@ -24,13 +24,13 @@ const IDIOMAS_DISPONIBLES = [
   'Turco', 'Hebreo', 'Hindi', 'Bengalí', 'Tailandés', 'Vietnamita'
 ];
 
-export const LanguagesForm = ({ newCv, handleChange }) => {
+export const LanguagesForm = memo(({ newCv, handleChange }) => {
   const [nuevoIdioma, setNuevoIdioma] = useState('');
   const [nivelIdioma, setNivelIdioma] = useState('Intermedio');
   
   const idiomas = newCv.idiomas || [];
 
-  const addIdioma = () => {
+  const addIdioma = useCallback(() => {
     if (nuevoIdioma.trim()) {
       const idioma = {
         id: uuidv4(),
@@ -47,9 +47,9 @@ export const LanguagesForm = ({ newCv, handleChange }) => {
       
       setNuevoIdioma('');
     }
-  };
+  }, [nuevoIdioma, nivelIdioma, idiomas, handleChange]);
 
-  const removeIdioma = (id) => {
+  const removeIdioma = useCallback((id) => {
     const nuevosIdiomas = idiomas.filter(i => i.id !== id);
     handleChange({
       target: {
@@ -57,9 +57,9 @@ export const LanguagesForm = ({ newCv, handleChange }) => {
         value: nuevosIdiomas
       }
     });
-  };
+  }, [idiomas, handleChange]);
 
-  const getNivelColor = (nivel) => {
+  const getNivelColor = useCallback((nivel) => {
     switch (nivel) {
       case 'Básico': return 'default';
       case 'Intermedio': return 'primary';
@@ -67,9 +67,9 @@ export const LanguagesForm = ({ newCv, handleChange }) => {
       case 'Nativo': return 'success';
       default: return 'default';
     }
-  };
+  }, []);
 
-  const getNivelDescription = (nivel) => {
+  const getNivelDescription = useCallback((nivel) => {
     switch (nivel) {
       case 'Básico': return 'A1-A2 (Puedo comunicarme de forma básica)';
       case 'Intermedio': return 'B1-B2 (Puedo mantener conversaciones fluidas)';
@@ -77,7 +77,7 @@ export const LanguagesForm = ({ newCv, handleChange }) => {
       case 'Nativo': return 'Lengua materna o nivel nativo';
       default: return '';
     }
-  };
+  }, []);
 
   return (
     <>
@@ -205,4 +205,6 @@ export const LanguagesForm = ({ newCv, handleChange }) => {
       </Box>
     </>
   );
-};
+});
+
+LanguagesForm.displayName = 'LanguagesForm';

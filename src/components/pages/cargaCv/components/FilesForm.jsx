@@ -1,9 +1,9 @@
-import React, { useRef } from 'react';
+import React, { useRef, memo, useCallback } from 'react';
 import { Grid, TextField, Box, Typography, Paper, Button, IconButton } from '@mui/material';
 import { CameraAlt, Upload } from '@mui/icons-material';
 import { RingLoader as Spinner } from 'react-spinners';
 
-export const FilesForm = ({ 
+export const FilesForm = memo(({ 
   onImageChange, 
   onCvChange, 
   loadingImage, 
@@ -12,13 +12,14 @@ export const FilesForm = ({
   const photoInputRef = useRef(null);
   const uploadInputRef = useRef(null);
 
-  const handleCameraClick = () => {
+  const handleCameraClick = useCallback(() => {
     photoInputRef.current?.click();
-  };
+  }, []);
 
-  const handleUploadClick = () => {
+  const handleUploadClick = useCallback(() => {
     uploadInputRef.current?.click();
-  };
+  }, []);
+  
   return (
     <>
      
@@ -97,4 +98,6 @@ export const FilesForm = ({
       </Grid>
     </>
   );
-};
+});
+
+FilesForm.displayName = 'FilesForm';

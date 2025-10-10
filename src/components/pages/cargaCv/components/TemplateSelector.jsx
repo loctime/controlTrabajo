@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { 
   Grid, 
   Typography, 
@@ -11,7 +11,7 @@ import {
   FormControlLabel
 } from '@mui/material';
 
-export const TemplateSelector = ({ selectedTemplate, onTemplateChange }) => {
+export const TemplateSelector = memo(({ selectedTemplate, onTemplateChange }) => {
   return (
     <>
       <Typography variant="h6" sx={{ mt: 3, mb: 2, color: 'primary.main' }}>
@@ -254,4 +254,6 @@ export const TemplateSelector = ({ selectedTemplate, onTemplateChange }) => {
       </Box>
     </>
   );
-};
+});
+
+TemplateSelector.displayName = 'TemplateSelector';

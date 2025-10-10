@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo, useCallback } from 'react';
 import { 
   Grid, 
   TextField, 
@@ -12,10 +12,10 @@ import {
 import { Add, Delete } from '@mui/icons-material';
 import { v4 as uuidv4 } from 'uuid';
 
-export const ProjectsForm = ({ newCv, handleChange }) => {
+export const ProjectsForm = memo(({ newCv, handleChange }) => {
   const proyectos = newCv.proyectos || [];
 
-  const addProyecto = () => {
+  const addProyecto = useCallback(() => {
     const nuevoProyecto = {
       id: uuidv4(),
       nombre: "",
@@ -30,9 +30,9 @@ export const ProjectsForm = ({ newCv, handleChange }) => {
         value: [...proyectos, nuevoProyecto]
       }
     });
-  };
+  }, [proyectos, handleChange]);
 
-  const removeProyecto = (id) => {
+  const removeProyecto = useCallback((id) => {
     const nuevosProyectos = proyectos.filter(proj => proj.id !== id);
     handleChange({
       target: {
@@ -40,9 +40,9 @@ export const ProjectsForm = ({ newCv, handleChange }) => {
         value: nuevosProyectos
       }
     });
-  };
+  }, [proyectos, handleChange]);
 
-  const updateProyecto = (id, field, value) => {
+  const updateProyecto = useCallback((id, field, value) => {
     const nuevosProyectos = proyectos.map(proj => 
       proj.id === id ? { ...proj, [field]: value } : proj
     );
@@ -52,7 +52,7 @@ export const ProjectsForm = ({ newCv, handleChange }) => {
         value: nuevosProyectos
       }
     });
-  };
+  }, [proyectos, handleChange]);
 
   return (
     <>
@@ -182,4 +182,6 @@ export const ProjectsForm = ({ newCv, handleChange }) => {
       </Box>
     </>
   );
-};
+});
+
+ProjectsForm.displayName = 'ProjectsForm';

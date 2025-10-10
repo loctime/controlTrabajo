@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Grid, TextField, Typography, Box } from '@mui/material';
 
-export const ContactForm = ({ newCv, handleChange }) => {
+export const ContactForm = memo(({ newCv, handleChange }) => {
   return (
     <>
       <Typography variant="h6" sx={{ mt: 3, mb: 2, color: 'primary.main' }}>
@@ -79,4 +79,6 @@ export const ContactForm = ({ newCv, handleChange }) => {
       </Box>
     </>
   );
-};
+});
+
+ContactForm.displayName = 'ContactForm';
