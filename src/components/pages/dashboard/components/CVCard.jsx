@@ -102,8 +102,8 @@ export const CVCard = ({
               {(cv.ciudad || cv.Ciudad) && (
                 <Box sx={{ flex: 1, minWidth: '120px' }}>
                   <Typography variant="body2" fontWeight="medium" sx={{ fontSize: '0.8rem' }}>
-                    {cv.ciudad && cv.estadoProvincia && cv.pais
-                      ? `${cv.ciudad}, ${cv.estadoProvincia}, ${cv.pais}`
+                    {cv.ciudad 
+                      ? (cv.localidad ? `${cv.ciudad}, ${cv.localidad}` : cv.ciudad)
                       : cv.Ciudad || 'No especificada'}
                   </Typography>
                 </Box>

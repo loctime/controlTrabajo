@@ -1,13 +1,10 @@
 import React from 'react';
 import { Box, Grid, TextField, FormControl, InputLabel, Select, MenuItem, Typography } from '@mui/material';
-import { PAISES, getEstadosPorPais } from '../../../../constants/locations';
+import { CIUDADES_DISPONIBLES } from '../../../../constants/locations';
 
 export const LocationForm = ({ 
   newCv, 
-  handleChange, 
-  handlePaisChange, 
-  handleEstadoChange, 
-  estadosDisponibles
+  handleChange
 }) => {
   return (
     <>
@@ -21,72 +18,30 @@ export const LocationForm = ({
       </Box>
       
       <Grid container spacing={3}>
-        <Grid item xs={12} sm={6} md={4}>
+        <Grid item xs={12} sm={6}>
           <FormControl fullWidth required>
-            <InputLabel id="pais-label">País *</InputLabel>
+            <InputLabel id="ciudad-label">Ciudad *</InputLabel>
             <Select
-              labelId="pais-label"
-              name="pais"
-              value={newCv.pais || ""}
-              onChange={handlePaisChange}
-              label="País *"
+              labelId="ciudad-label"
+              name="ciudad"
+              value={newCv.ciudad || ""}
+              onChange={handleChange}
+              label="Ciudad *"
             >
-              <MenuItem value="" disabled>Seleccione un país</MenuItem>
-              {PAISES.map((pais, index) => (
-                <MenuItem key={index} value={pais}>{pais}</MenuItem>
+              <MenuItem value="" disabled>Seleccione una ciudad</MenuItem>
+              {CIUDADES_DISPONIBLES.map((ciudad, index) => (
+                <MenuItem key={index} value={ciudad}>{ciudad}</MenuItem>
               ))}
             </Select>
           </FormControl>
         </Grid>
         
-        <Grid item xs={12} sm={6} md={4}>
-          {newCv.pais && estadosDisponibles.length > 0 ? (
-            <FormControl fullWidth required>
-              <InputLabel id="estado-label">Estado/Provincia *</InputLabel>
-              <Select
-                labelId="estado-label"
-                name="estadoProvincia"
-                value={newCv.estadoProvincia || ""}
-                onChange={handleEstadoChange}
-                label="Estado/Provincia *"
-              >
-                <MenuItem value="" disabled>Seleccione estado/provincia</MenuItem>
-                {estadosDisponibles.map((estadoItem, index) => (
-                  <MenuItem key={index} value={estadoItem}>{estadoItem}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          ) : (
-            <TextField 
-              variant="outlined" 
-              label="Estado/Provincia *" 
-              name="estadoProvincia" 
-              value={newCv.estadoProvincia} 
-              onChange={handleChange} 
-              required 
-              fullWidth 
-            />
-          )}
-        </Grid>
-        
-        <Grid item xs={12} sm={6} md={4}>
-          <TextField 
-            variant="outlined" 
-            label="Ciudad *" 
-            name="ciudad" 
-            value={newCv.ciudad} 
-            onChange={handleChange} 
-            required 
-            fullWidth 
-          />
-        </Grid>
-        
-        <Grid item xs={12} sm={6} md={4}>
+        <Grid item xs={12} sm={6}>
           <TextField 
             variant="outlined" 
             label="Localidad/Barrio (opcional)" 
             name="localidad" 
-            value={newCv.localidad} 
+            value={newCv.localidad || ""} 
             onChange={handleChange} 
             fullWidth 
           />

@@ -46,7 +46,9 @@ export const sendUserEmail = async (userEmail, userName) => {
 // Función para enviar correo electrónico al administrador
 export const sendAdminEmail = async (cvData) => {
   try {
-    const ubicacionCompleta = `${cvData.ciudad}, ${cvData.estadoProvincia}, ${cvData.pais}`;
+    const ubicacionCompleta = cvData.localidad 
+      ? `${cvData.ciudad}, ${cvData.localidad}` 
+      : cvData.ciudad;
     
     const templateParams = {
       to_email: 'ccariramallo@gmail.com',

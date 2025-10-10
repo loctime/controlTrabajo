@@ -5,7 +5,7 @@ import { collection, getDocs, updateDoc, doc, getDoc } from "firebase/firestore"
  * Script de migración para actualizar CVs existentes al nuevo formato
  * 
  * Cambios:
- * - Ciudad → pais, estadoProvincia, ciudad, localidad
+ * - Ciudad → ciudad, localidad
  * - Profesion → categoriaGeneral, categoriaEspecifica
  * - Agrega: motivoRechazo, fechaRechazo, versionCV
  * 
@@ -47,24 +47,26 @@ const PROFESION_TO_CATEGORIA = {
   "ventas": "Ventas y Comercio"
 };
 
-// Mapeo de ciudades a provincia y país
+// Mapeo de ciudades a ubicación normalizada
 const CIUDAD_TO_LOCATION = {
   "San Nicolás": {
-    ciudad: "San Nicolás de los Arroyos",
-    estadoProvincia: "Buenos Aires",
-    pais: "Argentina",
+    ciudad: "San Nicolás",
     localidad: ""
   },
   "San Nicolás de los Arroyos": {
-    ciudad: "San Nicolás de los Arroyos",
-    estadoProvincia: "Buenos Aires",
-    pais: "Argentina",
+    ciudad: "San Nicolás",
+    localidad: ""
+  },
+  "san nicolas": {
+    ciudad: "San Nicolás",
     localidad: ""
   },
   "Ramallo": {
     ciudad: "Ramallo",
-    estadoProvincia: "Buenos Aires",
-    pais: "Argentina",
+    localidad: ""
+  },
+  "ramallo": {
+    ciudad: "Ramallo",
     localidad: ""
   }
 };
@@ -78,16 +80,12 @@ export const migrateCVData = (cvData) => {
   const updates = {};
 
   // Migrar ubicación si existe el campo Ciudad
-  if (cvData.Ciudad && !cvData.pais) {
+  if (cvData.Ciudad && !cvData.ciudad) {
     const locationData = CIUDAD_TO_LOCATION[cvData.Ciudad] || {
       ciudad: cvData.Ciudad,
-      estadoProvincia: "",
-      pais: "",
       localidad: ""
     };
     
-    updates.pais = locationData.pais;
-    updates.estadoProvincia = locationData.estadoProvincia;
     updates.ciudad = locationData.ciudad;
     updates.localidad = locationData.localidad || "";
   }
@@ -131,7 +129,7 @@ export const migrateExistingCVs = async () => {
         const cvData = docSnap.data();
         
         // Verificar si ya fue migrado (tiene los nuevos campos)
-        if (cvData.pais && cvData.categoriaGeneral) {
+        if (cvData.ciudad && cvData.categoriaGeneral) {
           console.log(`⏭️  Saltando CV ${docSnap.id} - Ya migrado`);
           skippedCount++;
           continue;

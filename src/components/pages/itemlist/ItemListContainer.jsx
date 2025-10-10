@@ -3,16 +3,11 @@ import { db } from "../../../firebaseConfig";
 import { getDocs, collection } from "firebase/firestore";
 import { Button, Select, MenuItem, Box, Grid, Container, Typography, Avatar, Paper, FormControl, InputLabel, TextField, Chip } from "@mui/material";
 import { CATEGORIAS_GENERALES } from "../../../constants/categories";
-import { PAISES, getEstadosPorPais } from "../../../constants/locations";
 
 const ItemListContainer = () => {
   const [cvs, setCvs] = useState([]);
   const [selectedCategoria, setSelectedCategoria] = useState("");
-  const [selectedPais, setSelectedPais] = useState("");
-  const [selectedEstado, setSelectedEstado] = useState("");
   const [searchCiudad, setSearchCiudad] = useState("");
-  const [paises, setPaises] = useState([]);
-  const [estados, setEstados] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -23,13 +18,6 @@ const ItemListContainer = () => {
           ...doc.data(),
         }));
         setCvs(cvsData);
-
-        // Obtener lista única de países
-        const uniquePaises = [...new Set(cvsData
-          .filter(cv => cv.pais)
-          .map(cv => cv.pais)
-        )];
-        setPaises(uniquePaises);
       } catch (error) {
         console.error("Error fetching documents: ", error);
       }
@@ -37,26 +25,6 @@ const ItemListContainer = () => {
 
     fetchData();
   }, []);
-
-  // Actualizar estados disponibles cuando se selecciona un país
-  useEffect(() => {
-    if (selectedPais) {
-      const estadosDisponibles = getEstadosPorPais(selectedPais);
-      if (estadosDisponibles.length > 0) {
-        setEstados(estadosDisponibles);
-      } else {
-        // Si no hay estados predefinidos, obtener de los CVs
-        const uniqueEstados = [...new Set(cvs
-          .filter(cv => cv.pais === selectedPais && cv.estadoProvincia)
-          .map(cv => cv.estadoProvincia)
-        )];
-        setEstados(uniqueEstados);
-      }
-    } else {
-      setEstados([]);
-    }
-    setSelectedEstado("");
-  }, [selectedPais, cvs]);
 
   // Función para descargar el PDF
   const handleDownloadPDF = (url) => {
@@ -68,24 +36,9 @@ const ItemListContainer = () => {
     setSelectedCategoria(event.target.value);
   };
 
-  // Función para filtrar por país
-  const handlePaisChange = (event) => {
-    setSelectedPais(event.target.value);
-    setSelectedEstado("");
-    setSearchCiudad("");
-  };
-
-  // Función para filtrar por estado
-  const handleEstadoChange = (event) => {
-    setSelectedEstado(event.target.value);
-    setSearchCiudad("");
-  };
-
   // Función para limpiar filtros
   const handleClearFilters = () => {
     setSelectedCategoria("");
-    setSelectedPais("");
-    setSelectedEstado("");
     setSearchCiudad("");
   };
 
@@ -103,19 +56,10 @@ const ItemListContainer = () => {
       return false;
     }
 
-    // Filtro por país
-    if (selectedPais && cv.pais !== selectedPais) {
-      return false;
-    }
-
-    // Filtro por estado/provincia
-    if (selectedEstado && cv.estadoProvincia !== selectedEstado) {
-      return false;
-    }
-
     // Filtro por ciudad (búsqueda parcial, case insensitive)
     if (searchCiudad && 
-        !cv.ciudad?.toLowerCase().includes(searchCiudad.toLowerCase())) {
+        !cv.ciudad?.toLowerCase().includes(searchCiudad.toLowerCase()) &&
+        !cv.localidad?.toLowerCase().includes(searchCiudad.toLowerCase())) {
       return false;
     }
 
@@ -148,39 +92,8 @@ const ItemListContainer = () => {
               </Select>
             </FormControl>
 
-            <FormControl fullWidth>
-              <InputLabel>País</InputLabel>
-              <Select
-                value={selectedPais}
-                onChange={handlePaisChange}
-                label="País"
-              >
-                <MenuItem value="">Todos los países</MenuItem>
-                {PAISES.map((pais, index) => (
-                  <MenuItem key={index} value={pais}>{pais}</MenuItem>
-                ))}
-                {paises.filter(p => !PAISES.includes(p)).map((pais, index) => (
-                  <MenuItem key={`extra-${index}`} value={pais}>{pais}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            <FormControl fullWidth disabled={!selectedPais}>
-              <InputLabel>Estado/Provincia</InputLabel>
-              <Select
-                value={selectedEstado}
-                onChange={handleEstadoChange}
-                label="Estado/Provincia"
-              >
-                <MenuItem value="">Todos los estados</MenuItem>
-                {estados.map((estado, index) => (
-                  <MenuItem key={index} value={estado}>{estado}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
             <TextField
-              label="Buscar ciudad"
+              label="Buscar por ciudad o localidad"
               value={searchCiudad}
               onChange={(e) => setSearchCiudad(e.target.value)}
               placeholder="Ej: Buenos Aires"
@@ -196,7 +109,7 @@ const ItemListContainer = () => {
               Limpiar filtros
             </Button>
 
-            {(selectedCategoria || selectedPais || selectedEstado || searchCiudad) && (
+            {(selectedCategoria || searchCiudad) && (
               <Box sx={{ mt: 2 }}>
                 <Typography variant="caption" color="text.secondary">
                   Filtros activos:
@@ -205,14 +118,8 @@ const ItemListContainer = () => {
                   {selectedCategoria && (
                     <Chip label={selectedCategoria} size="small" onDelete={() => setSelectedCategoria("")} />
                   )}
-                  {selectedPais && (
-                    <Chip label={selectedPais} size="small" onDelete={() => setSelectedPais("")} />
-                  )}
-                  {selectedEstado && (
-                    <Chip label={selectedEstado} size="small" onDelete={() => setSelectedEstado("")} />
-                  )}
                   {searchCiudad && (
-                    <Chip label={`Ciudad: ${searchCiudad}`} size="small" onDelete={() => setSearchCiudad("")} />
+                    <Chip label={`Ubicación: ${searchCiudad}`} size="small" onDelete={() => setSearchCiudad("")} />
                   )}
                 </Box>
               </Box>
@@ -256,8 +163,8 @@ const ItemListContainer = () => {
                     )}
                     <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                       <strong>Ubicación:</strong>{' '}
-                      {cv.ciudad && cv.estadoProvincia && cv.pais
-                        ? `${cv.ciudad}, ${cv.estadoProvincia}, ${cv.pais}`
+                      {cv.ciudad 
+                        ? (cv.localidad ? `${cv.ciudad}, ${cv.localidad}` : cv.ciudad)
                         : cv.Ciudad || 'No especificada'}
                     </Typography>
                   </Box>

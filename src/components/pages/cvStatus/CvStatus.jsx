@@ -207,10 +207,9 @@ const CvStatus = () => {
                 Ubicación
               </Typography>
               <Typography variant="body1" gutterBottom>
-                {cvData.ciudad && cvData.estadoProvincia && cvData.pais
-                  ? `${cvData.ciudad}, ${cvData.estadoProvincia}, ${cvData.pais}`
+                {cvData.ciudad 
+                  ? (cvData.localidad ? `${cvData.ciudad}, ${cvData.localidad}` : cvData.ciudad)
                   : cvData.Ciudad || "No especificada"}
-                {cvData.localidad && ` (${cvData.localidad})`}
               </Typography>
             </Grid>
 

@@ -6,7 +6,6 @@ import { addDoc, collection, query, where, getDocs, setDoc, doc } from "firebase
 import { showAlert } from "../../../utils/swalConfig";
 import { Button } from "../../common/Button";
 import { useNavigate } from "react-router-dom";
-import { getEstadosPorPais } from "../../../constants/locations";
 
 // Hooks personalizados
 import { useFileUpload } from "./hooks/useFileUpload";
@@ -31,8 +30,6 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
     Edad: "",
     categoriaGeneral: "",
     categoriaEspecifica: "",
-    pais: "",
-    estadoProvincia: "",
     ciudad: "",
     localidad: "",
     Email: "",
@@ -42,7 +39,6 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
     versionCV: 1,
   });
 
-  const [estadosDisponibles, setEstadosDisponibles] = useState([]);
   const navigate = useNavigate();
 
   // Usar hooks personalizados
@@ -94,9 +90,6 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
           const cvData = doc.data();
           setCurrentCv({ id: doc.id, ...cvData });
           setNewCv({ ...cvData, estado: "pendiente" });
-          if (cvData.pais) {
-            setEstadosDisponibles(getEstadosPorPais(cvData.pais));
-          }
         });
       }
     } catch (error) {
@@ -106,16 +99,6 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
 
   const handleChange = (e) => {
     setNewCv({ ...newCv, [e.target.name]: e.target.value });
-  };
-
-  const handlePaisChange = (e) => {
-    const selectedPais = e.target.value;
-    setNewCv({ ...newCv, pais: selectedPais, estadoProvincia: "", ciudad: "", localidad: "" });
-    setEstadosDisponibles(getEstadosPorPais(selectedPais));
-  };
-
-  const handleEstadoChange = (e) => {
-    setNewCv({ ...newCv, estadoProvincia: e.target.value, ciudad: "", localidad: "" });
   };
 
   const handleImageChange = (e) => {
@@ -190,9 +173,6 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
           <LocationForm
             newCv={newCv}
             handleChange={handleChange}
-            handlePaisChange={handlePaisChange}
-            handleEstadoChange={handleEstadoChange}
-            estadosDisponibles={estadosDisponibles}
           />
           
           <Divider sx={{ my: 3 }} />
