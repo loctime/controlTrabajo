@@ -44,3 +44,4 @@ export const ProfessionalDataForm = ({ newCv, handleChange }) => {
   );
 };
 
+

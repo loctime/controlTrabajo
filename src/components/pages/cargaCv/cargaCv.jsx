@@ -9,7 +9,6 @@ import { useNavigate } from "react-router-dom";
 import { getEstadosPorPais } from "../../../constants/locations";
 
 // Hooks personalizados
-import { useGeolocation } from "./hooks/useGeolocation";
 import { useFileUpload } from "./hooks/useFileUpload";
 import { useAutoFillUserData } from "./hooks/useAutoFillUserData";
 
@@ -47,7 +46,6 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
   const navigate = useNavigate();
 
   // Usar hooks personalizados
-  const { detectingLocation, detectLocationManually } = useGeolocation();
   const { 
     isImageLoaded, 
     isCvLoaded, 
@@ -118,22 +116,6 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
 
   const handleEstadoChange = (e) => {
     setNewCv({ ...newCv, estadoProvincia: e.target.value, ciudad: "", localidad: "" });
-  };
-
-  const handleDetectLocation = async () => {
-    const locationData = await detectLocationManually();
-    if (locationData) {
-      setNewCv(prevCv => ({
-        ...prevCv,
-        ...(locationData.ciudad && { ciudad: locationData.ciudad }),
-        ...(locationData.estado && { estadoProvincia: locationData.estado }),
-        ...(locationData.pais && { pais: locationData.pais })
-      }));
-      
-      if (locationData.pais) {
-        setEstadosDisponibles(getEstadosPorPais(locationData.pais));
-      }
-    }
   };
 
   const handleImageChange = (e) => {
@@ -211,8 +193,6 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
             handlePaisChange={handlePaisChange}
             handleEstadoChange={handleEstadoChange}
             estadosDisponibles={estadosDisponibles}
-            detectingLocation={detectingLocation}
-            onDetectLocation={handleDetectLocation}
           />
           
           <Divider sx={{ my: 3 }} />

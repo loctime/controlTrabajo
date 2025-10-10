@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Grid, TextField, FormControl, InputLabel, Select, MenuItem, Typography, Button } from '@mui/material';
+import { Box, Grid, TextField, FormControl, InputLabel, Select, MenuItem, Typography } from '@mui/material';
 import { PAISES, getEstadosPorPais } from '../../../../constants/locations';
 
 export const LocationForm = ({ 
@@ -7,38 +7,17 @@ export const LocationForm = ({
   handleChange, 
   handlePaisChange, 
   handleEstadoChange, 
-  estadosDisponibles, 
-  detectingLocation, 
-  onDetectLocation 
+  estadosDisponibles
 }) => {
   return (
     <>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 3, mb: 2 }}>
-        <Box>
-          <Typography variant="h6" sx={{ color: 'primary.main' }}>
-            📍 Ubicación
-            {detectingLocation && (
-              <Typography variant="caption" sx={{ ml: 2, color: 'info.main' }}>
-                🔍 Detectando ubicación...
-              </Typography>
-            )}
-          </Typography>
-          <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block' }}>
-            {navigator.geolocation 
-              ? "💡 Se detectará automáticamente por timezone y opcionalmente por GPS" 
-              : "⚠️ Geolocalización no disponible - completa manualmente"
-            }
-          </Typography>
-        </Box>
-        <Button 
-          variant="outlined" 
-          size="small"
-          onClick={onDetectLocation}
-          disabled={detectingLocation || !navigator.geolocation}
-          sx={{ ml: 2 }}
-        >
-          {detectingLocation ? '🔍 Detectando...' : '📍 Detectar ubicación'}
-        </Button>
+      <Box sx={{ mt: 3, mb: 2 }}>
+        <Typography variant="h6" sx={{ color: 'primary.main' }}>
+          📍 Ubicación
+        </Typography>
+        <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block' }}>
+          Completa tu información de ubicación
+        </Typography>
       </Box>
       
       <Grid container spacing={3}>
@@ -116,5 +95,6 @@ export const LocationForm = ({
     </>
   );
 };
+
 
 
