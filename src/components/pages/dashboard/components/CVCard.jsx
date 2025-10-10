@@ -22,6 +22,7 @@ export const CVCard = ({
 }) => {
   return (
     <Box sx={{ position: 'relative' }}>
+      {/* Badge de estado */}
       <Chip 
         label={statusChip.label} 
         color={statusChip.color} 
@@ -35,6 +36,24 @@ export const CVCard = ({
           boxShadow: 2
         }}
       />
+      
+      {/* Badge de tipo de CV */}
+      {cv.cvGenerado !== undefined && (
+        <Chip 
+          label={cv.cvGenerado ? "🎨 CV Generado" : "📄 PDF Subido"} 
+          color={cv.cvGenerado ? "primary" : "secondary"} 
+          size="small"
+          sx={{ 
+            position: 'absolute',
+            top: -8,
+            left: -8,
+            zIndex: 1,
+            fontWeight: 'bold',
+            boxShadow: 2,
+            fontSize: '0.7rem'
+          }}
+        />
+      )}
       
       <Card 
         sx={{ 

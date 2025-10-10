@@ -5,6 +5,7 @@ import Home from "../components/pages/home/Home";
 //import ItemDetail from "../components/pages/itemDetail/ItemDetail";
 import ItemListContainer from "../components/pages/itemlist/ItemListContainer";
 import CvStatus from "../components/pages/cvStatus/CvStatus";
+import CVPublicView from "../components/pages/cvPublic/CVPublicView";
 //import UserOrders from "../components/pages/userOrders/UserOrders";
 
 export const routes = [
@@ -27,5 +28,10 @@ export const routes = [
     id: "mi-cv",
     path: "/mi-cv",
     Element: CvStatus,
+  },
+  {
+    id: "cv-publico",
+    path: "/cv-publico/:cvId",
+    Element: CVPublicView,
   },
 ]
