@@ -11,6 +11,7 @@ import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import LogoutIcon from "@mui/icons-material/Logout";
+import FileUploadIcon from "@mui/icons-material/FileUpload";
 import { AuthContext } from "../../../context/AuthContext";
 import { logout } from "../../../firebaseAuthControlFile";
 import { db } from "../../../firebaseConfig";
@@ -138,26 +139,155 @@ function Navbar() {
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
       <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
-        <Toolbar>
-          <Box sx={{ flexGrow: 1 }}>
-            {menuItems.map(({ id, path, title }) => (
-              <Button key={id} color="inherit" component={Link} to={path} sx={{ textTransform: "none", fontSize: { xs: '1rem', md: '1.1rem' }, fontFamily: 'inherit', letterSpacing: 0 }} translate="no">
-                {title}
-              </Button>
-            ))}
+        <Toolbar sx={{ minHeight: { xs: '56px', sm: '64px' }, px: { xs: 1, sm: 2 } }}>
+          <Box sx={{ flexGrow: 1, display: 'flex', gap: { xs: 0, sm: 1 } }}>
+            {menuItems.map(({ id, path, title, Icon }) => {
+              // Versión móvil compacta
+              if (id === "home") {
+                return (
+                  <Button 
+                    key={id} 
+                    color="inherit" 
+                    component={Link} 
+                    to={path} 
+                    sx={{ 
+                      textTransform: "none", 
+                      fontSize: { xs: '1.2rem', md: '1.1rem' }, 
+                      fontFamily: 'inherit', 
+                      letterSpacing: 0,
+                      flex: { xs: 1, md: 'none' },
+                      minHeight: { xs: '48px', md: 'auto' },
+                      px: { xs: 1, md: 2 }
+                    }} 
+                    translate="no"
+                  >
+                    <Box sx={{ display: { xs: 'block', md: 'none' } }}>
+                      <Icon sx={{ fontSize: { xs: '1.5rem', md: 'inherit' } }} />
+                    </Box>
+                    <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+                      {title}
+                    </Box>
+                  </Button>
+                );
+              }
+              
+              if (id === "cv") {
+                return (
+                  <Button 
+                    key={id} 
+                    color="inherit" 
+                    component={Link} 
+                    to={path} 
+                    sx={{ 
+                      textTransform: "none", 
+                      fontSize: { xs: '0.9rem', md: '1.1rem' }, 
+                      fontFamily: 'inherit', 
+                      letterSpacing: 0,
+                      flex: { xs: 1, md: 'none' },
+                      minHeight: { xs: '48px', md: 'auto' },
+                      px: { xs: 1, md: 2 }
+                    }} 
+                    translate="no"
+                  >
+                    <Box sx={{ display: { xs: 'block', md: 'none' } }}>
+                      Ver CV
+                    </Box>
+                    <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+                      {title}
+                    </Box>
+                  </Button>
+                );
+              }
+              
+              if (id === "mi-cv") {
+                return (
+                  <Button 
+                    key={id} 
+                    color="inherit" 
+                    component={Link} 
+                    to={path} 
+                    sx={{ 
+                      textTransform: "none", 
+                      fontSize: { xs: '0.9rem', md: '1.1rem' }, 
+                      fontFamily: 'inherit', 
+                      letterSpacing: 0,
+                      flex: { xs: 1, md: 'none' },
+                      minHeight: { xs: '48px', md: 'auto' },
+                      px: { xs: 1, md: 2 }
+                    }} 
+                    translate="no"
+                  >
+                    {title}
+                  </Button>
+                );
+              }
+              
+              if (id === "Cargar Cv") {
+                return (
+                  <Button 
+                    key={id} 
+                    color="inherit" 
+                    component={Link} 
+                    to={path} 
+                    sx={{ 
+                      textTransform: "none", 
+                      fontSize: { xs: '0.9rem', md: '1.1rem' }, 
+                      fontFamily: 'inherit', 
+                      letterSpacing: 0,
+                      flex: { xs: 1, md: 'none' },
+                      minHeight: { xs: '48px', md: 'auto' },
+                      px: { xs: 1, md: 2 },
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 0.5
+                    }} 
+                    translate="no"
+                  >
+                    <Box sx={{ display: { xs: 'flex', md: 'none' }, alignItems: 'center', gap: 0.5 }}>
+                      <FileUploadIcon sx={{ fontSize: { xs: '1.2rem', md: 'inherit' } }} />
+                      CV
+                    </Box>
+                    <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+                      {title}
+                    </Box>
+                  </Button>
+                );
+              }
+              
+              return (
+                <Button 
+                  key={id} 
+                  color="inherit" 
+                  component={Link} 
+                  to={path} 
+                  sx={{ 
+                    textTransform: "none", 
+                    fontSize: { xs: '0.9rem', md: '1.1rem' }, 
+                    fontFamily: 'inherit', 
+                    letterSpacing: 0,
+                    flex: { xs: 1, md: 'none' },
+                    minHeight: { xs: '48px', md: 'auto' },
+                    px: { xs: 1, md: 2 }
+                  }} 
+                  translate="no"
+                >
+                  {title}
+                </Button>
+              );
+            })}
             {isAdmin && (
-              <Button color="inherit" component={Link} to="/dashboard" sx={{ textTransform: "none", fontSize: { xs: '1rem', md: '1.1rem' }, fontFamily: 'inherit', letterSpacing: 0 }} translate="no">
+              <Button color="inherit" component={Link} to="/dashboard" sx={{ textTransform: "none", fontSize: { xs: '0.9rem', md: '1.1rem' }, fontFamily: 'inherit', letterSpacing: 0, flex: { xs: 1, md: 'none' }, minHeight: { xs: '48px', md: 'auto' }, px: { xs: 1, md: 2 } }} translate="no">
                 Dashboard
               </Button>
             )}
           </Box>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <IconButton onClick={handleAvatarClick} color="inherit">
+          <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 0.5, md: 2 } }}>
+            <IconButton onClick={handleAvatarClick} color="inherit" sx={{ p: { xs: 0.5, md: 1 } }}>
               {profilePhoto ? (
-                <Avatar src={profilePhoto} alt="Usuario" />
+                <Avatar src={profilePhoto} alt="Usuario" sx={{ width: { xs: 32, md: 40 }, height: { xs: 32, md: 40 } }} />
               ) : (
-                <Avatar alt="Usuario">
-                  <AccountCircleIcon />
+                <Avatar alt="Usuario" sx={{ width: { xs: 32, md: 40 }, height: { xs: 32, md: 40 } }}>
+                  <AccountCircleIcon sx={{ fontSize: { xs: '1.2rem', md: '1.5rem' } }} />
                 </Avatar>
               )}
             </IconButton>
