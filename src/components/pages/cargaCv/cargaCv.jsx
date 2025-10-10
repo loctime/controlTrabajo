@@ -13,6 +13,7 @@ import { useAutoFillUserData } from "./hooks/useAutoFillUserData";
 
 // Servicios
 import { sendRegistrationEmails } from "./services/emailService";
+import { pdfGeneratorService } from "./services/pdfGeneratorService";
 
 // Componentes de formulario
 import { PersonalDataForm } from "./components/PersonalDataForm";
@@ -190,6 +191,42 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
     setIsLoading(true);
     try {
       let docRef;
+      let cvPdfUrl = "";
+      
+      // Si es un CV generado, crear el PDF y subirlo
+      if (tabValue === 0) {
+        console.log("🎨 Generando CV con plantilla:", selectedTemplate);
+        
+        // Validar datos antes de generar
+        const validation = pdfGeneratorService.validateCVData(newCv);
+        if (!validation.isValid) {
+          const errorMessages = validation.errors.join(', ');
+          showAlert.error("Error de validación", `Por favor corrige los siguientes errores: ${errorMessages}`);
+          return;
+        }
+        
+        // Generar PDF
+        const pdfDoc = pdfGeneratorService.generateCVPdf(newCv, selectedTemplate);
+        const pdfBlob = pdfGeneratorService.getPDFAsBlob(pdfDoc);
+        
+        // Crear archivo para subir
+        const fileName = `CV_${newCv.Nombre}_${newCv.Apellido}_${selectedTemplate}.pdf`;
+        const pdfFile = new File([pdfBlob], fileName, { type: 'application/pdf' });
+        
+        // Subir PDF usando el hook de subida de archivos
+        console.log("📤 Subiendo PDF generado...");
+        await new Promise((resolve, reject) => {
+          handleFileChange(
+            { target: { files: [pdfFile] } }, 
+            "cv", 
+            (url) => {
+              cvPdfUrl = url;
+              console.log("✅ PDF generado y subido:", url);
+              resolve();
+            }
+          );
+        });
+      }
       
       // Preparar datos según el modo
       const cvData = {
@@ -198,6 +235,7 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
         uid: user.uid,
         cvGenerado: tabValue === 0, // true si es generador, false si es subida
         plantillaSeleccionada: tabValue === 0 ? selectedTemplate : null,
+        cvPdfUrl: tabValue === 0 ? cvPdfUrl : newCv.cv, // Usar PDF generado o archivo subido
         fechaCreacion: new Date().toISOString(),
         versionCV: currentCv ? (currentCv.versionCV || 1) + 1 : 1
       };
@@ -211,7 +249,7 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
       }
 
       // Enviar correos electrónicos
-      await sendRegistrationEmails(newCv);
+      await sendRegistrationEmails(cvData);
 
       const mensaje = tabValue === 0 
         ? "Tu CV profesional ha sido creado exitosamente. Está en revisión y pronto estará disponible."
