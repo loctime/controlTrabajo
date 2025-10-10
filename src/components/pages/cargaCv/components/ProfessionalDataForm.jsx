@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, memo, useCallback } from 'react';
 import { 
   Grid, 
   TextField, 
@@ -16,12 +16,12 @@ import {
 import { ArrowBack } from '@mui/icons-material';
 import { CATEGORIAS_GENERALES } from '../../../../constants/categories';
 
-export const ProfessionalDataForm = ({ newCv, handleChange }) => {
+export const ProfessionalDataForm = memo(({ newCv, handleChange }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showCustomInput, setShowCustomInput] = useState(false);
 
   // Agregar "Otros" a las categorías
-  const categoriasConOtros = [...CATEGORIAS_GENERALES, 'Otros'];
+  const categoriasConOtros = useMemo(() => [...CATEGORIAS_GENERALES, 'Otros'], []);
 
   // Filtrar categorías basado en el término de búsqueda
   const filteredCategorias = useMemo(() => {
@@ -29,9 +29,9 @@ export const ProfessionalDataForm = ({ newCv, handleChange }) => {
     return categoriasConOtros.filter(categoria =>
       categoria.toLowerCase().includes(searchTerm.toLowerCase())
     );
-  }, [searchTerm]);
+  }, [searchTerm, categoriasConOtros]);
 
-  const handleCategoriaChange = (event, newValue) => {
+  const handleCategoriaChange = useCallback((event, newValue) => {
     if (newValue === 'Otros') {
       setShowCustomInput(true);
       handleChange({
@@ -49,18 +49,18 @@ export const ProfessionalDataForm = ({ newCv, handleChange }) => {
         }
       });
     }
-  };
+  }, [handleChange]);
 
-  const handleCustomCategoriaChange = (event) => {
+  const handleCustomCategoriaChange = useCallback((event) => {
     handleChange({
       target: {
         name: 'categoriaGeneral',
         value: event.target.value
       }
     });
-  };
+  }, [handleChange]);
 
-  const handleBackToList = () => {
+  const handleBackToList = useCallback(() => {
     setShowCustomInput(false);
     setSearchTerm('');
     handleChange({
@@ -69,7 +69,8 @@ export const ProfessionalDataForm = ({ newCv, handleChange }) => {
         value: ''
       }
     });
-  };
+  }, [handleChange]);
+  
   return (
     <>
       <Typography variant="h6" sx={{ mt: 3, mb: 2, color: 'primary.main' }}>
@@ -156,6 +157,7 @@ export const ProfessionalDataForm = ({ newCv, handleChange }) => {
       </Grid>
     </>
   );
-};
+});
 
+ProfessionalDataForm.displayName = 'ProfessionalDataForm';
 

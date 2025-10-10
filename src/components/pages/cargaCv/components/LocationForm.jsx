@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Box, Grid, TextField, FormControl, InputLabel, Select, MenuItem, Typography } from '@mui/material';
 import { CIUDADES_DISPONIBLES } from '../../../../constants/locations';
 
-export const LocationForm = ({ 
+export const LocationForm = memo(({ 
   newCv, 
   handleChange
 }) => {
@@ -49,7 +49,8 @@ export const LocationForm = ({
       </Grid>
     </>
   );
-};
+});
 
+LocationForm.displayName = 'LocationForm';
 
 
