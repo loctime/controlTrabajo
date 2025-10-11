@@ -136,6 +136,7 @@ export const generateModernTemplate = async (cvData) => {
   if (cvData.telefono) contactInfo.push(`Tel: ${cvData.telefono}`);
   if (cvData.ciudad) contactInfo.push(`Ciudad: ${cvData.ciudad}`);
   if (cvData.linkedin) contactInfo.push(`LinkedIn`);
+  if (cvData.sitioWeb) contactInfo.push(`Web: ${cvData.sitioWeb}`);
 
   doc.text(contactInfo.join(' • '), 60, 40);
 
@@ -181,6 +182,11 @@ export const generateModernTemplate = async (cvData) => {
       doc.text(`${exp.empresa || ''} | ${exp.fechaInicio || ''} - ${exp.fechaFin || ''}`, leftColumnX, currentY);
       
       currentY += 4;
+      if (exp.ubicacion) {
+        doc.text(`📍 ${exp.ubicacion}`, leftColumnX, currentY);
+        currentY += 4;
+      }
+      
       if (exp.descripcion) {
         const splitDesc = doc.splitTextToSize(exp.descripcion, columnWidth);
         doc.text(splitDesc, leftColumnX, currentY);
@@ -289,8 +295,21 @@ export const generateModernTemplate = async (cvData) => {
       
       rightY += 4;
       doc.setFont('helvetica', 'normal');
+      if (proyecto.descripcion) {
+        const splitDesc = doc.splitTextToSize(proyecto.descripcion, columnWidth);
+        doc.text(splitDesc, rightColumnX, rightY);
+        rightY += splitDesc.length * 3.5;
+      }
+      
       if (proyecto.tecnologias) {
         doc.text(`Tecnologías: ${proyecto.tecnologias}`, rightColumnX, rightY);
+        rightY += 4;
+      }
+      
+      if (proyecto.url) {
+        doc.setTextColor(primaryColor);
+        doc.text(`🔗 Ver proyecto: ${proyecto.url}`, rightColumnX, rightY);
+        doc.setTextColor(textColor);
         rightY += 4;
       }
       

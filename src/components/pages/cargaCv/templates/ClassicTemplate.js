@@ -36,6 +36,7 @@ export const generateClassicTemplate = (cvData) => {
   if (cvData.telefono) contactInfo.push(cvData.telefono);
   if (cvData.ciudad) contactInfo.push(cvData.ciudad);
   if (cvData.linkedin) contactInfo.push('LinkedIn');
+  if (cvData.sitioWeb) contactInfo.push(cvData.sitioWeb);
 
   doc.text(contactInfo.join(' • '), 15, currentY);
   currentY += 15;
@@ -247,6 +248,13 @@ export const generateClassicTemplate = (cvData) => {
         const splitDesc = doc.splitTextToSize(proyecto.descripcion, pageWidth - 30);
         doc.text(splitDesc, 15, currentY);
         currentY += splitDesc.length * 3.5 + 5;
+      }
+      
+      if (proyecto.url) {
+        doc.setTextColor(primaryColor);
+        doc.text(`🔗 Ver proyecto: ${proyecto.url}`, 15, currentY);
+        doc.setTextColor(primaryColor);
+        currentY += 5;
       }
     });
     currentY += 5;

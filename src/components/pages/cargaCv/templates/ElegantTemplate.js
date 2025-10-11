@@ -168,6 +168,11 @@ export const generateElegantTemplate = async (cvData) => {
     leftY += 5;
   }
   
+  if (cvData.sitioWeb) {
+    doc.text(`🌐 ${cvData.sitioWeb}`, 10, leftY);
+    leftY += 5;
+  }
+  
   leftY += 10;
 
   // === APTITUDES/HABILIDADES ===
@@ -299,6 +304,53 @@ export const generateElegantTemplate = async (cvData) => {
     rightY += 10;
   }
 
+  // === PROYECTOS ===
+  if (cvData.proyectos && cvData.proyectos.length > 0) {
+    doc.setTextColor(textColor);
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.text('PROYECTOS DESTACADOS', rightColumnX, rightY);
+    
+    // Línea separadora
+    doc.setDrawColor('#CCCCCC');
+    doc.setLineWidth(0.5);
+    doc.line(rightColumnX, rightY + 2, pageWidth - 10, rightY + 2);
+    rightY += 8;
+    
+    cvData.proyectos.forEach((proyecto) => {
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
+      doc.text(proyecto.nombre || '', rightColumnX, rightY);
+      rightY += 6;
+      
+      if (proyecto.descripcion) {
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        const splitDesc = doc.splitTextToSize(proyecto.descripcion, rightColumnWidth);
+        doc.text(splitDesc, rightColumnX, rightY);
+        rightY += splitDesc.length * 3.5 + 4;
+      }
+      
+      if (proyecto.tecnologias) {
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Tecnologías: ${proyecto.tecnologias}`, rightColumnX, rightY);
+        rightY += 5;
+      }
+      
+      if (proyecto.url) {
+        doc.setFontSize(9);
+        doc.setTextColor(primaryColor);
+        doc.text(`🔗 ${proyecto.url}`, rightColumnX, rightY);
+        doc.setTextColor(textColor);
+        rightY += 5;
+      }
+      
+      rightY += 8;
+    });
+    rightY += 10;
+  }
+
   // === EXPERIENCIA LABORAL ===
   if (cvData.experiencias && cvData.experiencias.length > 0) {
     doc.setTextColor(textColor);
@@ -384,6 +436,44 @@ export const generateElegantTemplate = async (cvData) => {
       rightY += 4;
       doc.setFont('helvetica', 'bold');
       doc.text(edu.titulo || '', rightColumnX, rightY);
+      rightY += 8;
+    });
+    rightY += 10;
+  }
+
+  // === REFERENCIAS ===
+  if (cvData.referencias && cvData.referencias.length > 0) {
+    doc.setTextColor(textColor);
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.text('REFERENCIAS', rightColumnX, rightY);
+    
+    // Línea separadora
+    doc.setDrawColor('#CCCCCC');
+    doc.setLineWidth(0.5);
+    doc.line(rightColumnX, rightY + 2, pageWidth - 10, rightY + 2);
+    rightY += 8;
+
+    cvData.referencias.slice(0, 2).forEach((ref) => {
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      doc.text(ref.nombre || '', rightColumnX, rightY);
+      rightY += 4;
+      
+      doc.setFont('helvetica', 'normal');
+      doc.text(`${ref.cargo || ''} en ${ref.empresa || ''}`, rightColumnX, rightY);
+      rightY += 4;
+      
+      if (ref.telefono) {
+        doc.text(`📞 ${ref.telefono}`, rightColumnX, rightY);
+        rightY += 4;
+      }
+      
+      if (ref.email) {
+        doc.text(`✉️ ${ref.email}`, rightColumnX, rightY);
+        rightY += 4;
+      }
+      
       rightY += 8;
     });
   }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, CardContent, CardActions, Box, Typography, Chip, IconButton, Divider } from '@mui/material';
+import { Card, CardContent, CardActions, Box, Typography, Chip, IconButton, Divider, Link } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import ThumbDownIcon from '@mui/icons-material/ThumbDown';
@@ -8,6 +8,10 @@ import DownloadIcon from '@mui/icons-material/Download';
 import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import LanguageIcon from '@mui/icons-material/Language';
+import WorkIcon from '@mui/icons-material/Work';
+import SchoolIcon from '@mui/icons-material/School';
+import CodeIcon from '@mui/icons-material/Code';
 import ControlFileAvatar from '../../../common/ControlFileAvatar';
 
 export const CVCard = ({ 
@@ -95,12 +99,26 @@ export const CVCard = ({
                 </Box>
               )}
 
-              {cv.Telefono && (
+              {cv.telefono && (
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                   <PhoneIcon fontSize="small" color="action" />
                   <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
-                    {cv.Telefono}
+                    {cv.telefono}
                   </Typography>
+                </Box>
+              )}
+
+              {cv.sitioWeb && (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  <LanguageIcon fontSize="small" color="action" />
+                  <Link 
+                    href={cv.sitioWeb} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    sx={{ fontSize: '0.75rem', textDecoration: 'none' }}
+                  >
+                    Sitio Web
+                  </Link>
                 </Box>
               )}
             </Box>
@@ -128,6 +146,76 @@ export const CVCard = ({
                 </Box>
               )}
             </Box>
+
+            {/* Badges informativos */}
+            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 1 }}>
+              {cv.proyectos?.length > 0 && (
+                <Chip 
+                  icon={<CodeIcon />}
+                  label={`${cv.proyectos.length} proyecto${cv.proyectos.length !== 1 ? 's' : ''}`} 
+                  size="small" 
+                  color="primary" 
+                  variant="outlined"
+                />
+              )}
+              
+              {cv.habilidades?.length > 0 && (
+                <Chip 
+                  icon={<WorkIcon />}
+                  label={`${cv.habilidades.length} habilidad${cv.habilidades.length !== 1 ? 'es' : ''}`} 
+                  size="small" 
+                  color="secondary" 
+                  variant="outlined"
+                />
+              )}
+              
+              {cv.idiomas?.length > 0 && (
+                <Chip 
+                  icon={<LanguageIcon />}
+                  label={`${cv.idiomas.length} idioma${cv.idiomas.length !== 1 ? 's' : ''}`} 
+                  size="small" 
+                  color="success" 
+                  variant="outlined"
+                />
+              )}
+              
+              {cv.certificaciones?.length > 0 && (
+                <Chip 
+                  icon={<SchoolIcon />}
+                  label={`${cv.certificaciones.length} certificación${cv.certificaciones.length !== 1 ? 'es' : ''}`} 
+                  size="small" 
+                  color="info" 
+                  variant="outlined"
+                />
+              )}
+            </Box>
+
+            {/* Top habilidades */}
+            {cv.habilidades?.length > 0 && (
+              <Box sx={{ mt: 1 }}>
+                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 'bold' }}>
+                  Habilidades destacadas:
+                </Typography>
+                <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mt: 0.5 }}>
+                  {cv.habilidades.slice(0, 4).map((skill, index) => (
+                    <Chip 
+                      key={index}
+                      label={skill.nombre || skill} 
+                      size="small" 
+                      sx={{ fontSize: '0.7rem', height: '20px' }}
+                    />
+                  ))}
+                  {cv.habilidades.length > 4 && (
+                    <Chip 
+                      label={`+${cv.habilidades.length - 4} más`} 
+                      size="small" 
+                      color="default"
+                      sx={{ fontSize: '0.7rem', height: '20px' }}
+                    />
+                  )}
+                </Box>
+              </Box>
+            )}
 
             {currentView === 'rejected' && cv.motivoRechazo && (
               <Box 
