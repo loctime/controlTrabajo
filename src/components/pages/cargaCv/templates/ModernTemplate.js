@@ -63,14 +63,12 @@ export const generateModernTemplate = async (cvData) => {
 
   // === HEADER SECTION ===
   // Fondo con gradiente simulado usando múltiples rectángulos (más altura para todo el contenido)
-  doc.setFillColor('#1e3a8a'); // Azul más oscuro - base
+  doc.setFillColor('#1e3a8a'); // Azul más oscuro - base unificado
   doc.rect(0, 0, pageWidth, 65, 'F');
-  doc.setFillColor('#2563eb'); // Azul medio - más vibrante
-  doc.rect(0, 0, pageWidth, 55, 'F');
-  doc.setFillColor('#3b82f6'); // Azul medio-claro - mejor contraste
+  doc.setFillColor('#3b82f6'); // Azul medio
   doc.rect(0, 0, pageWidth, 45, 'F');
   doc.setFillColor('#60a5fa'); // Azul claro - para el gradiente superior
-  doc.rect(0, 0, pageWidth, 35, 'F');
+  doc.rect(0, 0, pageWidth, 30, 'F');
 
   // Línea decorativa en la parte inferior del header (más sutil)
   doc.setDrawColor('#ffffff');
@@ -305,10 +303,10 @@ export const generateModernTemplate = async (cvData) => {
     // Header con gradiente simulado (reducido para páginas adicionales)
     doc.setFillColor('#1e3a8a');
     doc.rect(0, 0, pageWidth, 45, 'F');
-    doc.setFillColor('#2563eb');
-    doc.rect(0, 0, pageWidth, 38, 'F');
     doc.setFillColor('#3b82f6');
-    doc.rect(0, 0, pageWidth, 32, 'F');
+    doc.rect(0, 0, pageWidth, 35, 'F');
+    doc.setFillColor('#60a5fa');
+    doc.rect(0, 0, pageWidth, 25, 'F');
     
     // Línea decorativa
     doc.setDrawColor('#ffffff');
