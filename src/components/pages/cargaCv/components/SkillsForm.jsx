@@ -195,6 +195,111 @@ export const SkillsForm = memo(({ newCv, handleChange }) => {
             </Button>
           </Grid>
         </Grid>
+         {/* Habilidades disponibles para selección rápida - Solo en desktop */}
+         <Box sx={{ 
+           mt: 3,
+           display: { xs: 'none', sm: 'block' } // Ocultar en móvil, mostrar en tablet y desktop
+         }}>
+           <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold' }}>
+             {categoriaFiltro !== 'Todas' 
+               ? `✨ Habilidades en ${categoriaFiltro} (${habilidadesFiltradas.length} disponibles):` 
+               : `✨ Habilidades disponibles (${habilidadesFiltradas.length} total):`}
+           </Typography>
+           <Typography variant="caption" sx={{ mb: 2, color: 'text.secondary', display: 'block' }}>
+             Haz clic en cualquier habilidad para agregarla rápidamente
+           </Typography>
+           
+           {/* Diseño de 3 filas con scroll horizontal */}
+           <Box sx={{ 
+             display: 'flex', 
+             flexDirection: 'column',
+             gap: 1,
+             maxHeight: '120px', // Altura para aproximadamente 3 filas
+             overflowY: 'auto',
+             overflowX: 'hidden',
+             '&::-webkit-scrollbar': {
+               width: '6px',
+             },
+             '&::-webkit-scrollbar-track': {
+               backgroundColor: '#f1f1f1',
+               borderRadius: '3px',
+             },
+             '&::-webkit-scrollbar-thumb': {
+               backgroundColor: '#c1c1c1',
+               borderRadius: '3px',
+               '&:hover': {
+                 backgroundColor: '#a8a8a8',
+               },
+             },
+           }}>
+             {/* Dividir en 3 filas */}
+             {[
+               habilidadesFiltradas.filter((_, index) => index % 3 === 0),
+               habilidadesFiltradas.filter((_, index) => index % 3 === 1),
+               habilidadesFiltradas.filter((_, index) => index % 3 === 2)
+             ].map((fila, filaIndex) => (
+               <Box key={filaIndex} sx={{ 
+                 display: 'flex', 
+                 gap: 1, 
+                 overflowX: 'auto',
+                 pb: 0.5,
+                 '&::-webkit-scrollbar': {
+                   height: '4px',
+                 },
+                 '&::-webkit-scrollbar-track': {
+                   backgroundColor: '#f8f8f8',
+                   borderRadius: '2px',
+                 },
+                 '&::-webkit-scrollbar-thumb': {
+                   backgroundColor: '#d0d0d0',
+                   borderRadius: '2px',
+                   '&:hover': {
+                     backgroundColor: '#b0b0b0',
+                   },
+                 },
+               }}>
+                 {fila.map((skill) => (
+                   <Chip
+                     key={skill}
+                     label={skill}
+                     variant="outlined"
+                     size="small"
+                     onClick={() => {
+                       setNuevaHabilidad(skill);
+                     }}
+                     sx={{ 
+                       cursor: 'pointer',
+                       flexShrink: 0,
+                       whiteSpace: 'nowrap',
+                       fontSize: '0.75rem',
+                       height: '24px',
+                       '&:hover': { 
+                         backgroundColor: 'primary.light', 
+                         color: 'white',
+                         transform: 'scale(1.05)',
+                         transition: 'all 0.2s ease'
+                       } 
+                     }}
+                   />
+                 ))}
+               </Box>
+             ))}
+           </Box>
+         </Box>
+      </Box>
+
+      {/* Mensaje informativo para móviles */}
+      <Box sx={{ 
+        mt: 2,
+        display: { xs: 'block', sm: 'none' }, // Mostrar solo en móvil
+        p: 2,
+        backgroundColor: '#f5f5f5',
+        borderRadius: '8px',
+        borderLeft: '4px solid #9c27b0'
+      }}>
+        <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.75rem' }}>
+          💡 <strong>Tip:</strong> Escribe en el campo de búsqueda para ver sugerencias automáticas de habilidades disponibles.
+        </Typography>
       </Box>
 
       {/* Lista de habilidades agregadas */}
@@ -227,43 +332,6 @@ export const SkillsForm = memo(({ newCv, handleChange }) => {
         </Box>
       )}
 
-      {/* Habilidades disponibles para selección rápida */}
-      <Box sx={{ mt: 3 }}>
-        <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold' }}>
-          {categoriaFiltro !== 'Todas' 
-            ? `✨ Habilidades en ${categoriaFiltro} (${habilidadesFiltradas.length} disponibles):` 
-            : `✨ Habilidades disponibles (${habilidadesFiltradas.length} total):`}
-        </Typography>
-        <Typography variant="caption" sx={{ mb: 2, color: 'text.secondary', display: 'block' }}>
-          Haz clic en cualquier habilidad para agregarla rápidamente
-        </Typography>
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-          {habilidadesFiltradas.slice(0, 20).map((skill) => (
-            <Chip
-              key={skill}
-              label={skill}
-              variant="outlined"
-              size="small"
-              onClick={() => {
-                setNuevaHabilidad(skill);
-              }}
-              sx={{ cursor: 'pointer', '&:hover': { backgroundColor: 'primary.light', color: 'white' } }}
-            />
-          ))}
-          {habilidadesFiltradas.length > 20 && (
-            <Chip
-              label={`+${habilidadesFiltradas.length - 20} más...`}
-              variant="outlined"
-              size="small"
-              sx={{ 
-                backgroundColor: '#f5f5f5', 
-                color: 'text.secondary',
-                fontStyle: 'italic'
-              }}
-            />
-          )}
-        </Box>
-      </Box>
     </>
   );
 });

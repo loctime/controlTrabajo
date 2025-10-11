@@ -96,22 +96,12 @@ export const LanguagesForm = memo(({ newCv, handleChange }) => {
           fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' },
           textShadow: '0 1px 2px rgba(0,0,0,0.1)'
         }}>
-          🌍 Idiomas
+          🌍 Idiomas    + <span style={{ fontSize: '1.2rem', fontWeight: 'normal' }}>Especifica los idiomas que dominas y tu nivel de competencia en cada uno.</span>
+
         </Typography>
+        
       </Box>
-      
-      <Typography variant="body1" sx={{ 
-        mb: 4, 
-        color: '#424242',
-        fontSize: '1.1rem',
-        fontWeight: 500,
-        p: 2,
-        backgroundColor: '#f5f5f5',
-        borderRadius: '8px',
-        borderLeft: '4px solid #e91e63'
-      }}>
-        🌐 Especifica los idiomas que dominas y tu nivel de competencia en cada uno.
-      </Typography>
+ 
 
       {/* Formulario para agregar nuevo idioma */}
       <Box sx={{ 
@@ -171,35 +161,126 @@ export const LanguagesForm = memo(({ newCv, handleChange }) => {
         </Grid>
       </Box>
 
+      {/* Idiomas disponibles para selección rápida - Solo en desktop */}
+      <Box sx={{ 
+        mt: 3,
+        display: { xs: 'none', sm: 'block' } // Ocultar en móvil, mostrar en tablet y desktop
+      }}>
+        <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold' }}>
+          ✨ Idiomas disponibles ({IDIOMAS_DISPONIBLES.length} total):
+        </Typography>
+        <Typography variant="caption" sx={{ mb: 2, color: 'text.secondary', display: 'block' }}>
+          Haz clic en cualquier idioma para agregarlo rápidamente
+        </Typography>
+        
+        {/* Diseño de 3 filas con scroll horizontal */}
+        <Box sx={{ 
+          display: 'flex', 
+          flexDirection: 'column',
+          gap: 1,
+          maxHeight: '120px', // Altura para aproximadamente 3 filas
+          overflowY: 'auto',
+          overflowX: 'hidden',
+          '&::-webkit-scrollbar': {
+            width: '6px',
+          },
+          '&::-webkit-scrollbar-track': {
+            backgroundColor: '#f1f1f1',
+            borderRadius: '3px',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            backgroundColor: '#c1c1c1',
+            borderRadius: '3px',
+            '&:hover': {
+              backgroundColor: '#a8a8a8',
+            },
+          },
+        }}>
+          {/* Dividir en 3 filas */}
+          {[
+            IDIOMAS_DISPONIBLES.filter((_, index) => index % 3 === 0),
+            IDIOMAS_DISPONIBLES.filter((_, index) => index % 3 === 1),
+            IDIOMAS_DISPONIBLES.filter((_, index) => index % 3 === 2)
+          ].map((fila, filaIndex) => (
+            <Box key={filaIndex} sx={{ 
+              display: 'flex', 
+              gap: 1, 
+              overflowX: 'auto',
+              pb: 0.5,
+              '&::-webkit-scrollbar': {
+                height: '4px',
+              },
+              '&::-webkit-scrollbar-track': {
+                backgroundColor: '#f8f8f8',
+                borderRadius: '2px',
+              },
+              '&::-webkit-scrollbar-thumb': {
+                backgroundColor: '#d0d0d0',
+                borderRadius: '2px',
+                '&:hover': {
+                  backgroundColor: '#b0b0b0',
+                },
+              },
+            }}>
+              {fila.map((idioma) => (
+                <Chip
+                  key={idioma}
+                  label={idioma}
+                  variant="outlined"
+                  size="small"
+                  onClick={() => {
+                    setNuevoIdioma(idioma);
+                  }}
+                  sx={{ 
+                    cursor: 'pointer',
+                    flexShrink: 0,
+                    whiteSpace: 'nowrap',
+                    fontSize: '0.75rem',
+                    height: '24px',
+                    '&:hover': { 
+                      backgroundColor: 'primary.light', 
+                      color: 'white',
+                      transform: 'scale(1.05)',
+                      transition: 'all 0.2s ease'
+                    } 
+                  }}
+                />
+              ))}
+            </Box>
+          ))}
+        </Box>
+      </Box>
+
+      {/* Mensaje informativo para móviles */}
+      <Box sx={{ 
+        mt: 2,
+        display: { xs: 'block', sm: 'none' }, // Mostrar solo en móvil
+        p: 2,
+        backgroundColor: '#f5f5f5',
+        borderRadius: '8px',
+        borderLeft: '4px solid #e91e63'
+      }}>
+        <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.75rem' }}>
+          💡 <strong>Tip:</strong> Escribe en el campo de búsqueda para ver sugerencias automáticas de idiomas disponibles.
+        </Typography>
+      </Box>
+
       {/* Lista de idiomas agregados */}
       {idiomas.length > 0 ? (
         <Box>
           <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 'bold' }}>
             Idiomas agregados ({idiomas.length}):
           </Typography>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
             {idiomas.map((idioma) => (
-              <Box key={idioma.id} sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 1, border: '1px solid #e0e0e0', borderRadius: 1 }}>
-                <Typography variant="body1" sx={{ fontWeight: 'bold', minWidth: 100 }}>
-                  {idioma.idioma}
-                </Typography>
-                <Chip
-                  label={idioma.nivel}
-                  color={getNivelColor(idioma.nivel)}
-                  variant="outlined"
-                  size="small"
-                />
-                <Typography variant="caption" sx={{ color: 'text.secondary', flex: 1 }}>
-                  {getNivelDescription(idioma.nivel)}
-                </Typography>
-                <Button
-                  size="small"
-                  color="error"
-                  onClick={() => removeIdioma(idioma.id)}
-                >
-                  Eliminar
-                </Button>
-              </Box>
+              <Chip
+                key={idioma.id}
+                label={`${idioma.idioma} - ${idioma.nivel}`}
+                color={getNivelColor(idioma.nivel)}
+                onDelete={() => removeIdioma(idioma.id)}
+                variant="outlined"
+                sx={{ mb: 1 }}
+              />
             ))}
           </Box>
         </Box>

@@ -10,7 +10,16 @@
         "AWS", "Google Cloud", "Azure", "Vercel", "Render", "Heroku", "DigitalOcean", "Netlify",
         "Linux", "Ubuntu", "Debian", "CLI", "Visual Studio Code", "WebStorm",
         "Testing", "Jest", "Cypress", "Mocha", "Chai", "Unit Testing", "End-to-End Testing",
-        "Data Structures", "Algorithms", "API Design", "Microservices", "Clean Code", "Design Patterns", "SOLID Principles"
+        "Data Structures", "Algorithms", "API Design", "Microservices", "Clean Code", "Design Patterns", "SOLID Principles",
+        "Astro", "Remix", "Nuxt.js", "Electron", "Capacitor", "Cordova", "React Native",
+        "Ionic", "Expo", "Flutter", "Dart", "TensorFlow", "PyTorch", "OpenCV",
+        "LangChain", "Pandas", "NumPy", "Matplotlib", "Scikit-learn",
+        "Hadoop", "Spark", "BigQuery", "Supabase", "tRPC",
+        "SvelteKit", "Bun", "Vite", "Webpack", "Parcel", "ESLint", "Prettier",
+        "Firebase Functions", "Cloud Run", "App Engine",
+        "Nginx", "Apache", "Reverse Proxy", "SSL", "OAuth", "JWT",
+        "Postman", "Insomnia", "Swagger", "OpenAPI", "Zod", "TypeORM", "Drizzle ORM",
+        "ElectronJS", "Tauri", "CLI Development", "Testing Library", "Vitest"
       ]
     },
     {
@@ -20,7 +29,13 @@
         "Premiere Pro", "After Effects", "DaVinci Resolve", "Final Cut Pro", "Blender", "Cinema 4D", "3ds Max",
         "Diseño Gráfico", "Diseño UX/UI", "Diseño Web", "Diseño de Interiores", "Diseño Industrial", "Diseño de Moda",
         "Maquetación", "Fotografía", "Edición de Video", "Edición de Imagen", "Animación 2D", "Animación 3D", "Modelado 3D",
-        "Storyboarding", "Diseño de Marca", "Identidad Visual", "Tipografía", "Colorimetría", "Composición Visual"
+        "Storyboarding", "Diseño de Marca", "Identidad Visual", "Tipografía", "Colorimetría", "Composición Visual",
+        "Diseño Editorial", "Diseño Publicitario", "Diseño Sostenible",
+        "Storyboard", "Animación Stop Motion", "Renderizado 3D", "Escultura Digital",
+        "Diseño de Experiencia (XD)", "Diseño de Personajes", "Diseño de Escenografía",
+        "UX Research", "Wireframing", "Prototipado", "Motion Graphics", "Fotografía de Producto",
+        "Fotografía Publicitaria", "Color Grading", "Brandbook", "Diseño de Packaging", "Impresión 3D",
+        "Diseño Tipográfico", "Diagramación", "AI Art", "Generative Art"
       ]
     },
     {
@@ -32,7 +47,13 @@
         "E-commerce", "Shopify", "WooCommerce", "Mercado Shops", "Dropshipping", "Customer Journey",
         "Funnel de Ventas", "Branding", "Posicionamiento de Marca", "Relaciones Públicas", "Ventas B2B", "Ventas B2C",
         "Negociación Comercial", "Prospección de Clientes", "Cierre de Ventas", "Atención al Cliente", "Telemarketing",
-        "Estrategia Comercial", "Gestión de Cuentas", "Retención de Clientes"
+        "Estrategia Comercial", "Gestión de Cuentas", "Retención de Clientes",
+        "Neuromarketing", "Growth Hacking", "Inbound Marketing", "Outbound Marketing",
+        "Performance Marketing", "Estrategia de Contenidos", "Automatización de Marketing",
+        "CRM Avanzado", "Segmentación de Audiencia", "Copywriting SEO", "Gestión de Leads",
+        "TikTok Marketing", "Influencer Marketing", "Analítica Social", "Google My Business",
+        "Customer Success", "Customer Experience (CX)", "Data Driven Marketing",
+        "Fidelización de Clientes", "Campañas Cross-Channel", "A/B Testing"
       ]
     },
     {
@@ -42,7 +63,12 @@
         "Office 365", "Gestión de Documentos", "Gestión de Agenda", "Redacción de Informes", "Atención Telefónica",
         "Archivo y Correspondencia", "Facturación", "Contabilidad", "Presupuestos", "Gestión de Compras", "Inventarios",
         "Gestión de Proveedores", "ERP", "SAP", "Odoo", "Tango", "Análisis de Costos", "Gestión de Pagos y Cobros",
-        "Control de Gastos", "Conciliaciones Bancarias", "Planificación de Reuniones", "Gestión de Contratos"
+        "Control de Gastos", "Conciliaciones Bancarias", "Planificación de Reuniones", "Gestión de Contratos",
+        "Notion", "Airtable", "ClickUp", "Zoho", "Asana Avanzado", "Trello Power-Ups",
+        "Gestión de Reuniones", "Control de Presupuesto", "Flujos de Aprobación",
+        "Automatización con Zapier", "Automatización con Make (Integromat)",
+        "Gestión de Licitaciones", "Gestión de Compras Internacionales",
+        "Secretariado Ejecutivo", "Gestión de Archivos Digitales", "Base de Datos Empresarial"
       ]
     },
     {
@@ -51,7 +77,11 @@
         "Reclutamiento y Selección", "Entrevistas Laborales", "Onboarding", "Evaluación de Desempeño", "Desarrollo Organizacional",
         "Capacitación y Formación", "Gestión del Talento", "Gestión de Nóminas", "Compensaciones y Beneficios",
         "Clima Laboral", "Comunicación Interna", "Legislación Laboral", "Resolución de Conflictos", "Gestión de Personal",
-        "Gestión por Competencias", "Evaluaciones Psicolaborales", "Outplacement", "Gestión de Turnos", "Cultura Organizacional"
+        "Gestión por Competencias", "Evaluaciones Psicolaborales", "Outplacement", "Gestión de Turnos", "Cultura Organizacional",
+        "Employer Branding", "Gestión de Clima Organizacional", "People Analytics",
+        "OKRs", "Gestión de Desempeño por Competencias", "Softlanding", "Desvinculación Amigable",
+        "Payroll Internacional", "Benchmarking Salarial", "Diversidad e Inclusión",
+        "Coaching Ejecutivo", "Mentoring", "Plan de Carrera", "Team Building", "Formador Interno"
       ]
     },
     {
@@ -61,7 +91,12 @@
         "ISO 45001", "ISO 9001", "ISO 14001", "OHSAS 18001", "Legislación en Seguridad", "Plan de Emergencias",
         "Primeros Auxilios", "Ergonomía", "Seguridad Eléctrica", "Seguridad contra Incendios",
         "Auditorías Internas", "Capacitaciones de Seguridad", "Investigación de Accidentes", "Gestión Ambiental",
-        "Control de Sustancias Peligrosas", "Gestión de Residuos", "Mediciones Ambientales", "Monitoreo Ocupacional"
+        "Control de Sustancias Peligrosas", "Gestión de Residuos", "Mediciones Ambientales", "Monitoreo Ocupacional",
+        "Simulacros de Evacuación", "Evaluación Ergonómica", "Monitoreo Ambiental",
+        "Inspecciones de Seguridad", "Matrices IPER/ATS", "Sistemas de Permisos de Trabajo (PTW)",
+        "Gestión de EPIs", "SG-SST", "Residuos Peligrosos", "Mediciones de Ruido",
+        "Gestión de Sustancias Químicas", "Plan de Contingencia", "Análisis de Incidentes",
+        "Seguridad Vial", "Emergencias Químicas", "Seguridad Contra Explosiones"
       ]
     },
     {
@@ -72,7 +107,13 @@
         "Mecánica Industrial", "Tornería", "Fresado", "Neumática", "Hidráulica",
         "Control de Calidad", "Producción", "Lean Manufacturing", "Six Sigma",
         "Mantenimiento Preventivo", "Mantenimiento Correctivo", "Operación de Maquinaria Pesada",
-        "Operador de Grúas", "Carretilla Elevadora", "Montajes Electromecánicos"
+        "Operador de Grúas", "Carretilla Elevadora", "Montajes Electromecánicos",
+        "Operación de Retroexcavadora", "Hormigón Armado", "Estructuras Metálicas",
+        "Montajes Industriales", "Construcción en Seco", "Electricidad Trifásica",
+        "Automatización Industrial", "PLC Siemens", "PLC Allen Bradley",
+        "Soldadura TIG", "Soldadura MIG", "Control de Procesos", "Calderería",
+        "Sistemas de Climatización", "Aire Acondicionado Split", "Energías Fotovoltaicas",
+        "Mecánica Automotriz", "Balanceo y Alineación", "Mecánica de Precisión"
       ]
     },
     {
@@ -80,7 +121,11 @@
       "habilidades": [
         "Docencia", "Pedagogía", "Psicopedagogía", "Diseño Curricular", "Planificación Didáctica", "Evaluación Educativa",
         "Tutoría", "Orientación Educativa", "Educación Infantil", "Educación Especial", "Educación para Adultos",
-        "E-learning", "Moodle", "Google Classroom", "Formación Profesional", "Metodologías Activas", "Gamificación"
+        "E-learning", "Moodle", "Google Classroom", "Formación Profesional", "Metodologías Activas", "Gamificación",
+        "Educación Virtual", "Diseño Instruccional", "Evaluación por Competencias",
+        "Aprendizaje Basado en Proyectos (ABP)", "Aprendizaje Colaborativo",
+        "Educación STEAM", "Neuroeducación", "Gamificación Educativa", "E-learning Interactivo",
+        "Tutoría Virtual", "Planificación de Contenidos", "Coaching Educativo", "Evaluación Continua"
       ]
     },
     {
@@ -88,7 +133,12 @@
       "habilidades": [
         "Enfermería", "Primeros Auxilios", "Cuidado de Ancianos", "Cuidado Infantil", "Fisioterapia", "Farmacia",
         "Análisis Clínicos", "Radiología", "Odontología", "Nutrición", "Psicología", "Atención Domiciliaria",
-        "Geriatría", "Pediatría", "Medicina General", "RCP", "Manejo de Medicamentos", "Control de Signos Vitales"
+        "Geriatría", "Pediatría", "Medicina General", "RCP", "Manejo de Medicamentos", "Control de Signos Vitales",
+        "Triage", "Atención Primaria", "Vacunación", "Enfermería Geriátrica",
+        "Psicología Clínica", "Atención Psicosocial", "Acompañamiento Terapéutico",
+        "Kinesiología", "Rehabilitación Física", "Primeros Auxilios Psicológicos",
+        "Laboratorio de Análisis", "Farmacología Básica",
+        "Nutrición Deportiva", "Educación para la Salud"
       ]
     },
     {
@@ -96,7 +146,12 @@
       "habilidades": [
         "Cocina", "Repostería", "Panadería", "Barista", "Camarero", "Sumiller", "Gestión Hotelera", "Recepción Hotelera",
         "Housekeeping", "Guía Turístico", "Organización de Eventos", "Catering", "Manipulación de Alimentos",
-        "APPCC", "Servicio de Restaurante", "Coctelería", "Atención al Cliente", "Reservas Online"
+        "APPCC", "Servicio de Restaurante", "Coctelería", "Atención al Cliente", "Reservas Online",
+        "Gestión de Reservas", "Turismo Sostenible", "Animación Turística",
+        "Protocolo y Ceremonial", "Atención Multilingüe", "Barismo Avanzado",
+        "Coctelería de Autor", "Pastelería Internacional", "Cocina Vegetariana",
+        "Cocina Vegana", "Cocina Regional", "Panadería Artesanal",
+        "Decoración de Eventos", "Protocolo Hotelero", "Atención al Huésped"
       ]
     },
     {
@@ -105,7 +160,11 @@
         "Conducción", "Carnet B", "Carnet C", "Carnet D", "CAP", "ADR", "Gestión de Almacén",
         "Inventarios", "Cadena de Suministro", "Picking", "Packing", "Gestión de Pedidos",
         "Distribución", "Rutas de Reparto", "Transporte Internacional", "Gestión de Flotas",
-        "Planificación Logística", "Gestión de Stock", "Control de Entradas y Salidas"
+        "Planificación Logística", "Gestión de Stock", "Control de Entradas y Salidas",
+        "Gestión de Transporte Marítimo", "Gestión Portuaria", "Despacho Aduanero",
+        "Gestión de Flotas Satelital", "Logística Inversa", "Gestión de Rutas Inteligentes",
+        "Uso de GPS", "Sistemas TMS/WMS", "Gestión de Combustible",
+        "Distribución Urbana", "Gestión de Entregas", "Optimización de Rutas"
       ]
     },
     {
@@ -114,7 +173,11 @@
         "Derecho Laboral", "Derecho Civil", "Derecho Mercantil", "Asesoría Legal", "Gestión de Contratos",
         "Contabilidad Financiera", "Análisis Financiero", "Auditoría", "Fiscalidad", "Impuestos", "Tesorería",
         "Gestión de Presupuestos", "Banca", "Inversiones", "Seguros", "Análisis de Riesgos", "Plan de Negocios",
-        "Emprendimiento", "Gestión de Empresas", "Compliance", "Due Diligence"
+        "Emprendimiento", "Gestión de Empresas", "Compliance", "Due Diligence",
+        "Compliance Empresarial", "Due Diligence Legal", "Finanzas Corporativas",
+        "Trading Online", "Criptoactivos", "Control de Gestión", "Tesorería Internacional",
+        "Gestión de Cobros", "Contabilidad Analítica", "Normas IFRS", "Gestión de Licencias",
+        "Asesoría Fiscal", "Gestión Patrimonial", "Análisis de Inversiones", "Control Interno"
       ]
     },
     {
@@ -122,7 +185,11 @@
       "habilidades": [
         "Agricultura", "Jardinería", "Paisajismo", "Riego", "Cultivos", "Maquinaria Agrícola", "Ganadería",
         "Veterinaria", "Selvicultura", "Energías Renovables", "Paneles Solares", "Eólica", "Biogás", "Sostenibilidad",
-        "Gestión Ambiental", "Reciclaje", "Gestión de Residuos", "Evaluación de Impacto Ambiental"
+        "Gestión Ambiental", "Reciclaje", "Gestión de Residuos", "Evaluación de Impacto Ambiental",
+        "Agroecología", "Hidroponía", "Compostaje", "Biotecnología", "Permacultura",
+        "Agricultura de Precisión", "Control de Plagas", "Silvicultura Sostenible",
+        "Energía Solar", "Energía Eólica", "Eficiencia Energética", "Gestión de Recursos Naturales",
+        "Gestión de Fauna", "Gestión de Flora", "Economía Circular", "Análisis de Suelos"
       ]
     },
     {
@@ -130,7 +197,11 @@
       "habilidades": [
         "Gestión de Proyectos", "Scrum", "Agile", "Kanban", "Lean", "PMP", "Prince2", "Jira", "Trello", "Asana", "Monday",
         "Microsoft Project", "Gestión de Presupuestos", "Gestión de Riesgos", "Planificación Estratégica",
-        "Control de Avance", "Evaluación de Resultados", "Gestión de Equipos", "Gestión del Cambio"
+        "Control de Avance", "Evaluación de Resultados", "Gestión de Equipos", "Gestión del Cambio",
+        "Gestión Ágil", "Gestión de Stakeholders", "Gestión de Alcance",
+        "Planificación Scrum", "OKR Management", "Evaluación de KPIs",
+        "Gestión de Riesgos Técnicos", "Gestión de Productividad", "Metodología Lean",
+        "Design Thinking", "Análisis de Viabilidad", "Gestión de Innovación", "Gestión de Crisis"
       ]
     },
     {
@@ -140,7 +211,12 @@
         "Firewall", "VPN", "Criptografía", "Autenticación Multifactor", "Auditoría de Seguridad",
         "Análisis Forense", "SOC", "SIEM", "Protección de Datos (GDPR)", "Seguridad en la Nube",
         "Blockchain", "Criptomonedas", "Smart Contracts", "Internet de las Cosas (IoT)",
-        "Inteligencia Artificial", "Machine Learning", "Deep Learning", "Procesamiento de Imágenes"
+        "Inteligencia Artificial", "Machine Learning", "Deep Learning", "Procesamiento de Imágenes",
+        "SOC Analyst", "Threat Hunting", "Cyber Threat Intelligence",
+        "OSINT", "Gestión de Vulnerabilidades", "Respuesta a Incidentes",
+        "Análisis de Malware", "Forense Digital", "Seguridad en IoT",
+        "DevSecOps", "Seguridad en APIs", "Ciberdefensa", "Privacidad de Datos",
+        "Seguridad Blockchain", "Auditoría de Smart Contracts", "Phishing Awareness"
       ]
     },
     {
@@ -150,15 +226,48 @@
         "Pensamiento Crítico", "Resolución de Problemas", "Negociación", "Proactividad", "Iniciativa",
         "Gestión del Tiempo", "Responsabilidad", "Organización", "Atención al Detalle", "Resiliencia",
         "Autonomía", "Escucha Activa", "Inteligencia Emocional", "Gestión del Estrés",
-        "Orientación a Resultados", "Capacidad de Aprendizaje", "Visión Estratégica", "Motivación", "Colaboración"
+        "Orientación a Resultados", "Capacidad de Aprendizaje", "Visión Estratégica", "Motivación", "Colaboración",
+        "Pensamiento Analítico", "Capacidad de Persuasión", "Gestión de Prioridades",
+        "Aprendizaje Continuo", "Toma de Decisiones Éticas", "Autogestión",
+        "Confianza", "Networking", "Escucha Activa Avanzada", "Pensamiento Estratégico",
+        "Liderazgo Colaborativo", "Trabajo Multicultural", "Flexibilidad Mental",
+        "Innovación", "Autocrítica", "Empoderamiento", "Resolución de Conflictos Complejos"
       ]
     },
     {
       "categoria": "Idiomas",
       "habilidades": [
         "Español", "Inglés", "Francés", "Alemán", "Portugués", "Italiano", "Chino", "Japonés",
-        "Coreano", "Árabe", "Ruso", "Catalán", "Euskera", "Gallego", "Valenciano"
+        "Coreano", "Árabe", "Ruso", "Catalán", "Euskera", "Gallego", "Valenciano",
+        "Lengua de Señas Argentina (LSA)", "Esperanto", "Hindi", "Turco", "Hebreo", "Sueco", "Noruego", "Danés", "Holandés",
+        "Polaco", "Checo", "Griego", "Tailandés", "Vietnamita", "Tagalo", "Finés", "Ucraniano", "Rumano", "Búlgaro"
+      ]
+    },
+    {
+      "categoria": "Audiovisual y Medios",
+      "habilidades": [
+        "Producción Audiovisual", "Dirección de Fotografía", "Guionismo", "Locución",
+        "Edición de Sonido", "Postproducción", "Radio", "Televisión", "Producción en Vivo",
+        "Montaje", "Colorización", "Iluminación Escénica", "Realización Audiovisual",
+        "Podcasting", "Narrativa Digital", "Fotoperiodismo"
+      ]
+    },
+    {
+      "categoria": "Ciencia, Tecnología y Laboratorio",
+      "habilidades": [
+        "Análisis Químico", "Biología Molecular", "Microbiología", "Física Aplicada",
+        "Nanotecnología", "Biotecnología", "Control de Calidad de Laboratorio",
+        "Instrumentación Científica", "Gestión de Muestras", "Calibración de Equipos",
+        "Investigación Científica", "Manejo de Sustancias", "Técnicas de Cromatografía"
+      ]
+    },
+    {
+      "categoria": "Comercio y Atención al Público",
+      "habilidades": [
+        "Atención al Cliente", "Cajero", "Repositor", "Ventas Presenciales", "Gestión de Reclamos",
+        "Gestión de Cobros", "Merchandising", "Visual Merchandising", "Atención Telefónica",
+        "Venta Asistida", "Gestión de Cajas", "Uso de POS", "Facturación Rápida",
+        "Gestión de Devoluciones", "Experiencia del Cliente (CX)", "Ventas Consultivas"
       ]
     }
   ]
-  
