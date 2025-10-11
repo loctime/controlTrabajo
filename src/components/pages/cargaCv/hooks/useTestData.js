@@ -177,7 +177,7 @@ export const useTestData = () => {
       
       // Información de contacto
       telefono: "+54 9 11 4567-8901",
-      direccion: "Av. Corrientes 1234, Piso 15, Oficina 1502, Buenos Aires, Argentina",
+      direccion: "Av. Corrientes 1234, Piso 15, Oficina 1502, San Nicolás, Argentina",
       linkedin: "https://linkedin.com/in/alejandro-rodriguez-tech",
       sitioWeb: "https://alejandro-rodriguez.dev",
       perfilProfesional: "Tech Lead y Arquitecto de Software con más de 12 años de experiencia en desarrollo full-stack, liderazgo de equipos y arquitecturas escalables. Especializado en React, Node.js, Python, microservicios y cloud computing. Experiencia internacional trabajando con equipos distribuidos en 5 países diferentes. Certificado en AWS Solutions Architect y Google Cloud Professional. Apasionado por la innovación tecnológica, la mentoría de desarrolladores y la implementación de mejores prácticas de desarrollo ágil. Lideré la transformación digital de 3 empresas Fortune 500, resultando en mejoras de rendimiento del 300% y reducción de costos del 40%. Experto en DevOps, CI/CD, Docker, Kubernetes y metodologías ágiles como Scrum y Kanban.",
@@ -187,7 +187,7 @@ export const useTestData = () => {
       categoriaEspecifica: "Arquitecto de Software / Tech Lead",
       
       // Ubicación
-      ciudad: "Buenos Aires",
+      ciudad: "San Nicolás",
       localidad: "Centro",
       
       // Experiencias laborales EXTENSAS (6 trabajos)
@@ -196,7 +196,7 @@ export const useTestData = () => {
           id: "exp-1",
           cargo: "Senior Tech Lead & Solutions Architect",
           empresa: "GloboTech Solutions International",
-          ubicacion: "Buenos Aires, Argentina (Remoto Global)",
+          ubicacion: "San Nicolás, Argentina (Remoto Global)",
           fechaInicio: "01/2021",
           fechaFin: "Actualidad",
           descripcion: "Liderazgo técnico de un equipo de 15 desarrolladores distribuidos en 4 países. Arquitectura y diseño de sistemas de microservicios para plataformas de e-commerce que manejan más de 1 millón de transacciones diarias. Implementación de estrategias de CI/CD que redujeron el tiempo de deployment en un 80%. Migración exitosa de monolitos legacy a arquitecturas cloud-native en AWS y Google Cloud. Colaboración estrecha con equipos de Product, Design y DevOps para definir roadmaps técnicos a largo plazo. Implementación de metodologías ágiles y establecimiento de mejores prácticas de desarrollo que aumentaron la productividad del equipo en un 150%.",
@@ -236,7 +236,7 @@ export const useTestData = () => {
           id: "exp-5",
           cargo: "Software Developer",
           empresa: "Digital Solutions Argentina",
-          ubicacion: "Buenos Aires, Argentina",
+          ubicacion: "San Nicolás, Argentina",
           fechaInicio: "01/2012",
           fechaFin: "08/2014",
           descripcion: "Desarrollo de aplicaciones web para clientes corporativos utilizando PHP, MySQL, JavaScript y jQuery. Mantenimiento y optimización de sistemas legacy. Desarrollo de módulos de e-commerce con integración a gateways de pago locales. Trabajo con frameworks como Laravel y CodeIgniter. Implementación de sistemas de gestión de contenido (CMS) personalizados. Participación en proyectos de migración de datos y integración de sistemas terceros. Desarrollo de APIs para integración con sistemas ERP y CRM.",
@@ -246,7 +246,7 @@ export const useTestData = () => {
           id: "exp-6",
           cargo: "Junior Web Developer",
           empresa: "WebDev Studio",
-          ubicacion: "Buenos Aires, Argentina",
+          ubicacion: "San Nicolás, Argentina",
           fechaInicio: "06/2011",
           fechaFin: "12/2011",
           descripcion: "Desarrollo de sitios web corporativos y landing pages utilizando HTML, CSS, JavaScript y PHP. Diseño responsivo y optimización para motores de búsqueda (SEO). Integración con redes sociales y herramientas de analytics. Mantenimiento de sitios web existentes y resolución de bugs. Aprendizaje de metodologías de desarrollo y herramientas de versionado con Git.",
@@ -259,8 +259,8 @@ export const useTestData = () => {
         {
           id: "edu-1",
           titulo: "Master en Ingeniería de Software",
-          institucion: "Universidad de Buenos Aires - Facultad de Ingeniería",
-          ubicacion: "Buenos Aires, Argentina",
+          institucion: "Universidad Nacional de San Nicolás - Facultad de Ingeniería",
+          ubicacion: "San Nicolás, Argentina",
           fechaInicio: "03/2010",
           fechaFin: "12/2012",
           descripcion: "Especialización en Arquitecturas de Software, Patrones de Diseño y Metodologías Ágiles. Tesis: 'Implementación de Microservicios en Plataformas de E-commerce: Análisis de Performance y Escalabilidad'. Nota final: 9.2/10. Proyecto de investigación en colaboración con IBM Argentina sobre optimización de bases de datos distribuidas."
@@ -304,8 +304,8 @@ export const useTestData = () => {
         {
           id: "edu-6",
           titulo: "Diplomado en Machine Learning y Data Science",
-          institucion: "Instituto Tecnológico de Buenos Aires (ITBA)",
-          ubicacion: "Buenos Aires, Argentina",
+          institucion: "Instituto Tecnológico de San Nicolás (ITSN)",
+          ubicacion: "San Nicolás, Argentina",
           fechaInicio: "03/2021",
           fechaFin: "11/2021",
           descripcion: "Especialización en algoritmos de machine learning, deep learning, procesamiento de big data y herramientas como Python, TensorFlow, PyTorch, Pandas y Scikit-learn. Proyecto final: Sistema de recomendaciones para e-commerce."

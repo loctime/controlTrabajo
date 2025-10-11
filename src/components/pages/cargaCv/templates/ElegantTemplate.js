@@ -1,6 +1,17 @@
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { getDownloadUrl } from '../../../../lib/controlFileStorage';
+import { 
+  checkPageOverflow, 
+  addNewPage, 
+  addFooter, 
+  renderAdaptiveList,
+  addSectionTitle,
+  addSeparatorLine,
+  buildContactInfo,
+  buildProfessionalTitle,
+  renderTextWithOverflow
+} from './templateUtils';
 
 // Función auxiliar para cargar imagen desde URL usando ControlFile API
 const loadImageFromUrl = async (imageUrl) => {
@@ -51,7 +62,7 @@ export const generateElegantTemplate = async (cvData) => {
   doc.setFont('helvetica');
   
   // === LEFT COLUMN (Color Background) ===
-  const leftColumnWidth = pageWidth * 0.35; // 35% del ancho
+  let leftColumnWidth = pageWidth * 0.35; // 35% del ancho
   
   // Fondo de la columna izquierda
   doc.setFillColor(primaryColor);
@@ -71,38 +82,38 @@ export const generateElegantTemplate = async (cvData) => {
       // Intentar cargar imagen desde URL
       const img = await loadImageFromUrl(cvData.Foto);
       
-            // Crear canvas para procesar la imagen como círculo
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            const size = 50; // Tamaño de la imagen
-            canvas.width = size;
-            canvas.height = size;
-            
-            // Calcular dimensiones manteniendo aspecto ratio
-            const imgAspect = img.width / img.height;
-            const canvasAspect = size / size; // 1:1 para círculo
-            
-            let drawWidth, drawHeight, offsetX, offsetY;
-            
-            if (imgAspect > canvasAspect) {
-              // Imagen más ancha que alta
-              drawHeight = size;
-              drawWidth = size * imgAspect;
-              offsetX = (size - drawWidth) / 2;
-              offsetY = 0;
-            } else {
-              // Imagen más alta que ancha
-              drawWidth = size;
-              drawHeight = size / imgAspect;
-              offsetX = 0;
-              offsetY = (size - drawHeight) / 2;
-            }
-            
-            // Dibujar imagen circular manteniendo proporciones
-            ctx.beginPath();
-            ctx.arc(size/2, size/2, size/2, 0, 2 * Math.PI);
-            ctx.clip();
-            ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
+      // Crear canvas para procesar la imagen como círculo
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const size = 50; // Tamaño de la imagen
+      canvas.width = size;
+      canvas.height = size;
+      
+      // Calcular dimensiones manteniendo aspecto ratio
+      const imgAspect = img.width / img.height;
+      const canvasAspect = size / size; // 1:1 para círculo
+      
+      let drawWidth, drawHeight, offsetX, offsetY;
+      
+      if (imgAspect > canvasAspect) {
+        // Imagen más ancha que alta
+        drawHeight = size;
+        drawWidth = size * imgAspect;
+        offsetX = (size - drawWidth) / 2;
+        offsetY = 0;
+      } else {
+        // Imagen más alta que ancha
+        drawWidth = size;
+        drawHeight = size / imgAspect;
+        offsetX = 0;
+        offsetY = (size - drawHeight) / 2;
+      }
+      
+      // Dibujar imagen circular manteniendo proporciones
+      ctx.beginPath();
+      ctx.arc(size/2, size/2, size/2, 0, 2 * Math.PI);
+      ctx.clip();
+      ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
       
       // Convertir canvas a base64 y agregar al PDF
       const imgData = canvas.toDataURL('image/jpeg', 0.8);
@@ -110,33 +121,29 @@ export const generateElegantTemplate = async (cvData) => {
       
       console.log('✅ Imagen de perfil cargada correctamente');
     } catch (error) {
-      console.log('⚠️ Error al cargar imagen de perfil, usando placeholder:', error);
+      console.log('⚠️ Error al cargar imagen de perfil:', error);
       
-      // Fallback: mostrar placeholder elegante
-      doc.setFillColor(secondaryColor);
+      // Fallback: mostrar placeholder
+      doc.setFillColor(primaryColor);
       doc.circle(leftColumnWidth/2, leftY + 25, 23, 'F');
       
       doc.setTextColor('#ffffff');
-      doc.setFontSize(8);
-      doc.text('FOTO', leftColumnWidth/2, leftY + 27, { align: 'center' });
-      doc.setFontSize(6);
-      doc.text('DE', leftColumnWidth/2, leftY + 31, { align: 'center' });
-      doc.text('PERFIL', leftColumnWidth/2, leftY + 35, { align: 'center' });
+      doc.setFontSize(10);
+      doc.text('FOTO', leftColumnWidth/2, leftY + 28, { align: 'center' });
     }
   } else {
-    // Si no hay foto, mostrar placeholder
-    doc.setFillColor(secondaryColor);
+    // Placeholder cuando no hay foto
+    doc.setFillColor('#ffffff');
+    doc.circle(leftColumnWidth/2, leftY + 25, 25, 'F');
+    doc.setFillColor(primaryColor);
     doc.circle(leftColumnWidth/2, leftY + 25, 23, 'F');
     
     doc.setTextColor('#ffffff');
-    doc.setFontSize(8);
-    doc.text('FOTO', leftColumnWidth/2, leftY + 27, { align: 'center' });
-    doc.setFontSize(6);
-    doc.text('DE', leftColumnWidth/2, leftY + 31, { align: 'center' });
-    doc.text('PERFIL', leftColumnWidth/2, leftY + 35, { align: 'center' });
+    doc.setFontSize(10);
+    doc.text('FOTO', leftColumnWidth/2, leftY + 28, { align: 'center' });
   }
-  
-  leftY += 60;
+
+  leftY += 70;
 
   // === INFORMACIÓN DE CONTACTO ===
   doc.setTextColor('#ffffff');
@@ -148,30 +155,11 @@ export const generateElegantTemplate = async (cvData) => {
   doc.setFontSize(9);
   doc.setFont('helvetica', 'normal');
   
-  if (cvData.direccion) {
-    doc.text(`Dirección: ${cvData.direccion}`, 10, leftY);
+  const contactInfo = buildContactInfo(cvData);
+  contactInfo.forEach(info => {
+    doc.text(info, 10, leftY);
     leftY += 5;
-  }
-  
-  if (cvData.telefono) {
-    doc.text(`Tel: ${cvData.telefono}`, 10, leftY);
-    leftY += 5;
-  }
-  
-  if (cvData.Email) {
-    doc.text(`Email: ${cvData.Email}`, 10, leftY);
-    leftY += 5;
-  }
-  
-  if (cvData.linkedin) {
-    doc.text(`LinkedIn`, 10, leftY);
-    leftY += 5;
-  }
-  
-  if (cvData.sitioWeb) {
-    doc.text(`Web: ${cvData.sitioWeb}`, 10, leftY);
-    leftY += 5;
-  }
+  });
   
   leftY += 10;
 
@@ -183,13 +171,59 @@ export const generateElegantTemplate = async (cvData) => {
     doc.text('APTITUDES', 10, leftY);
     leftY += 8;
     
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'normal');
+    // Usar formato adaptativo para habilidades en sidebar
+    const sidebarWidth = leftColumnWidth - 20;
+    const halfWidth = sidebarWidth / 2 - 5;
     
-    cvData.habilidades.forEach((skill) => {
-      doc.text(`• ${skill.nombre}`, 10, leftY);
-      leftY += 4;
-    });
+    if (cvData.habilidades.length <= 8) {
+      // Formato vertical normal para pocas habilidades
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      cvData.habilidades.forEach((skill) => {
+        doc.text(`• ${skill.nombre}`, 10, leftY);
+        leftY += 4;
+      });
+    } else if (cvData.habilidades.length <= 16) {
+      // Formato de 2 columnas para habilidades moderadas
+      leftY = renderAdaptiveList(
+        doc, 
+        cvData.habilidades, 
+        10, 
+        leftY, 
+        sidebarWidth, 
+        halfWidth
+      );
+    } else {
+      // Formato compacto para muchas habilidades
+      leftY = renderAdaptiveList(
+        doc, 
+        cvData.habilidades, 
+        10, 
+        leftY, 
+        sidebarWidth
+      );
+    }
+    
+    leftY += 10;
+  }
+
+  // === IDIOMAS ===
+  if (cvData.idiomas && cvData.idiomas.length > 0) {
+    doc.setTextColor('#ffffff');
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.text('IDIOMAS', 10, leftY);
+    leftY += 8;
+    
+    // Usar formato compacto para idiomas en sidebar
+    const sidebarWidth = leftColumnWidth - 20;
+    leftY = renderAdaptiveList(
+      doc, 
+      cvData.idiomas, 
+      10, 
+      leftY, 
+      sidebarWidth
+    );
     
     leftY += 10;
   }
@@ -206,13 +240,20 @@ export const generateElegantTemplate = async (cvData) => {
     doc.setFont('helvetica', 'normal');
     const splitPerfil = doc.splitTextToSize(cvData.perfilProfesional, leftColumnWidth - 20);
     doc.text(splitPerfil, 10, leftY);
-    leftY += splitPerfil.length * 4 + 15; // Aumentar espaciado
+    leftY += splitPerfil.length * 4 + 15;
   }
 
   // === RIGHT COLUMN (White Background) ===
-  const rightColumnX = leftColumnWidth + 10;
-  const rightColumnWidth = pageWidth - leftColumnWidth - 20;
+  let rightColumnX = leftColumnWidth + 10;
+  let rightColumnWidth = pageWidth - leftColumnWidth - 20;
   let rightY = 20;
+
+  // Función helper para resetear columnas en páginas adicionales
+  const resetColumnsForNewPage = () => {
+    leftColumnWidth = 0;
+    rightColumnX = 15;
+    rightColumnWidth = pageWidth - 30;
+  };
 
   // Nombre completo
   doc.setTextColor(primaryColor);
@@ -221,278 +262,259 @@ export const generateElegantTemplate = async (cvData) => {
   doc.text(`${cvData.Nombre || ''} ${cvData.Apellido || ''}`, rightColumnX, rightY);
   rightY += 15;
 
-  // === IDIOMAS ===
-  if (cvData.idiomas && cvData.idiomas.length > 0) {
-    doc.setTextColor(textColor);
+  // Edad (opcional, solo si está completada)
+  if (cvData.Edad) {
     doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.text('IDIOMAS', rightColumnX, rightY);
-    
-    // Línea separadora
-    doc.setDrawColor('#CCCCCC');
-    doc.setLineWidth(0.5);
-    doc.line(rightColumnX, rightY + 2, pageWidth - 10, rightY + 2);
-    rightY += 8;
-    
-    doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
-    cvData.idiomas.forEach((idioma) => {
-      doc.text(`• ${idioma.idioma} ${idioma.nivel}`, rightColumnX, rightY);
-      rightY += 5;
-    });
-    rightY += 10;
+    doc.text(`${cvData.Edad} años`, rightColumnX, rightY);
+    rightY += 8;
   }
 
-  // === HABILIDADES INFORMÁTICAS ===
-  if (cvData.habilidades && cvData.habilidades.length > 0) {
-    doc.setTextColor(textColor);
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.text('HABILIDADES INFORMÁTICAS', rightColumnX, rightY);
-    
-    // Línea separadora
-    doc.setDrawColor('#CCCCCC');
-    doc.setLineWidth(0.5);
-    doc.line(rightColumnX, rightY + 2, pageWidth - 10, rightY + 2);
-    rightY += 8;
-    
-    doc.setFontSize(10);
+  // Título profesional completo
+  const professionalTitle = buildProfessionalTitle(cvData);
+  if (professionalTitle) {
+    doc.setFontSize(14);
     doc.setFont('helvetica', 'normal');
-    
-    // Agrupar habilidades por nivel para mejor presentación
-    const habilidadesPorNivel = {};
-    cvData.habilidades.forEach(skill => {
-      if (!habilidadesPorNivel[skill.nivel]) {
-        habilidadesPorNivel[skill.nivel] = [];
-      }
-      habilidadesPorNivel[skill.nivel].push(skill.nombre);
-    });
-
-    Object.entries(habilidadesPorNivel).forEach(([nivel, habilidades]) => {
-      if (habilidades.length > 0) {
-        doc.text(`• ${habilidades.join(', ')}.`, rightColumnX, rightY);
-        rightY += 5;
-      }
-    });
-    rightY += 10;
+    doc.text(professionalTitle, rightColumnX, rightY);
+    rightY += 15;
   }
 
   // === CERTIFICACIONES ===
   if (cvData.certificaciones && cvData.certificaciones.length > 0) {
-    doc.setTextColor(textColor);
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.text('CURSOS Y CERTIFICADOS', rightColumnX, rightY);
+    // Verificar si necesita nueva página
+    if (checkPageOverflow(doc, rightY + 40)) {
+      rightY = addNewPage(doc);
+      resetColumnsForNewPage();
+    }
     
-    // Línea separadora
-    doc.setDrawColor('#CCCCCC');
-    doc.setLineWidth(0.5);
-    doc.line(rightColumnX, rightY + 2, pageWidth - 10, rightY + 2);
-    rightY += 8;
+    rightY = addSectionTitle(doc, 'CERTIFICACIONES', rightColumnX, rightY, textColor);
+    addSeparatorLine(doc, rightColumnX, rightY - 2, rightColumnWidth, '#CCCCCC', 0.5);
     
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
     cvData.certificaciones.forEach((cert) => {
-      doc.text(`• ${cert.nombre}`, rightColumnX, rightY);
-      rightY += 4;
-      if (cert.institucion) {
-        doc.text(`  ${cert.institucion}`, rightColumnX, rightY);
-        rightY += 4;
+      // Verificar overflow antes de cada certificación
+      if (checkPageOverflow(doc, rightY + 25)) {
+        rightY = addNewPage(doc);
+        resetColumnsForNewPage();
       }
+      
+      doc.setTextColor(textColor);
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      doc.text(cert.nombre || '', rightColumnX, rightY);
+      
+      rightY += 4;
+      doc.setFont('helvetica', 'normal');
+      doc.text(`${cert.institucion || ''} | ${cert.fecha || ''}`, rightColumnX, rightY);
+      
       // Agregar enlace si existe URL
       if (cert.url) {
+        rightY += 4;
         doc.setTextColor(secondaryColor);
         doc.setFont('helvetica', 'italic');
-        doc.textWithLink('  Ver certificado', rightColumnX, rightY, { url: cert.url, target: '_blank' });
-        rightY += 4;
-        doc.setTextColor(textColor);
-        doc.setFont('helvetica', 'normal');
-      }
-      rightY += 5;
-    });
-    rightY += 10;
-  }
-
-  // === PROYECTOS ===
-  if (cvData.proyectos && cvData.proyectos.length > 0) {
-    doc.setTextColor(textColor);
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.text('PROYECTOS DESTACADOS', rightColumnX, rightY);
-    
-    // Línea separadora
-    doc.setDrawColor('#CCCCCC');
-    doc.setLineWidth(0.5);
-    doc.line(rightColumnX, rightY + 2, pageWidth - 10, rightY + 2);
-    rightY += 8;
-    
-    cvData.proyectos.forEach((proyecto) => {
-      doc.setFontSize(11);
-      doc.setFont('helvetica', 'bold');
-      doc.text(proyecto.nombre || '', rightColumnX, rightY);
-      rightY += 6;
-      
-      if (proyecto.descripcion) {
-        doc.setFontSize(9);
-        doc.setFont('helvetica', 'normal');
-        const splitDesc = doc.splitTextToSize(proyecto.descripcion, rightColumnWidth);
-        doc.text(splitDesc, rightColumnX, rightY);
-        rightY += splitDesc.length * 3.5 + 4;
-      }
-      
-      if (proyecto.tecnologias) {
-        doc.setFontSize(9);
-        doc.setFont('helvetica', 'normal');
-        doc.text(`Tecnologías: ${proyecto.tecnologias}`, rightColumnX, rightY);
-        rightY += 5;
-      }
-      
-      if (proyecto.url) {
-        doc.setFontSize(9);
-        doc.setTextColor(primaryColor);
-        doc.textWithLink(`Link: ${proyecto.url}`, rightColumnX, rightY, { url: proyecto.url, target: '_blank' });
-        doc.setTextColor(textColor);
-        rightY += 5;
+        doc.textWithLink('Ver certificado', rightColumnX, rightY, { url: cert.url, target: '_blank' });
       }
       
       rightY += 8;
     });
-    rightY += 10;
-  }
-
-  // === EXPERIENCIA LABORAL ===
-  if (cvData.experiencias && cvData.experiencias.length > 0) {
-    doc.setTextColor(textColor);
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.text('HISTORIAL LABORAL', rightColumnX, rightY);
-    
-    // Línea separadora
-    doc.setDrawColor('#CCCCCC');
-    doc.setLineWidth(0.5);
-    doc.line(rightColumnX, rightY + 2, pageWidth - 10, rightY + 2);
-    rightY += 8;
-
-    cvData.experiencias.forEach((exp, index) => {
-      // Fechas
-      doc.setFontSize(10);
-      doc.setFont('helvetica', 'normal');
-      doc.text(`${exp.fechaInicio || ''} - ${exp.fechaFin || ''}`, rightColumnX, rightY);
-      rightY += 5;
-      
-      // Cargo y empresa
-      doc.setFontSize(11);
-      doc.setFont('helvetica', 'bold');
-      doc.text(`${exp.cargo || ''} ${exp.empresa || ''}`, rightColumnX, rightY);
-      if (exp.ubicacion) {
-        doc.text(exp.ubicacion, rightColumnX, rightY + 4);
-        rightY += 4;
-      }
-      rightY += 8;
-      
-      // Descripción
-      if (exp.descripcion) {
-        doc.setFontSize(9);
-        doc.setFont('helvetica', 'normal');
-        const splitDesc = doc.splitTextToSize(exp.descripcion, rightColumnWidth);
-        doc.text(splitDesc, rightColumnX, rightY);
-        rightY += splitDesc.length * 3.5 + 5;
-      }
-      
-      // Logros clave (si existen)
-      if (index === 0 && cvData.habilidades && cvData.habilidades.length > 0) {
-        doc.setFontSize(10);
-        doc.setFont('helvetica', 'bold');
-        doc.text('Logros clave', rightColumnX, rightY);
-        rightY += 5;
-        
-        doc.setFontSize(9);
-        doc.setFont('helvetica', 'normal');
-        doc.text(`• Incremento en un 18% de media en el tráfico de nuestros clientes.`, rightColumnX, rightY);
-        rightY += 4;
-        doc.text(`• Nominada en los premios Edebril por mejor diseño web.`, rightColumnX, rightY);
-        rightY += 8;
-      }
-      
-      // Línea separadora entre experiencias
-      if (index < cvData.experiencias.length - 1) {
-        doc.setDrawColor('#EEEEEE');
-        doc.setLineWidth(0.3);
-        doc.line(rightColumnX, rightY, pageWidth - 10, rightY);
-        rightY += 10;
-      }
-    });
-    rightY += 15;
   }
 
   // === EDUCACIÓN ===
   if (cvData.educacion && cvData.educacion.length > 0) {
-    doc.setTextColor(textColor);
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.text('FORMACIÓN', rightColumnX, rightY);
+    // Verificar si necesita nueva página
+    if (checkPageOverflow(doc, rightY + 40)) {
+      rightY = addNewPage(doc);
+      resetColumnsForNewPage();
+    }
     
-    // Línea separadora
-    doc.setDrawColor('#CCCCCC');
-    doc.setLineWidth(0.5);
-    doc.line(rightColumnX, rightY + 2, pageWidth - 10, rightY + 2);
-    rightY += 8;
-
+    rightY = addSectionTitle(doc, 'EDUCACIÓN', rightColumnX, rightY, textColor);
+    addSeparatorLine(doc, rightColumnX, rightY - 2, rightColumnWidth, '#CCCCCC', 0.5);
+    
     cvData.educacion.forEach((edu) => {
+      // Verificar overflow antes de cada educación
+      if (checkPageOverflow(doc, rightY + 30)) {
+        rightY = addNewPage(doc);
+        resetColumnsForNewPage();
+      }
+      
+      doc.setTextColor(textColor);
       doc.setFontSize(10);
-      doc.setFont('helvetica', 'normal');
-      doc.text(`${edu.fechaInicio || ''}`, rightColumnX, rightY);
-      rightY += 4;
       doc.setFont('helvetica', 'bold');
       doc.text(edu.titulo || '', rightColumnX, rightY);
+      
+      rightY += 4;
+      doc.setFont('helvetica', 'normal');
+      doc.text(`${edu.institucion || ''} | ${edu.fechaInicio || ''} - ${edu.fechaFin || ''}`, rightColumnX, rightY);
+      
+      if (edu.ubicacion) {
+        rightY += 4;
+        doc.text(`Ubicación: ${edu.ubicacion}`, rightColumnX, rightY);
+      }
+      
+      if (edu.descripcion) {
+        rightY += 4;
+        const result = renderTextWithOverflow(doc, edu.descripcion, rightColumnX, rightY, rightColumnWidth - 10, 9);
+        rightY = result !== null ? result : rightY + 20;
+      }
+      
       rightY += 8;
     });
-    rightY += 10;
+  }
+
+  // === EXPERIENCIA LABORAL ===
+  if (cvData.experiencias && cvData.experiencias.length > 0) {
+    // Verificar si necesita nueva página
+    if (checkPageOverflow(doc, rightY + 50)) {
+      rightY = addNewPage(doc);
+      resetColumnsForNewPage();
+    }
+    
+    rightY = addSectionTitle(doc, 'EXPERIENCIA LABORAL', rightColumnX, rightY, textColor);
+    addSeparatorLine(doc, rightColumnX, rightY - 2, rightColumnWidth, '#CCCCCC', 0.5);
+
+    cvData.experiencias.forEach((exp, index) => {
+      // Verificar overflow antes de cada experiencia
+      if (checkPageOverflow(doc, rightY + 40)) {
+        rightY = addNewPage(doc);
+        resetColumnsForNewPage();
+        // Agregar título de continuación si no es la primera experiencia
+        if (index > 0) {
+          rightY = addSectionTitle(doc, 'EXPERIENCIA LABORAL (cont.)', rightColumnX, rightY, textColor);
+          addSeparatorLine(doc, rightColumnX, rightY - 2, rightColumnWidth, '#CCCCCC', 0.5);
+        }
+      }
+      
+      // Fechas
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(secondaryColor);
+      doc.text(`${exp.fechaInicio || ''} - ${exp.fechaFin || ''}`, rightColumnX, rightY);
+      
+      // Cargo
+      rightY += 4;
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(textColor);
+      doc.text(exp.cargo || '', rightColumnX, rightY);
+      
+      // Empresa
+      rightY += 6;
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text(exp.empresa || '', rightColumnX, rightY);
+      
+      // Ubicación
+      if (exp.ubicacion) {
+        rightY += 4;
+        doc.text(`Ubicación: ${exp.ubicacion}`, rightColumnX, rightY);
+      }
+      
+      // Descripción
+      if (exp.descripcion) {
+        rightY += 6;
+        const result = renderTextWithOverflow(doc, exp.descripcion, rightColumnX, rightY, rightColumnWidth - 10, 9);
+        if (result !== null) {
+          rightY = result;
+        } else {
+          // Continuar en nueva página
+          rightY = addNewPage(doc);
+          resetColumnsForNewPage();
+          const result2 = renderTextWithOverflow(doc, exp.descripcion, rightColumnX, rightY, rightColumnWidth - 10, 9);
+          rightY = result2 !== null ? result2 : rightY + 50;
+        }
+      }
+      
+      // Línea separadora entre experiencias
+      if (index < cvData.experiencias.length - 1) {
+        rightY += 8;
+        addSeparatorLine(doc, rightColumnX, rightY, rightColumnWidth, '#EEEEEE', 0.3);
+        rightY += 8;
+      }
+    });
+  }
+
+  // === PROYECTOS ===
+  if (cvData.proyectos && cvData.proyectos.length > 0) {
+    // Verificar si necesita nueva página
+    if (checkPageOverflow(doc, rightY + 40)) {
+      rightY = addNewPage(doc);
+      resetColumnsForNewPage();
+    }
+    
+    rightY = addSectionTitle(doc, 'PROYECTOS', rightColumnX, rightY, textColor);
+    addSeparatorLine(doc, rightColumnX, rightY - 2, rightColumnWidth, '#CCCCCC', 0.5);
+
+    cvData.proyectos.forEach((proyecto) => {
+      // Verificar overflow antes de cada proyecto
+      if (checkPageOverflow(doc, rightY + 30)) {
+        rightY = addNewPage(doc);
+        resetColumnsForNewPage();
+      }
+      
+      doc.setTextColor(textColor);
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      doc.text(proyecto.nombre || '', rightColumnX, rightY);
+      
+      rightY += 5;
+      doc.setFont('helvetica', 'normal');
+      if (proyecto.descripcion) {
+        const result = renderTextWithOverflow(doc, proyecto.descripcion, rightColumnX, rightY, rightColumnWidth - 10, 9);
+        rightY = result !== null ? result : rightY + 20;
+      }
+      
+      if (proyecto.tecnologias) {
+        doc.text(`Tecnologías: ${proyecto.tecnologias}`, rightColumnX, rightY);
+        rightY += 4;
+      }
+      
+      if (proyecto.url) {
+        doc.setTextColor(primaryColor);
+        doc.textWithLink(`Ver proyecto: ${proyecto.url}`, rightColumnX, rightY, { url: proyecto.url, target: '_blank' });
+        doc.setTextColor(textColor);
+        rightY += 4;
+      }
+      
+      rightY += 8;
+    });
   }
 
   // === REFERENCIAS ===
   if (cvData.referencias && cvData.referencias.length > 0) {
-    doc.setTextColor(textColor);
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.text('REFERENCIAS', rightColumnX, rightY);
+    // Verificar si necesita nueva página
+    if (checkPageOverflow(doc, rightY + 40)) {
+      rightY = addNewPage(doc);
+      resetColumnsForNewPage();
+    }
     
-    // Línea separadora
-    doc.setDrawColor('#CCCCCC');
-    doc.setLineWidth(0.5);
-    doc.line(rightColumnX, rightY + 2, pageWidth - 10, rightY + 2);
-    rightY += 8;
-
-    cvData.referencias.slice(0, 2).forEach((ref) => {
-      doc.setFontSize(10);
+    rightY = addSectionTitle(doc, 'REFERENCIAS', rightColumnX, rightY, textColor);
+    addSeparatorLine(doc, rightColumnX, rightY - 2, rightColumnWidth, '#CCCCCC', 0.5);
+    
+    let refCurrentY = rightY;
+    cvData.referencias.slice(0, 3).forEach((ref) => {
+      // Verificar overflow antes de cada referencia
+      if (checkPageOverflow(doc, refCurrentY + 20)) {
+        refCurrentY = addNewPage(doc);
+        resetColumnsForNewPage();
+      }
+      
+      doc.setFontSize(9);
       doc.setFont('helvetica', 'bold');
-      doc.text(ref.nombre || '', rightColumnX, rightY);
-      rightY += 4;
+      doc.text(ref.nombre || '', rightColumnX, refCurrentY);
       
+      refCurrentY += 4;
       doc.setFont('helvetica', 'normal');
-      doc.text(`${ref.cargo || ''} en ${ref.empresa || ''}`, rightColumnX, rightY);
-      rightY += 4;
+      doc.text(`${ref.cargo || ''} en ${ref.empresa || ''}`, rightColumnX, refCurrentY);
       
-      if (ref.telefono) {
-        doc.text(`Tel: ${ref.telefono}`, rightColumnX, rightY);
-        rightY += 4;
-      }
+      refCurrentY += 4;
+      if (ref.telefono) doc.text(`Tel: ${ref.telefono}`, rightColumnX, refCurrentY);
+      if (ref.email) doc.text(`Email: ${ref.email}`, rightColumnX + 40, refCurrentY);
       
-      if (ref.email) {
-        doc.text(`Email: ${ref.email}`, rightColumnX, rightY);
-        rightY += 4;
-      }
-      
-      rightY += 8;
+      refCurrentY += 8;
     });
   }
 
-  // === FOOTER ===
-  const footerY = pageHeight - 15;
-  doc.setTextColor('#666666');
-  doc.setFontSize(8);
-  doc.setFont('helvetica', 'normal');
-  doc.text('CV generado automáticamente por BolsaTrabajo.com', pageWidth / 2, footerY, { align: 'center' });
+  // === FOOTER FINAL ===
+  addFooter(doc);
 
   return doc;
 };

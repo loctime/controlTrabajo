@@ -1,5 +1,16 @@
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import { 
+  checkPageOverflow, 
+  addNewPage, 
+  addFooter, 
+  renderCompactList,
+  addSectionTitle,
+  addSeparatorLine,
+  buildContactInfo,
+  buildProfessionalTitle,
+  renderTextWithOverflow
+} from './templateUtils';
 
 export const generateClassicTemplate = (cvData) => {
   const doc = new jsPDF();
@@ -28,51 +39,79 @@ export const generateClassicTemplate = (cvData) => {
   doc.text(`${cvData.Nombre || ''} ${cvData.Apellido || ''}`, 15, currentY);
   currentY += 8;
 
-  // Información de contacto en una línea
+  // Edad (opcional, solo si está completada)
+  if (cvData.Edad) {
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`${cvData.Edad} años`, 15, currentY);
+    currentY += 5;
+  }
+
+  // Título profesional completo
+  const professionalTitle = buildProfessionalTitle(cvData);
+  if (professionalTitle) {
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'normal');
+    doc.text(professionalTitle, 15, currentY);
+    currentY += 5;
+  }
+
+  // Información de contacto completa
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
-  const contactInfo = [];
-  if (cvData.Email) contactInfo.push(cvData.Email);
-  if (cvData.telefono) contactInfo.push(cvData.telefono);
-  if (cvData.ciudad) contactInfo.push(cvData.ciudad);
-  if (cvData.linkedin) contactInfo.push('LinkedIn');
-  if (cvData.sitioWeb) contactInfo.push(cvData.sitioWeb);
-
+  const contactInfo = buildContactInfo(cvData);
   doc.text(contactInfo.join(' • '), 15, currentY);
   currentY += 15;
 
   // === PERFIL PROFESIONAL ===
   if (cvData.perfilProfesional) {
-    doc.setTextColor(primaryColor);
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.text('PERFIL PROFESIONAL', 15, currentY);
+    // Verificar si necesita nueva página
+    if (checkPageOverflow(doc, currentY + 30)) {
+      currentY = addNewPage(doc);
+    }
+    
+    currentY = addSectionTitle(doc, 'PERFIL PROFESIONAL', 15, currentY, primaryColor);
     
     // Línea debajo del título
-    doc.setLineWidth(0.5);
-    doc.line(15, currentY + 2, pageWidth - 15, currentY + 2);
-    currentY += 8;
+    addSeparatorLine(doc, 15, currentY - 2, pageWidth - 30);
     
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
-    const splitPerfil = doc.splitTextToSize(cvData.perfilProfesional, pageWidth - 30);
-    doc.text(splitPerfil, 15, currentY);
-    currentY += splitPerfil.length * 5 + 15; // Aumentar espaciado
+    const result = renderTextWithOverflow(doc, cvData.perfilProfesional, 15, currentY, pageWidth - 30, 10, false);
+    if (result !== null) {
+      currentY = result;
+    } else {
+      // Necesita nueva página
+      currentY = addNewPage(doc);
+      currentY = addSectionTitle(doc, 'PERFIL PROFESIONAL (cont.)', 15, currentY, primaryColor);
+      addSeparatorLine(doc, 15, currentY - 2, pageWidth - 30);
+      const result2 = renderTextWithOverflow(doc, cvData.perfilProfesional, 15, currentY, pageWidth - 30, 10, false);
+      currentY = result2 !== null ? result2 : currentY + 50;
+    }
+    currentY += 15;
   }
 
   // === EXPERIENCIA LABORAL ===
   if (cvData.experiencias && cvData.experiencias.length > 0) {
-    doc.setTextColor(primaryColor);
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.text('EXPERIENCIA LABORAL', 15, currentY);
+    // Verificar si necesita nueva página
+    if (checkPageOverflow(doc, currentY + 50)) {
+      currentY = addNewPage(doc);
+    }
+    
+    currentY = addSectionTitle(doc, 'EXPERIENCIA LABORAL', 15, currentY, primaryColor);
     
     // Línea debajo del título
-    doc.setLineWidth(0.5);
-    doc.line(15, currentY + 2, pageWidth - 15, currentY + 2);
-    currentY += 8;
+    addSeparatorLine(doc, 15, currentY - 2, pageWidth - 30);
 
     cvData.experiencias.forEach((exp, index) => {
+      // Verificar overflow antes de cada experiencia
+      if (checkPageOverflow(doc, currentY + 40)) {
+        currentY = addNewPage(doc);
+        // Agregar título de continuación si no es la primera experiencia
+        if (index > 0) {
+          currentY = addSectionTitle(doc, 'EXPERIENCIA LABORAL (cont.)', 15, currentY, primaryColor);
+          addSeparatorLine(doc, 15, currentY - 2, pageWidth - 30);
+        }
+      }
+      
       doc.setTextColor(primaryColor);
       doc.setFontSize(10);
       doc.setFont('helvetica', 'bold');
@@ -84,20 +123,26 @@ export const generateClassicTemplate = (cvData) => {
       
       currentY += 5;
       if (exp.ubicacion) {
-        doc.text(exp.ubicacion, 15, currentY);
+        doc.text(`Ubicación: ${exp.ubicacion}`, 15, currentY);
         currentY += 5;
       }
       
       if (exp.descripcion) {
-        const splitDesc = doc.splitTextToSize(exp.descripcion, pageWidth - 30);
-        doc.text(splitDesc, 15, currentY);
-        currentY += splitDesc.length * 3.5 + 5;
+        const result = renderTextWithOverflow(doc, exp.descripcion, 15, currentY, pageWidth - 30, 9);
+        if (result !== null) {
+          currentY = result;
+        } else {
+          // Continuar en nueva página
+          currentY = addNewPage(doc);
+          const result2 = renderTextWithOverflow(doc, exp.descripcion, 15, currentY, pageWidth - 30, 9);
+          currentY = result2 !== null ? result2 : currentY + 50;
+        }
       }
       
       // Línea separadora entre experiencias
       if (index < cvData.experiencias.length - 1) {
-        doc.setLineWidth(0.2);
-        doc.line(15, currentY, pageWidth - 15, currentY);
+        currentY += 5;
+        addSeparatorLine(doc, 15, currentY, pageWidth - 30, '#EEEEEE', 0.2);
         currentY += 5;
       }
     });
@@ -106,17 +151,22 @@ export const generateClassicTemplate = (cvData) => {
 
   // === EDUCACIÓN ===
   if (cvData.educacion && cvData.educacion.length > 0) {
-    doc.setTextColor(primaryColor);
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.text('FORMACIÓN ACADÉMICA', 15, currentY);
+    // Verificar si necesita nueva página
+    if (checkPageOverflow(doc, currentY + 40)) {
+      currentY = addNewPage(doc);
+    }
+    
+    currentY = addSectionTitle(doc, 'FORMACIÓN ACADÉMICA', 15, currentY, primaryColor);
     
     // Línea debajo del título
-    doc.setLineWidth(0.5);
-    doc.line(15, currentY + 2, pageWidth - 15, currentY + 2);
-    currentY += 8;
+    addSeparatorLine(doc, 15, currentY - 2, pageWidth - 30);
 
     cvData.educacion.forEach((edu) => {
+      // Verificar overflow antes de cada educación
+      if (checkPageOverflow(doc, currentY + 30)) {
+        currentY = addNewPage(doc);
+      }
+      
       doc.setTextColor(primaryColor);
       doc.setFontSize(10);
       doc.setFont('helvetica', 'bold');
@@ -128,7 +178,13 @@ export const generateClassicTemplate = (cvData) => {
       
       if (edu.ubicacion) {
         currentY += 4;
-        doc.text(edu.ubicacion, 15, currentY);
+        doc.text(`Ubicación: ${edu.ubicacion}`, 15, currentY);
+      }
+      
+      if (edu.descripcion) {
+        currentY += 4;
+        const result = renderTextWithOverflow(doc, edu.descripcion, 15, currentY, pageWidth - 30, 9);
+        currentY = result !== null ? result : currentY + 20;
       }
       
       currentY += 8;
@@ -138,15 +194,15 @@ export const generateClassicTemplate = (cvData) => {
 
   // === HABILIDADES ===
   if (cvData.habilidades && cvData.habilidades.length > 0) {
-    doc.setTextColor(primaryColor);
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.text('COMPETENCIAS TÉCNICAS', 15, currentY);
+    // Verificar si necesita nueva página
+    if (checkPageOverflow(doc, currentY + 40)) {
+      currentY = addNewPage(doc);
+    }
+    
+    currentY = addSectionTitle(doc, 'COMPETENCIAS TÉCNICAS', 15, currentY, primaryColor);
     
     // Línea debajo del título
-    doc.setLineWidth(0.5);
-    doc.line(15, currentY + 2, pageWidth - 15, currentY + 2);
-    currentY += 8;
+    addSeparatorLine(doc, 15, currentY - 2, pageWidth - 30);
 
     // Agrupar habilidades por nivel
     const habilidadesPorNivel = {};
@@ -158,56 +214,83 @@ export const generateClassicTemplate = (cvData) => {
     });
 
     Object.entries(habilidadesPorNivel).forEach(([nivel, habilidades]) => {
+      // Verificar overflow antes de cada nivel
+      if (checkPageOverflow(doc, currentY + 20)) {
+        currentY = addNewPage(doc);
+      }
+      
       doc.setFontSize(10);
       doc.setFont('helvetica', 'bold');
       doc.text(`${nivel}:`, 15, currentY);
       
       currentY += 5;
       doc.setFont('helvetica', 'normal');
-      doc.text(habilidades.join(' • '), 20, currentY);
-      currentY += 8;
+      
+      // Usar formato compacto si hay muchas habilidades
+      if (habilidades.length > 10) {
+        currentY = renderCompactList(doc, habilidades, 20, currentY, pageWidth - 50, 9);
+      } else {
+        doc.text(habilidades.join(' • '), 20, currentY);
+        currentY += 8;
+      }
     });
     currentY += 5;
   }
 
   // === IDIOMAS ===
   if (cvData.idiomas && cvData.idiomas.length > 0) {
-    doc.setTextColor(primaryColor);
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.text('IDIOMAS', 15, currentY);
+    // Verificar si necesita nueva página
+    if (checkPageOverflow(doc, currentY + 30)) {
+      currentY = addNewPage(doc);
+    }
+    
+    currentY = addSectionTitle(doc, 'IDIOMAS', 15, currentY, primaryColor);
     
     // Línea debajo del título
-    doc.setLineWidth(0.5);
-    doc.line(15, currentY + 2, pageWidth - 15, currentY + 2);
-    currentY += 8;
+    addSeparatorLine(doc, 15, currentY - 2, pageWidth - 30);
 
-    cvData.idiomas.forEach((idioma) => {
-      doc.setFontSize(10);
-      doc.setFont('helvetica', 'bold');
-      doc.text(`${idioma.idioma}:`, 15, currentY);
-      
-      currentY += 4;
-      doc.setFont('helvetica', 'normal');
-      doc.text(idioma.nivel, 40, currentY);
-      currentY += 6;
-    });
+    // Usar formato compacto para idiomas si son muchos
+    if (cvData.idiomas.length > 5) {
+      const idiomasText = cvData.idiomas.map(idioma => `${idioma.idioma} (${idioma.nivel})`);
+      currentY = renderCompactList(doc, idiomasText, 15, currentY, pageWidth - 30, 9);
+    } else {
+      cvData.idiomas.forEach((idioma) => {
+        // Verificar overflow antes de cada idioma
+        if (checkPageOverflow(doc, currentY + 15)) {
+          currentY = addNewPage(doc);
+        }
+        
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'bold');
+        doc.text(`${idioma.idioma}:`, 15, currentY);
+        
+        currentY += 4;
+        doc.setFont('helvetica', 'normal');
+        doc.text(idioma.nivel, 40, currentY);
+        currentY += 6;
+      });
+    }
     currentY += 5;
   }
 
   // === CERTIFICACIONES ===
   if (cvData.certificaciones && cvData.certificaciones.length > 0) {
-    doc.setTextColor(primaryColor);
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.text('CERTIFICACIONES', 15, currentY);
+    // Verificar si necesita nueva página
+    if (checkPageOverflow(doc, currentY + 40)) {
+      currentY = addNewPage(doc);
+    }
+    
+    currentY = addSectionTitle(doc, 'CERTIFICACIONES', 15, currentY, primaryColor);
     
     // Línea debajo del título
-    doc.setLineWidth(0.5);
-    doc.line(15, currentY + 2, pageWidth - 15, currentY + 2);
-    currentY += 8;
+    addSeparatorLine(doc, 15, currentY - 2, pageWidth - 30);
 
     cvData.certificaciones.forEach((cert) => {
+      // Verificar overflow antes de cada certificación
+      if (checkPageOverflow(doc, currentY + 25)) {
+        currentY = addNewPage(doc);
+      }
+      
       doc.setFontSize(10);
       doc.setFont('helvetica', 'bold');
       doc.text(cert.nombre || '', 15, currentY);
@@ -222,7 +305,7 @@ export const generateClassicTemplate = (cvData) => {
         doc.setTextColor(primaryColor);
         doc.setFont('helvetica', 'italic');
         doc.textWithLink('Ver certificado', 15, currentY, { url: cert.url, target: '_blank' });
-        doc.setTextColor(textColor);
+        doc.setTextColor('#424242');
         doc.setFont('helvetica', 'normal');
       }
       
@@ -233,79 +316,88 @@ export const generateClassicTemplate = (cvData) => {
 
   // === PROYECTOS ===
   if (cvData.proyectos && cvData.proyectos.length > 0) {
-    doc.setTextColor(primaryColor);
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.text('PROYECTOS DESTACADOS', 15, currentY);
+    // Verificar si necesita nueva página
+    if (checkPageOverflow(doc, currentY + 40)) {
+      currentY = addNewPage(doc);
+    }
+    
+    currentY = addSectionTitle(doc, 'PROYECTOS DESTACADOS', 15, currentY, primaryColor);
     
     // Línea debajo del título
-    doc.setLineWidth(0.5);
-    doc.line(15, currentY + 2, pageWidth - 15, currentY + 2);
-    currentY += 8;
+    addSeparatorLine(doc, 15, currentY - 2, pageWidth - 30);
 
     cvData.proyectos.forEach((proyecto) => {
+      // Verificar overflow antes de cada proyecto
+      if (checkPageOverflow(doc, currentY + 30)) {
+        currentY = addNewPage(doc);
+      }
+      
       doc.setFontSize(10);
       doc.setFont('helvetica', 'bold');
       doc.text(proyecto.nombre || '', 15, currentY);
       
       currentY += 5;
       doc.setFont('helvetica', 'normal');
-      if (proyecto.tecnologias) {
-        doc.text(`Tecnologías: ${proyecto.tecnologias}`, 15, currentY);
-        currentY += 5;
-      }
       
       if (proyecto.descripcion) {
-        const splitDesc = doc.splitTextToSize(proyecto.descripcion, pageWidth - 30);
-        doc.text(splitDesc, 15, currentY);
-        currentY += splitDesc.length * 3.5 + 5;
+        const result = renderTextWithOverflow(doc, proyecto.descripcion, 15, currentY, pageWidth - 30, 9);
+        currentY = result !== null ? result : currentY + 20;
+      }
+      
+      if (proyecto.tecnologias) {
+        doc.text(`Tecnologías: ${proyecto.tecnologias}`, 15, currentY);
+        currentY += 4;
       }
       
       if (proyecto.url) {
         doc.setTextColor(primaryColor);
         doc.textWithLink(`Ver proyecto: ${proyecto.url}`, 15, currentY, { url: proyecto.url, target: '_blank' });
-        doc.setTextColor(primaryColor);
-        currentY += 5;
+        doc.setTextColor('#424242');
+        currentY += 4;
       }
+      
+      currentY += 8;
     });
     currentY += 5;
   }
 
   // === REFERENCIAS ===
   if (cvData.referencias && cvData.referencias.length > 0) {
-    doc.setTextColor(primaryColor);
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.text('REFERENCIAS', 15, currentY);
+    // Verificar si necesita nueva página
+    if (checkPageOverflow(doc, currentY + 40)) {
+      currentY = addNewPage(doc);
+    }
+    
+    currentY = addSectionTitle(doc, 'REFERENCIAS', 15, currentY, primaryColor);
     
     // Línea debajo del título
-    doc.setLineWidth(0.5);
-    doc.line(15, currentY + 2, pageWidth - 15, currentY + 2);
-    currentY += 8;
-
-    cvData.referencias.slice(0, 2).forEach((ref) => {
+    addSeparatorLine(doc, 15, currentY - 2, pageWidth - 30);
+    
+    let refCurrentY = currentY;
+    cvData.referencias.slice(0, 3).forEach((ref) => {
+      // Verificar overflow antes de cada referencia
+      if (checkPageOverflow(doc, refCurrentY + 20)) {
+        refCurrentY = addNewPage(doc);
+      }
+      
       doc.setFontSize(10);
       doc.setFont('helvetica', 'bold');
-      doc.text(ref.nombre || '', 15, currentY);
+      doc.text(ref.nombre || '', 15, refCurrentY);
       
-      currentY += 5;
+      refCurrentY += 5;
       doc.setFont('helvetica', 'normal');
-      doc.text(`${ref.cargo || ''} en ${ref.empresa || ''}`, 15, currentY);
+      doc.text(`${ref.cargo || ''} en ${ref.empresa || ''}`, 15, refCurrentY);
       
-      currentY += 4;
-      if (ref.telefono) doc.text(`Tel: ${ref.telefono}`, 15, currentY);
-      if (ref.email) doc.text(`Email: ${ref.email}`, 15, currentY + 4);
+      refCurrentY += 4;
+      if (ref.telefono) doc.text(`Tel: ${ref.telefono}`, 15, refCurrentY);
+      if (ref.email) doc.text(`Email: ${ref.email}`, 15 + 40, refCurrentY);
       
-      currentY += 12;
+      refCurrentY += 8;
     });
   }
 
-  // === FOOTER ===
-  const footerY = pageHeight - 15;
-  doc.setTextColor('#666666');
-  doc.setFontSize(8);
-  doc.setFont('helvetica', 'normal');
-  doc.text('CV generado automáticamente por BolsaTrabajo.com', pageWidth / 2, footerY, { align: 'center' });
+  // === FOOTER FINAL ===
+  addFooter(doc);
 
   return doc;
 };
