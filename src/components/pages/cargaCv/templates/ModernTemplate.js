@@ -221,135 +221,85 @@ export const generateModernTemplate = async (cvData) => {
     currentY += 15;
   }
 
-  // === MAIN CONTENT (Flujo Continuo) ===
-  // Distribución de columnas para flujo continuo (márgenes más estrechos)
-  const leftColumnX = 10;
-  const leftColumnWidth = pageWidth * 0.48;
-  const rightColumnX = leftColumnWidth + 15;
-  const rightColumnWidth = pageWidth * 0.47;
+  // === MAIN CONTENT (Layout simplificado) ===
+  // Usar todo el ancho disponible para mejor aprovechamiento del espacio
+  const contentX = 10;
+  const contentWidth = pageWidth - 20;
   
-  // Variables para controlar el flujo continuo
-  let leftY = currentY;
-  let rightY = currentY;
-  let currentColumn = 'left'; // 'left' o 'right'
-  let columnSwitchThreshold = 80; // Píxeles desde el final de la página para cambiar de columna
+  // Variable para controlar la posición Y - usar currentY del perfil profesional
+  let contentY = currentY;
 
-  // Función para determinar la mejor columna para el contenido
-  const getBestColumn = (contentHeight) => {
-    const leftSpace = pageHeight - leftY - 30; // 30px para footer
-    const rightSpace = pageHeight - rightY - 30;
-    
-    // Si la columna actual tiene espacio suficiente
-    if (currentColumn === 'left' && leftSpace >= contentHeight) {
-      return 'left';
-    }
-    if (currentColumn === 'right' && rightSpace >= contentHeight) {
-      return 'right';
-    }
-    
-    // Si ninguna columna tiene espacio, crear nueva página
-    if (leftSpace < contentHeight && rightSpace < contentHeight) {
-      return 'newpage';
-    }
-    
-    // Cambiar a la columna con más espacio
-    if (rightSpace > leftSpace) {
-      return 'right';
-    } else {
-      return 'left';
-    }
+  // Función para verificar si hay espacio suficiente en la página actual
+  const hasSpaceForContent = (contentHeight) => {
+    const availableSpace = pageHeight - contentY - 30; // 30px para footer
+    return availableSpace >= contentHeight;
   };
 
-  // Función para agregar nueva página con flujo continuo
-  const addNewPageWithFlow = (doc) => {
-    addFooter(doc, `Página ${pageCounter}`);
-    doc.addPage();
-    pageCounter++;
-    addConsistentHeader(doc, pageCounter);
-    
-    // Resetear posiciones Y pero mantener la columna actual (márgenes más estrechos)
-    leftY = 48;
-    rightY = 48;
-    
-    return currentColumn === 'left' ? leftY : rightY;
+  // Función para agregar nueva página cuando sea necesario
+  const addNewPageIfNeeded = (doc, contentHeight) => {
+    if (!hasSpaceForContent(contentHeight)) {
+      addFooter(doc, `Página ${pageCounter}`);
+      doc.addPage();
+      pageCounter++;
+      contentY = addConsistentHeader(doc, pageCounter);
+    }
+    return contentY;
   };
 
-  // Función para renderizar contenido en la columna óptima
-  const renderInOptimalColumn = (doc, content, contentHeight, renderFunction) => {
-    const bestColumn = getBestColumn(contentHeight);
-    
-    if (bestColumn === 'newpage') {
-      const newY = addNewPageWithFlow(doc);
-      currentColumn = newY === leftY ? 'left' : 'right';
-      
-      // Determinar parámetros de columna según la columna actual
-      if (currentColumn === 'left') {
-        return renderFunction(doc, newY, leftColumnX, leftColumnWidth);
-      } else {
-        return renderFunction(doc, newY, rightColumnX, rightColumnWidth);
-      }
-    }
-    
-    if (bestColumn === 'right') {
-      currentColumn = 'right';
-      const result = renderFunction(doc, rightY, rightColumnX, rightColumnWidth);
-      rightY = result;
-      return result;
-    } else {
-      currentColumn = 'left';
-      const result = renderFunction(doc, leftY, leftColumnX, leftColumnWidth);
-      leftY = result;
-      return result;
-    }
+  // Función simplificada para renderizar secciones sin verificación de altura
+  const renderSection = (doc, sectionName, renderFunction) => {
+    contentY = addSectionTitle(doc, sectionName, contentX, contentY, primaryColor);
+    contentY = renderFunction(doc, contentX, contentY, contentWidth);
+    return contentY;
   };
 
   // Función helper para agregar header consistente en páginas adicionales
   const addConsistentHeader = (doc, pageNumber) => {
-    // Header con gradiente simulado (reducido para páginas adicionales)
+    // Header con gradiente simulado (más compacto para páginas adicionales)
     doc.setFillColor('#1e3a8a');
-    doc.rect(0, 0, pageWidth, 45, 'F');
+    doc.rect(0, 0, pageWidth, 40, 'F');
     doc.setFillColor('#3b82f6');
-    doc.rect(0, 0, pageWidth, 35, 'F');
+    doc.rect(0, 0, pageWidth, 32, 'F');
     doc.setFillColor('#60a5fa');
-    doc.rect(0, 0, pageWidth, 25, 'F');
+    doc.rect(0, 0, pageWidth, 24, 'F');
     
     // Línea decorativa
     doc.setDrawColor('#ffffff');
     doc.setLineWidth(0.8);
-    doc.line(0, 44, pageWidth, 44);
+    doc.line(0, 39, pageWidth, 39);
     
     // Línea adicional sutil
     doc.setDrawColor('#e2e8f0');
     doc.setLineWidth(0.5);
-    doc.line(0, 43.5, pageWidth, 43.5);
+    doc.line(0, 38.5, pageWidth, 38.5);
     
     // HEADER CONSISTENTE SIMPLE
     
-    // Nombre principal - simple y limpio (márgenes más estrechos)
+    // Nombre principal - simple y limpio (mejor centrado en header compacto)
     doc.setTextColor('#ffffff');
-    doc.setFontSize(16);
+    doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
     const fullName = `${cvData.Nombre || ''} ${cvData.Apellido || ''}`;
     const splitHeaderName = doc.splitTextToSize(fullName, pageWidth - 50);
-    doc.text(splitHeaderName, 10, 10);
+    doc.text(splitHeaderName, 10, 12);
     
     // Título profesional - debajo del nombre
-    doc.setFontSize(10);
+    doc.setFontSize(9);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor('#f1f5f9');
     const professionalTitle = buildProfessionalTitle(cvData);
     if (professionalTitle) {
       const splitTitle = doc.splitTextToSize(professionalTitle, pageWidth - 50);
-      doc.text(splitTitle, 10, 23);
+      doc.text(splitTitle, 10, 25);
     }
     
     // Número de página (opcional)
     if (pageNumber > 1) {
-      doc.setFontSize(9);
-      doc.text(`Página ${pageNumber}`, pageWidth - 25, 21);
+      doc.setFontSize(8);
+      doc.text(`Página ${pageNumber}`, pageWidth - 25, 23);
     }
     
-    return 48; // Retornar Y inicial para el contenido (más cerca del header)
+    return 55; // Retornar Y inicial para el contenido (más separado del header)
   };
 
   // Función personalizada para agregar nueva página con header consistente
@@ -366,257 +316,257 @@ export const generateModernTemplate = async (cvData) => {
   
   // EXPERIENCIA LABORAL
   if (cvData.experiencias && cvData.experiencias.length > 0) {
-    const renderExperiencias = (doc, startY, columnX, columnWidth) => {
-      let y = addSectionTitle(doc, 'EXPERIENCIA LABORAL', columnX, startY, primaryColor);
+    contentY = addSectionTitle(doc, 'EXPERIENCIA LABORAL', contentX, contentY, primaryColor);
 
-      cvData.experiencias.forEach((exp, index) => {
-        doc.setTextColor(textColor);
-        doc.setFontSize(10);
-        doc.setFont('helvetica', 'bold');
-        const splitCargo = doc.splitTextToSize(exp.cargo || '', columnWidth);
-        doc.text(splitCargo, columnX, y);
-        y += splitCargo.length * 4;
-        
-        y += 4;
-        doc.setFont('helvetica', 'normal');
-        const splitEmpresaInfo = doc.splitTextToSize(`${exp.empresa || ''} | ${exp.fechaInicio || ''} - ${exp.fechaFin || ''}`, columnWidth);
-        doc.text(splitEmpresaInfo, columnX, y);
-        y += splitEmpresaInfo.length * 4;
-        
-        y += 4;
-        if (exp.ubicacion) {
-          const splitUbicacion = doc.splitTextToSize(`Ubicación: ${exp.ubicacion}`, columnWidth);
-          doc.text(splitUbicacion, columnX, y);
-          y += splitUbicacion.length * 4;
-        }
-        
-        if (exp.descripcion) {
-          doc.setTextColor(textColor);
-          const result = renderTextWithOverflow(doc, exp.descripcion, columnX, y, columnWidth - 10, 9);
-          y = result !== null ? result : y + 50;
-        }
-        y += 8;
-      });
+    cvData.experiencias.forEach((exp, index) => {
+      // Verificar si necesitamos nueva página
+      if (contentY > pageHeight - 80) {
+        addFooter(doc, `Página ${pageCounter}`);
+        doc.addPage();
+        pageCounter++;
+        contentY = addConsistentHeader(doc, pageCounter);
+      }
+
+      doc.setTextColor(textColor);
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      const splitCargo = doc.splitTextToSize(exp.cargo || '', contentWidth);
+      doc.text(splitCargo, contentX, contentY);
+      contentY += splitCargo.length * 4;
       
-      return y;
-    };
-
-    // Estimar altura de contenido para experiencias
-    const estimatedHeight = cvData.experiencias.length * 60 + 50; // Aproximación
-    renderInOptimalColumn(doc, cvData.experiencias, estimatedHeight, renderExperiencias);
+      contentY += 4;
+      doc.setFont('helvetica', 'normal');
+      const splitEmpresaInfo = doc.splitTextToSize(`${exp.empresa || ''} | ${exp.fechaInicio || ''} - ${exp.fechaFin || ''}`, contentWidth);
+      doc.text(splitEmpresaInfo, contentX, contentY);
+      contentY += splitEmpresaInfo.length * 4;
+      
+      contentY += 4;
+      if (exp.ubicacion) {
+        const splitUbicacion = doc.splitTextToSize(`Ubicación: ${exp.ubicacion}`, contentWidth);
+        doc.text(splitUbicacion, contentX, contentY);
+        contentY += splitUbicacion.length * 4;
+      }
+      
+      if (exp.descripcion) {
+        doc.setTextColor(textColor);
+        const result = renderTextWithOverflow(doc, exp.descripcion, contentX, contentY, contentWidth - 10, 9);
+        contentY = result !== null ? result : contentY + 50;
+      }
+      contentY += 8;
+    });
   }
 
   // EDUCACIÓN
   if (cvData.educacion && cvData.educacion.length > 0) {
-    const renderEducacion = (doc, startY, columnX, columnWidth) => {
-      let y = addSectionTitle(doc, 'EDUCACIÓN', columnX, startY, primaryColor);
+    contentY = addSectionTitle(doc, 'EDUCACIÓN', contentX, contentY, primaryColor);
 
-      cvData.educacion.forEach((edu) => {
-        doc.setTextColor(textColor);
-        doc.setFontSize(10);
-        doc.setFont('helvetica', 'bold');
-        doc.text(edu.titulo || '', columnX, y);
-        
-        y += 4;
-        doc.setFont('helvetica', 'normal');
-        doc.text(`${edu.institucion || ''} | ${edu.fechaInicio || ''} - ${edu.fechaFin || ''}`, columnX, y);
-        
-        if (edu.ubicacion) {
-          y += 4;
-          doc.text(`Ubicación: ${edu.ubicacion}`, columnX, y);
-        }
-        
-        if (edu.descripcion) {
-          y += 4;
-          const result = renderTextWithOverflow(doc, edu.descripcion, columnX, y, columnWidth - 10, 9);
-          y = result !== null ? result : y + 20;
-        }
-        
-        y += 8;
-      });
+    cvData.educacion.forEach((edu) => {
+      // Verificar si necesitamos nueva página
+      if (contentY > pageHeight - 80) {
+        addFooter(doc, `Página ${pageCounter}`);
+        doc.addPage();
+        pageCounter++;
+        contentY = addConsistentHeader(doc, pageCounter);
+      }
+
+      doc.setTextColor(textColor);
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      doc.text(edu.titulo || '', contentX, contentY);
       
-      return y;
-    };
-
-    // Estimar altura de contenido para educación
-    const estimatedHeight = cvData.educacion.length * 40 + 30;
-    renderInOptimalColumn(doc, cvData.educacion, estimatedHeight, renderEducacion);
+      contentY += 4;
+      doc.setFont('helvetica', 'normal');
+      doc.text(`${edu.institucion || ''} | ${edu.fechaInicio || ''} - ${edu.fechaFin || ''}`, contentX, contentY);
+      
+      if (edu.ubicacion) {
+        contentY += 4;
+        doc.text(`Ubicación: ${edu.ubicacion}`, contentX, contentY);
+      }
+      
+      if (edu.descripcion) {
+        contentY += 4;
+        const result = renderTextWithOverflow(doc, edu.descripcion, contentX, contentY, contentWidth - 10, 9);
+        contentY = result !== null ? result : contentY + 20;
+      }
+      
+      contentY += 8;
+    });
   }
 
   // HABILIDADES
   if (cvData.habilidades && cvData.habilidades.length > 0) {
-    const renderHabilidades = (doc, startY, columnX, columnWidth) => {
-      let y = addSectionTitle(doc, 'HABILIDADES', columnX, startY, primaryColor);
-      
-      // Usar formato compacto para habilidades (siempre con comas para mejor aprovechamiento del espacio)
-      const habilidadesText = cvData.habilidades.map(h => h.nombre || h).join(', ');
-      const splitHabilidades = doc.splitTextToSize(habilidadesText, columnWidth - 10);
-      doc.setFontSize(9);
-      doc.setFont('helvetica', 'normal');
-      doc.setTextColor(textColor);
-      doc.text(splitHabilidades, columnX, y);
-      y += splitHabilidades.length * 4 + 10; // Más espacio entre secciones
-      
-      return y;
-    };
-
-    // Estimar altura de contenido para habilidades
-    const estimatedHeight = 30;
-    renderInOptimalColumn(doc, cvData.habilidades, estimatedHeight, renderHabilidades);
+    // Verificar si necesitamos nueva página
+    if (contentY > pageHeight - 80) {
+      addFooter(doc, `Página ${pageCounter}`);
+      doc.addPage();
+      pageCounter++;
+      contentY = addConsistentHeader(doc, pageCounter);
+    }
+    
+    contentY = addSectionTitle(doc, 'HABILIDADES', contentX, contentY, primaryColor);
+    
+    // Usar formato compacto para habilidades (siempre con comas para mejor aprovechamiento del espacio)
+    const habilidadesText = cvData.habilidades.map(h => h.nombre || h).join(', ');
+    const splitHabilidades = doc.splitTextToSize(habilidadesText, contentWidth - 10);
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(textColor);
+    doc.text(splitHabilidades, contentX, contentY);
+    contentY += splitHabilidades.length * 4 + 10; // Más espacio entre secciones
   }
 
   // IDIOMAS
   if (cvData.idiomas && cvData.idiomas.length > 0) {
-    const renderIdiomas = (doc, startY, columnX, columnWidth) => {
-      let y = addSectionTitle(doc, 'IDIOMAS', columnX, startY, primaryColor);
-      
-      // Usar formato compacto para idiomas
-      const idiomasText = cvData.idiomas.map(i => {
-        if (typeof i === 'object' && i.idioma) {
-          return `${i.idioma} (${i.nivel})`;
-        }
-        return i;
-      }).join(', ');
-      const splitIdiomas = doc.splitTextToSize(idiomasText, columnWidth - 10);
-      doc.setFontSize(9);
-      doc.setFont('helvetica', 'normal');
-      doc.setTextColor(textColor);
-      doc.text(splitIdiomas, columnX, y);
-      y += splitIdiomas.length * 4 + 10; // Más espacio entre secciones
-      
-      return y;
-    };
-
-    // Estimar altura de contenido para idiomas
-    const estimatedHeight = 25;
-    renderInOptimalColumn(doc, cvData.idiomas, estimatedHeight, renderIdiomas);
+    // Verificar si necesitamos nueva página
+    if (contentY > pageHeight - 80) {
+      addFooter(doc, `Página ${pageCounter}`);
+      doc.addPage();
+      pageCounter++;
+      contentY = addConsistentHeader(doc, pageCounter);
+    }
+    
+    contentY = addSectionTitle(doc, 'IDIOMAS', contentX, contentY, primaryColor);
+    
+    // Usar formato compacto para idiomas
+    const idiomasText = cvData.idiomas.map(i => {
+      if (typeof i === 'object' && i.idioma) {
+        return `${i.idioma} (${i.nivel})`;
+      }
+      return i;
+    }).join(', ');
+    const splitIdiomas = doc.splitTextToSize(idiomasText, contentWidth - 10);
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(textColor);
+    doc.text(splitIdiomas, contentX, contentY);
+    contentY += splitIdiomas.length * 4 + 10; // Más espacio entre secciones
   }
 
   // CERTIFICACIONES
   if (cvData.certificaciones && cvData.certificaciones.length > 0) {
-    const renderCertificaciones = (doc, startY, columnX, columnWidth) => {
-      let y = addSectionTitle(doc, 'CERTIFICACIONES', columnX, startY, primaryColor);
+    contentY = addSectionTitle(doc, 'CERTIFICACIONES', contentX, contentY, primaryColor);
 
-      cvData.certificaciones.forEach((cert) => {
-        doc.setTextColor(textColor);
-        doc.setFontSize(9);
-        doc.setFont('helvetica', 'bold');
-        doc.text(cert.nombre || '', columnX, y);
-        
-        y += 4;
-        doc.setFont('helvetica', 'normal');
-        doc.text(`${cert.institucion || ''} | ${cert.fecha || ''}`, columnX, y);
-        
-        // Agregar enlace si existe URL
-        if (cert.url) {
-          y += 4;
-          doc.setTextColor(secondaryColor);
-          doc.setFont('helvetica', 'italic');
-          doc.textWithLink('Ver certificado', columnX, y, { url: cert.url, target: '_blank' });
-          doc.setTextColor(textColor);
-        }
-        
-        y += 8;
-      });
+    cvData.certificaciones.forEach((cert) => {
+      // Verificar si necesitamos nueva página
+      if (contentY > pageHeight - 80) {
+        addFooter(doc, `Página ${pageCounter}`);
+        doc.addPage();
+        pageCounter++;
+        contentY = addConsistentHeader(doc, pageCounter);
+      }
+
+      doc.setTextColor(textColor);
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'bold');
+      doc.text(cert.nombre || '', contentX, contentY);
       
-      return y;
-    };
-
-    // Estimar altura de contenido para certificaciones
-    const estimatedHeight = cvData.certificaciones.length * 25 + 30;
-    renderInOptimalColumn(doc, cvData.certificaciones, estimatedHeight, renderCertificaciones);
+      contentY += 4;
+      doc.setFont('helvetica', 'normal');
+      doc.text(`${cert.institucion || ''} | ${cert.fecha || ''}`, contentX, contentY);
+      
+      // Agregar enlace si existe URL
+      if (cert.url) {
+        contentY += 4;
+        doc.setTextColor(secondaryColor);
+        doc.setFont('helvetica', 'italic');
+        doc.textWithLink('Ver certificado', contentX, contentY, { url: cert.url, target: '_blank' });
+        doc.setTextColor(textColor);
+      }
+      
+      contentY += 8;
+    });
   }
 
   // REFERENCIAS
   if (cvData.referencias && cvData.referencias.length > 0) {
-    const renderReferencias = (doc, startY, columnX, columnWidth) => {
-      let y = addSectionTitle(doc, 'REFERENCIAS', columnX, startY, primaryColor);
-      
-      cvData.referencias.slice(0, 3).forEach((ref) => {
-        // Solo renderizar si la referencia tiene datos
-        if (ref && (ref.nombre || ref.cargo || ref.empresa)) {
-          doc.setTextColor(textColor);
-          doc.setFontSize(9);
-          doc.setFont('helvetica', 'bold');
-          
-          if (ref.nombre) {
-            doc.text(ref.nombre, columnX, y);
-            y += 4;
-          }
-          
-          doc.setFont('helvetica', 'normal');
-          if (ref.cargo && ref.empresa) {
-            doc.text(`${ref.cargo} en ${ref.empresa}`, columnX, y);
-            y += 4;
-          } else if (ref.cargo) {
-            doc.text(ref.cargo, columnX, y);
-            y += 4;
-          } else if (ref.empresa) {
-            doc.text(ref.empresa, columnX, y);
-            y += 4;
-          }
-          
-          if (ref.telefono) {
-            doc.text(`Tel: ${ref.telefono}`, columnX, y);
-          }
-          if (ref.email) {
-            doc.text(`Email: ${ref.email}`, columnX + 40, y);
-          }
-          if (ref.telefono || ref.email) {
-            y += 4;
-          }
-          
-          y += 8;
-        }
-      });
-      
-      return y;
-    };
+    contentY = addSectionTitle(doc, 'REFERENCIAS', contentX, contentY, primaryColor);
+    
+    cvData.referencias.slice(0, 3).forEach((ref) => {
+      // Verificar si necesitamos nueva página
+      if (contentY > pageHeight - 80) {
+        addFooter(doc, `Página ${pageCounter}`);
+        doc.addPage();
+        pageCounter++;
+        contentY = addConsistentHeader(doc, pageCounter);
+      }
 
-    // Estimar altura de contenido para referencias
-    const estimatedHeight = Math.min(cvData.referencias.length, 3) * 25 + 30;
-    renderInOptimalColumn(doc, cvData.referencias, estimatedHeight, renderReferencias);
+      // Solo renderizar si la referencia tiene datos
+      if (ref && (ref.nombre || ref.cargo || ref.empresa)) {
+        doc.setTextColor(textColor);
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'bold');
+        
+        if (ref.nombre) {
+          doc.text(ref.nombre, contentX, contentY);
+          contentY += 4;
+        }
+        
+        doc.setFont('helvetica', 'normal');
+        if (ref.cargo && ref.empresa) {
+          doc.text(`${ref.cargo} en ${ref.empresa}`, contentX, contentY);
+          contentY += 4;
+        } else if (ref.cargo) {
+          doc.text(ref.cargo, contentX, contentY);
+          contentY += 4;
+        } else if (ref.empresa) {
+          doc.text(ref.empresa, contentX, contentY);
+          contentY += 4;
+        }
+        
+        if (ref.telefono) {
+          doc.text(`Tel: ${ref.telefono}`, contentX, contentY);
+        }
+        if (ref.email) {
+          doc.text(`Email: ${ref.email}`, contentX + 40, contentY);
+        }
+        if (ref.telefono || ref.email) {
+          contentY += 4;
+        }
+        
+        contentY += 8;
+      }
+    });
   }
 
   // PROYECTOS
   if (cvData.proyectos && cvData.proyectos.length > 0) {
-    const renderProyectos = (doc, startY, columnX, columnWidth) => {
-      let y = addSectionTitle(doc, 'PROYECTOS', columnX, startY, primaryColor);
+    contentY = addSectionTitle(doc, 'PROYECTOS', contentX, contentY, primaryColor);
 
-      cvData.proyectos.forEach((proyecto) => {
-        doc.setTextColor(textColor);
-        doc.setFontSize(10);
-        doc.setFont('helvetica', 'bold');
-        doc.text(proyecto.nombre || '', columnX, y);
-        
-        y += 8; // Más espacio después del título del proyecto
-        doc.setFont('helvetica', 'normal');
-        if (proyecto.descripcion) {
-          const result = renderTextWithOverflow(doc, proyecto.descripcion, columnX, y, columnWidth - 10, 9);
-          y = result !== null ? result : y + 20;
-        }
-        
-        if (proyecto.tecnologias) {
-          doc.text(`Tecnologías: ${proyecto.tecnologias}`, columnX, y);
-          y += 4;
-        }
-        
-        if (proyecto.url) {
-          doc.setTextColor(primaryColor);
-          doc.textWithLink(`Ver proyecto: ${proyecto.url}`, columnX, y, { url: proyecto.url, target: '_blank' });
-          doc.setTextColor(textColor);
-          y += 4;
-        }
-        
-        y += 8;
-      });
+    cvData.proyectos.forEach((proyecto) => {
+      // Verificar si necesitamos nueva página
+      if (contentY > pageHeight - 80) {
+        addFooter(doc, `Página ${pageCounter}`);
+        doc.addPage();
+        pageCounter++;
+        contentY = addConsistentHeader(doc, pageCounter);
+      }
+
+      doc.setTextColor(textColor);
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      doc.text(proyecto.nombre || '', contentX, contentY);
       
-      return y;
-    };
-
-    // Estimar altura de contenido para proyectos
-    const estimatedHeight = cvData.proyectos.length * 50 + 40;
-    renderInOptimalColumn(doc, cvData.proyectos, estimatedHeight, renderProyectos);
+      contentY += 8; // Más espacio después del título del proyecto
+      doc.setFont('helvetica', 'normal');
+      if (proyecto.descripcion) {
+        const result = renderTextWithOverflow(doc, proyecto.descripcion, contentX, contentY, contentWidth - 10, 9);
+        contentY = result !== null ? result : contentY + 20;
+      }
+      
+      if (proyecto.tecnologias) {
+        doc.text(`Tecnologías: ${proyecto.tecnologias}`, contentX, contentY);
+        contentY += 4;
+      }
+      
+      if (proyecto.url) {
+        doc.setTextColor(primaryColor);
+        doc.textWithLink(`Ver proyecto: ${proyecto.url}`, contentX, contentY, { url: proyecto.url, target: '_blank' });
+        doc.setTextColor(textColor);
+        contentY += 4;
+      }
+      
+      contentY += 8;
+    });
   }
 
   // === FOOTER FINAL ===
