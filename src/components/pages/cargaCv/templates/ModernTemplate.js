@@ -85,11 +85,11 @@ export const generateModernTemplate = async (cvData) => {
     try {
       console.log('📸 Cargando imagen de perfil:', cvData.Foto);
       
-      // Crear círculo de fondo con sombra (ajustado para header más cerca del borde)
+      // Crear círculo de fondo con sombra (mejor posicionado para el layout)
       doc.setFillColor('#ffffff');
-      doc.circle(20, 25, 18, 'F');
+      doc.circle(20, 28, 18, 'F');
       doc.setFillColor('#f8fafc');
-      doc.circle(20, 25, 16, 'F');
+      doc.circle(20, 28, 16, 'F');
       
       // Cargar imagen desde URL
       const img = await loadImageFromUrl(cvData.Foto);
@@ -127,35 +127,36 @@ export const generateModernTemplate = async (cvData) => {
       ctx.clip();
       ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
       
-      // Convertir canvas a base64 y agregar al PDF (ajustado para header más cerca del borde)
+      // Convertir canvas a base64 y agregar al PDF (mejor posicionado para el layout)
       const imgData = canvas.toDataURL('image/jpeg', 0.8);
-      doc.addImage(imgData, 'JPEG', 4, 9, 32, 32);
+      doc.addImage(imgData, 'JPEG', 4, 12, 32, 32);
       
       console.log('✅ Imagen de perfil cargada correctamente');
     } catch (error) {
       console.log('⚠️ Error al cargar imagen de perfil:', error);
       
-      // Fallback: mostrar placeholder con mejor diseño (ajustado para header más cerca del borde)
+      // Fallback: mostrar placeholder con mejor diseño (mejor posicionado para el layout)
       doc.setFillColor('#ffffff');
-      doc.circle(20, 25, 16, 'F');
+      doc.circle(20, 28, 16, 'F');
       doc.setFillColor('#e5e7eb');
-      doc.circle(20, 25, 14, 'F');
+      doc.circle(20, 28, 14, 'F');
       
       doc.setTextColor('#6b7280');
       doc.setFontSize(8);
-      doc.text('FOTO', 20, 28, { align: 'center' });
+      doc.text('FOTO', 20, 31, { align: 'center' });
     }
   }
 
   // === HEADER CON TODO EL ANCHO ===
   
-  // NOMBRE PRINCIPAL - Usando todo el ancho disponible (márgenes más estrechos)
+  // NOMBRE PRINCIPAL - Posicionado para no tapar la foto
   doc.setTextColor('#ffffff');
   doc.setFontSize(32); // Más grande para mejor legibilidad
   doc.setFont('helvetica', 'bold');
   const fullName = `${cvData.Nombre || ''} ${cvData.Apellido || ''}`;
-  const splitName = doc.splitTextToSize(fullName, pageWidth - 45); // Usar casi todo el ancho
-  doc.text(splitName, 15, 12); // Más cerca del borde superior
+  // Ajustar ancho para dejar espacio a la foto (que está en x=4, ancho=32, más margen)
+  const splitName = doc.splitTextToSize(fullName, pageWidth - 55); 
+  doc.text(splitName, 50, 12); // Empezar después de la foto
   
   // Calcular posición Y después del nombre (ajustado para márgenes más estrechos)
   let currentHeaderY = 12 + (splitName.length * 8); // Más espacio para fuente más grande
@@ -171,24 +172,24 @@ export const generateModernTemplate = async (cvData) => {
     doc.text(`${cvData.Edad} años`, pageWidth - 25, 18);
   }
 
-  // TÍTULO PROFESIONAL - Usando todo el ancho
+  // TÍTULO PROFESIONAL - Alineado con el nombre
   const professionalTitle = buildProfessionalTitle(cvData);
   if (professionalTitle) {
     doc.setFontSize(14);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor('#f1f5f9');
-    const splitTitle = doc.splitTextToSize(professionalTitle, pageWidth - 45);
-    doc.text(splitTitle, 15, currentHeaderY);
+    const splitTitle = doc.splitTextToSize(professionalTitle, pageWidth - 55);
+    doc.text(splitTitle, 50, currentHeaderY);
     currentHeaderY += (splitTitle.length * 6) + 8;
   }
 
-  // INFORMACIÓN DE CONTACTO - Usando todo el ancho (más grande y mejor espaciado)
+  // INFORMACIÓN DE CONTACTO - Alineado con el nombre (más grande y mejor espaciado)
   doc.setFontSize(10);
   doc.setTextColor('#e2e8f0');
   const contactInfo = buildContactInfo(cvData);
   const contactText = contactInfo.join(' • ');
-  const splitContact = doc.splitTextToSize(contactText, pageWidth - 45);
-  doc.text(splitContact, 15, currentHeaderY);
+  const splitContact = doc.splitTextToSize(contactText, pageWidth - 55);
+  doc.text(splitContact, 50, currentHeaderY);
 
   // === PERFIL PROFESIONAL ===
   let currentY = 75; // Ajustado para el header más grande con más espacio
