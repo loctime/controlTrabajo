@@ -291,7 +291,7 @@ export const TemplateSelector = memo(({ selectedTemplate, onTemplateChange }) =>
                     </Typography>
                   </Box>
                   
-                  {/* Preview visual de la plantilla clásica */}
+                  {/* Preview visual de laa plantilla clásica */}
                   <Box sx={{ 
                     border: '1px solid #ddd', 
                     borderRadius: 1, 
