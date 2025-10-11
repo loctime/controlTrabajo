@@ -167,7 +167,7 @@ export const generateModernTemplate = async (cvData) => {
       currentY = result;
     } else {
       // Necesita nueva página
-      currentY = addNewPage(doc);
+      currentY = addNewPageWithHeader(doc);
       currentY = addSectionTitle(doc, 'PERFIL PROFESIONAL (cont.)', 15, currentY, primaryColor);
       const result2 = renderTextWithOverflow(doc, cvData.perfilProfesional, 15, currentY, pageWidth - 30, 10, false);
       currentY = result2 !== null ? result2 : currentY + 50;
@@ -182,13 +182,52 @@ export const generateModernTemplate = async (cvData) => {
   const rightColumnX = leftColumnWidth + 20;
   const rightColumnWidth = pageWidth * 0.38;
 
+  // Función helper para agregar header consistente en páginas adicionales
+  const addConsistentHeader = (doc, pageNumber) => {
+    // Header con color de marca
+    doc.setFillColor(primaryColor);
+    doc.rect(0, 0, pageWidth, 40, 'F');
+    
+    // Nombre y apellidos
+    doc.setTextColor('#ffffff');
+    doc.setFontSize(16);
+    doc.setFont('helvetica', 'bold');
+    doc.text(`${cvData.Nombre || ''} ${cvData.Apellido || ''}`, 15, 20);
+    
+    // Título profesional
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'normal');
+    const professionalTitle = buildProfessionalTitle(cvData);
+    if (professionalTitle) {
+      doc.text(professionalTitle, 15, 30);
+    }
+    
+    // Número de página (opcional)
+    if (pageNumber > 1) {
+      doc.setFontSize(10);
+      doc.text(`Página ${pageNumber}`, pageWidth - 30, 25);
+    }
+    
+    return 50; // Retornar Y inicial para el contenido
+  };
+
+  // Función personalizada para agregar nueva página con header consistente
+  let pageCounter = 1;
+  const addNewPageWithHeader = (doc) => {
+    pageCounter++;
+    addFooter(doc);
+    doc.addPage();
+    const startY = addConsistentHeader(doc, pageCounter);
+    return startY;
+  };
+
   // === LEFT COLUMN ===
   
   // EXPERIENCIA LABORAL
   if (cvData.experiencias && cvData.experiencias.length > 0) {
     // Verificar si necesita nueva página
     if (checkPageOverflow(doc, currentY + 50)) {
-      currentY = addNewPage(doc);
+      currentY = addNewPageWithHeader(doc);
     }
     
     currentY = addSectionTitle(doc, 'EXPERIENCIA LABORAL', leftColumnX, currentY, primaryColor);
@@ -196,7 +235,7 @@ export const generateModernTemplate = async (cvData) => {
     cvData.experiencias.forEach((exp, index) => {
       // Verificar overflow antes de cada experiencia
       if (checkPageOverflow(doc, currentY + 40)) {
-        currentY = addNewPage(doc);
+        currentY = addNewPageWithHeader(doc);
       }
       
       doc.setTextColor(textColor);
@@ -220,7 +259,7 @@ export const generateModernTemplate = async (cvData) => {
           currentY = result;
         } else {
           // Continuar en nueva página
-          currentY = addNewPage(doc);
+          currentY = addNewPageWithHeader(doc);
           const result2 = renderTextWithOverflow(doc, exp.descripcion, leftColumnX, currentY, leftColumnWidth - 10, 9);
           currentY = result2 !== null ? result2 : currentY + 50;
         }
@@ -233,7 +272,7 @@ export const generateModernTemplate = async (cvData) => {
   if (cvData.educacion && cvData.educacion.length > 0) {
     // Verificar si necesita nueva página
     if (checkPageOverflow(doc, currentY + 30)) {
-      currentY = addNewPage(doc);
+      currentY = addNewPageWithHeader(doc);
     }
     
     currentY = addSectionTitle(doc, 'EDUCACIÓN', leftColumnX, currentY, primaryColor);
@@ -241,7 +280,7 @@ export const generateModernTemplate = async (cvData) => {
     cvData.educacion.forEach((edu) => {
       // Verificar overflow antes de cada educación
       if (checkPageOverflow(doc, currentY + 25)) {
-        currentY = addNewPage(doc);
+        currentY = addNewPageWithHeader(doc);
       }
       
       doc.setTextColor(textColor);
@@ -275,7 +314,7 @@ export const generateModernTemplate = async (cvData) => {
   if (cvData.habilidades && cvData.habilidades.length > 0) {
     // Verificar si necesita nueva página
     if (checkPageOverflow(doc, rightY + 30)) {
-      rightY = addNewPage(doc);
+      rightY = addNewPageWithHeader(doc);
     }
     
     rightY = addSectionTitle(doc, 'HABILIDADES', rightColumnX, rightY, primaryColor);
@@ -295,7 +334,7 @@ export const generateModernTemplate = async (cvData) => {
   if (cvData.idiomas && cvData.idiomas.length > 0) {
     // Verificar si necesita nueva página
     if (checkPageOverflow(doc, rightY + 25)) {
-      rightY = addNewPage(doc);
+      rightY = addNewPageWithHeader(doc);
     }
     
     rightY = addSectionTitle(doc, 'IDIOMAS', rightColumnX, rightY, primaryColor);
@@ -315,7 +354,7 @@ export const generateModernTemplate = async (cvData) => {
   if (cvData.certificaciones && cvData.certificaciones.length > 0) {
     // Verificar si necesita nueva página
     if (checkPageOverflow(doc, rightY + 30)) {
-      rightY = addNewPage(doc);
+      rightY = addNewPageWithHeader(doc);
     }
     
     rightY = addSectionTitle(doc, 'CERTIFICACIONES', rightColumnX, rightY, primaryColor);
@@ -323,7 +362,7 @@ export const generateModernTemplate = async (cvData) => {
     cvData.certificaciones.forEach((cert) => {
       // Verificar overflow antes de cada certificación
       if (checkPageOverflow(doc, rightY + 25)) {
-        rightY = addNewPage(doc);
+        rightY = addNewPageWithHeader(doc);
       }
       
       doc.setTextColor(textColor);
@@ -354,7 +393,7 @@ export const generateModernTemplate = async (cvData) => {
     
     // Si no hay espacio suficiente, crear nueva página
     if (checkPageOverflow(doc, refY + 50)) {
-      const newPageY = addNewPage(doc);
+      const newPageY = addNewPageWithHeader(doc);
       currentY = addSectionTitle(doc, 'REFERENCIAS', 15, newPageY, primaryColor);
     } else {
       currentY = addSectionTitle(doc, 'REFERENCIAS', 15, refY, primaryColor);
@@ -364,7 +403,7 @@ export const generateModernTemplate = async (cvData) => {
     cvData.referencias.slice(0, 3).forEach((ref) => {
       // Verificar overflow antes de cada referencia
       if (checkPageOverflow(doc, refCurrentY + 20)) {
-        refCurrentY = addNewPage(doc);
+        refCurrentY = addNewPageWithHeader(doc);
       }
       
       doc.setTextColor(textColor);
@@ -390,7 +429,7 @@ export const generateModernTemplate = async (cvData) => {
     
     // Si no hay espacio suficiente, crear nueva página
     if (checkPageOverflow(doc, projY + 40)) {
-      const newPageY = addNewPage(doc);
+      const newPageY = addNewPageWithHeader(doc);
       currentY = addSectionTitle(doc, 'PROYECTOS', 15, newPageY, primaryColor);
     } else {
       currentY = addSectionTitle(doc, 'PROYECTOS', 15, projY, primaryColor);
@@ -399,7 +438,7 @@ export const generateModernTemplate = async (cvData) => {
     cvData.proyectos.forEach((proyecto) => {
       // Verificar overflow antes de cada proyecto
       if (checkPageOverflow(doc, currentY + 30)) {
-        currentY = addNewPage(doc);
+        currentY = addNewPageWithHeader(doc);
       }
       
       doc.setTextColor(textColor);

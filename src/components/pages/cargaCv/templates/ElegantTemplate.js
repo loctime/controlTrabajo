@@ -255,6 +255,46 @@ export const generateElegantTemplate = async (cvData) => {
     rightColumnWidth = pageWidth - 30;
   };
 
+  // Función helper para agregar header consistente en páginas adicionales
+  const addConsistentHeader = (doc, pageNumber) => {
+    // Header con color de marca
+    doc.setFillColor(primaryColor);
+    doc.rect(0, 0, pageWidth, 40, 'F');
+    
+    // Nombre y apellidos
+    doc.setTextColor('#ffffff');
+    doc.setFontSize(16);
+    doc.setFont('helvetica', 'bold');
+    doc.text(`${cvData.Nombre || ''} ${cvData.Apellido || ''}`, 15, 20);
+    
+    // Título profesional
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'normal');
+    const professionalTitle = buildProfessionalTitle(cvData);
+    if (professionalTitle) {
+      doc.text(professionalTitle, 15, 30);
+    }
+    
+    // Número de página (opcional)
+    if (pageNumber > 1) {
+      doc.setFontSize(10);
+      doc.text(`Página ${pageNumber}`, pageWidth - 30, 25);
+    }
+    
+    return 50; // Retornar Y inicial para el contenido
+  };
+
+  // Función personalizada para agregar nueva página con header consistente
+  let pageCounter = 1;
+  const addNewPageWithHeader = (doc) => {
+    pageCounter++;
+    addFooter(doc);
+    doc.addPage();
+    const startY = addConsistentHeader(doc, pageCounter);
+    resetColumnsForNewPage();
+    return startY;
+  };
+
   // Nombre completo
   doc.setTextColor(primaryColor);
   doc.setFontSize(20);
@@ -283,8 +323,7 @@ export const generateElegantTemplate = async (cvData) => {
   if (cvData.certificaciones && cvData.certificaciones.length > 0) {
     // Verificar si necesita nueva página
     if (checkPageOverflow(doc, rightY + 40)) {
-      rightY = addNewPage(doc);
-      resetColumnsForNewPage();
+      rightY = addNewPageWithHeader(doc);
     }
     
     rightY = addSectionTitle(doc, 'CERTIFICACIONES', rightColumnX, rightY, textColor);
@@ -293,8 +332,7 @@ export const generateElegantTemplate = async (cvData) => {
     cvData.certificaciones.forEach((cert) => {
       // Verificar overflow antes de cada certificación
       if (checkPageOverflow(doc, rightY + 25)) {
-        rightY = addNewPage(doc);
-        resetColumnsForNewPage();
+        rightY = addNewPageWithHeader(doc);
       }
       
       doc.setTextColor(textColor);
@@ -322,8 +360,7 @@ export const generateElegantTemplate = async (cvData) => {
   if (cvData.educacion && cvData.educacion.length > 0) {
     // Verificar si necesita nueva página
     if (checkPageOverflow(doc, rightY + 40)) {
-      rightY = addNewPage(doc);
-      resetColumnsForNewPage();
+      rightY = addNewPageWithHeader(doc);
     }
     
     rightY = addSectionTitle(doc, 'EDUCACIÓN', rightColumnX, rightY, textColor);
@@ -332,8 +369,7 @@ export const generateElegantTemplate = async (cvData) => {
     cvData.educacion.forEach((edu) => {
       // Verificar overflow antes de cada educación
       if (checkPageOverflow(doc, rightY + 30)) {
-        rightY = addNewPage(doc);
-        resetColumnsForNewPage();
+        rightY = addNewPageWithHeader(doc);
       }
       
       doc.setTextColor(textColor);
@@ -364,8 +400,7 @@ export const generateElegantTemplate = async (cvData) => {
   if (cvData.experiencias && cvData.experiencias.length > 0) {
     // Verificar si necesita nueva página
     if (checkPageOverflow(doc, rightY + 50)) {
-      rightY = addNewPage(doc);
-      resetColumnsForNewPage();
+      rightY = addNewPageWithHeader(doc);
     }
     
     rightY = addSectionTitle(doc, 'EXPERIENCIA LABORAL', rightColumnX, rightY, textColor);
@@ -374,8 +409,7 @@ export const generateElegantTemplate = async (cvData) => {
     cvData.experiencias.forEach((exp, index) => {
       // Verificar overflow antes de cada experiencia
       if (checkPageOverflow(doc, rightY + 40)) {
-        rightY = addNewPage(doc);
-        resetColumnsForNewPage();
+        rightY = addNewPageWithHeader(doc);
         // Agregar título de continuación si no es la primera experiencia
         if (index > 0) {
           rightY = addSectionTitle(doc, 'EXPERIENCIA LABORAL (cont.)', rightColumnX, rightY, textColor);
@@ -416,8 +450,7 @@ export const generateElegantTemplate = async (cvData) => {
           rightY = result;
         } else {
           // Continuar en nueva página
-          rightY = addNewPage(doc);
-          resetColumnsForNewPage();
+          rightY = addNewPageWithHeader(doc);
           const result2 = renderTextWithOverflow(doc, exp.descripcion, rightColumnX, rightY, rightColumnWidth - 10, 9);
           rightY = result2 !== null ? result2 : rightY + 50;
         }
@@ -436,8 +469,7 @@ export const generateElegantTemplate = async (cvData) => {
   if (cvData.proyectos && cvData.proyectos.length > 0) {
     // Verificar si necesita nueva página
     if (checkPageOverflow(doc, rightY + 40)) {
-      rightY = addNewPage(doc);
-      resetColumnsForNewPage();
+      rightY = addNewPageWithHeader(doc);
     }
     
     rightY = addSectionTitle(doc, 'PROYECTOS', rightColumnX, rightY, textColor);
@@ -446,8 +478,7 @@ export const generateElegantTemplate = async (cvData) => {
     cvData.proyectos.forEach((proyecto) => {
       // Verificar overflow antes de cada proyecto
       if (checkPageOverflow(doc, rightY + 30)) {
-        rightY = addNewPage(doc);
-        resetColumnsForNewPage();
+        rightY = addNewPageWithHeader(doc);
       }
       
       doc.setTextColor(textColor);
@@ -482,8 +513,7 @@ export const generateElegantTemplate = async (cvData) => {
   if (cvData.referencias && cvData.referencias.length > 0) {
     // Verificar si necesita nueva página
     if (checkPageOverflow(doc, rightY + 40)) {
-      rightY = addNewPage(doc);
-      resetColumnsForNewPage();
+      rightY = addNewPageWithHeader(doc);
     }
     
     rightY = addSectionTitle(doc, 'REFERENCIAS', rightColumnX, rightY, textColor);
@@ -493,8 +523,7 @@ export const generateElegantTemplate = async (cvData) => {
     cvData.referencias.slice(0, 3).forEach((ref) => {
       // Verificar overflow antes de cada referencia
       if (checkPageOverflow(doc, refCurrentY + 20)) {
-        refCurrentY = addNewPage(doc);
-        resetColumnsForNewPage();
+        refCurrentY = addNewPageWithHeader(doc);
       }
       
       doc.setFontSize(9);
