@@ -17,8 +17,8 @@ export const addNewPage = (doc, footerText = 'CV generado automáticamente por B
 };
 
 // Función para footer consistente
-export const addFooter = (doc, text) => {
-  if (!doc || !text) return; // Validación básica
+export const addFooter = (doc, text = '') => {
+  if (!doc) return; // Validación básica
   
   const pageHeight = doc.internal.pageSize.getHeight();
   const pageWidth = doc.internal.pageSize.getWidth();
@@ -140,13 +140,19 @@ export const renderAdaptiveList = (doc, items, startX, startY, maxWidth, columnW
 
 // Función para agregar sección con título
 export const addSectionTitle = (doc, title, x, y, color = '#1976d2', fontSize = 12) => {
+  // Validaciones básicas
+  if (!doc || !title || typeof x !== 'number' || typeof y !== 'number') {
+    console.warn('addSectionTitle: Invalid arguments', { doc: !!doc, title, x, y });
+    return y || 0;
+  }
+  
   const originalColor = doc.getTextColor();
   const originalFontSize = doc.getFontSize();
   
   doc.setTextColor(color);
   doc.setFontSize(fontSize);
   doc.setFont('helvetica', 'bold');
-  doc.text(title, x, y);
+  doc.text(String(title), x, y);
   
   // Restaurar configuración original
   doc.setTextColor(originalColor);
