@@ -1,5 +1,5 @@
-import React from 'react';
-import { Card, CardContent, CardActions, Box, Typography, Chip, IconButton, Divider, Link } from '@mui/material';
+import React, { useState } from 'react';
+import { Card, CardContent, CardActions, Box, Typography, Chip, IconButton, Divider, Link, Tooltip, Popover } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import ThumbDownIcon from '@mui/icons-material/ThumbDown';
@@ -24,6 +24,20 @@ export const CVCard = ({
   onReject, 
   onDelete 
 }) => {
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [popoverContent, setPopoverContent] = useState({ type: '', data: [] });
+
+  const handleClick = (event, type, data) => {
+    setAnchorEl(event.currentTarget);
+    setPopoverContent({ type, data });
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+    setPopoverContent({ type: '', data: [] });
+  };
+
+  const open = Boolean(anchorEl);
   return (
     <Box sx={{ position: 'relative' }}>
       {/* Badge de estado */}
@@ -147,75 +161,76 @@ export const CVCard = ({
               )}
             </Box>
 
-            {/* Badges informativos */}
-            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 1 }}>
+            {/* Badges informativos - Chips compactos */}
+            <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mt: 1 }}>
               {cv.proyectos?.length > 0 && (
-                <Chip 
-                  icon={<CodeIcon />}
-                  label={`${cv.proyectos.length} proyecto${cv.proyectos.length !== 1 ? 's' : ''}`} 
-                  size="small" 
-                  color="primary" 
-                  variant="outlined"
-                />
+                <Tooltip title={`Ver ${cv.proyectos.length} proyecto${cv.proyectos.length !== 1 ? 's' : ''}`} arrow>
+                  <Chip 
+                    icon={<CodeIcon />}
+                    label={`${cv.proyectos.length}`}
+                    size="small" 
+                    color="primary" 
+                    variant="outlined"
+                    onClick={(e) => handleClick(e, 'proyectos', cv.proyectos)}
+                    sx={{ 
+                      cursor: 'pointer',
+                      '&:hover': { bgcolor: 'primary.light' }
+                    }}
+                  />
+                </Tooltip>
               )}
               
               {cv.habilidades?.length > 0 && (
-                <Chip 
-                  icon={<WorkIcon />}
-                  label={`${cv.habilidades.length} habilidad${cv.habilidades.length !== 1 ? 'es' : ''}`} 
-                  size="small" 
-                  color="secondary" 
-                  variant="outlined"
-                />
+                <Tooltip title={`Ver ${cv.habilidades.length} habilidad${cv.habilidades.length !== 1 ? 'es' : ''}`} arrow>
+                  <Chip 
+                    icon={<WorkIcon />}
+                    label={`${cv.habilidades.length}`}
+                    size="small" 
+                    color="secondary" 
+                    variant="outlined"
+                    onClick={(e) => handleClick(e, 'habilidades', cv.habilidades)}
+                    sx={{ 
+                      cursor: 'pointer',
+                      '&:hover': { bgcolor: 'secondary.light' }
+                    }}
+                  />
+                </Tooltip>
               )}
               
               {cv.idiomas?.length > 0 && (
-                <Chip 
-                  icon={<LanguageIcon />}
-                  label={`${cv.idiomas.length} idioma${cv.idiomas.length !== 1 ? 's' : ''}`} 
-                  size="small" 
-                  color="success" 
-                  variant="outlined"
-                />
+                <Tooltip title={`Ver ${cv.idiomas.length} idioma${cv.idiomas.length !== 1 ? 's' : ''}`} arrow>
+                  <Chip 
+                    icon={<LanguageIcon />}
+                    label={`${cv.idiomas.length}`}
+                    size="small" 
+                    color="success" 
+                    variant="outlined"
+                    onClick={(e) => handleClick(e, 'idiomas', cv.idiomas)}
+                    sx={{ 
+                      cursor: 'pointer',
+                      '&:hover': { bgcolor: 'success.light' }
+                    }}
+                  />
+                </Tooltip>
               )}
               
               {cv.certificaciones?.length > 0 && (
-                <Chip 
-                  icon={<SchoolIcon />}
-                  label={`${cv.certificaciones.length} certificación${cv.certificaciones.length !== 1 ? 'es' : ''}`} 
-                  size="small" 
-                  color="info" 
-                  variant="outlined"
-                />
+                <Tooltip title={`Ver ${cv.certificaciones.length} certificación${cv.certificaciones.length !== 1 ? 'es' : ''}`} arrow>
+                  <Chip 
+                    icon={<SchoolIcon />}
+                    label={`${cv.certificaciones.length}`}
+                    size="small" 
+                    color="info" 
+                    variant="outlined"
+                    onClick={(e) => handleClick(e, 'certificaciones', cv.certificaciones)}
+                    sx={{ 
+                      cursor: 'pointer',
+                      '&:hover': { bgcolor: 'info.light' }
+                    }}
+                  />
+                </Tooltip>
               )}
             </Box>
-
-            {/* Top habilidades */}
-            {cv.habilidades?.length > 0 && (
-              <Box sx={{ mt: 1 }}>
-                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 'bold' }}>
-                  Habilidades destacadas:
-                </Typography>
-                <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mt: 0.5 }}>
-                  {cv.habilidades.slice(0, 4).map((skill, index) => (
-                    <Chip 
-                      key={index}
-                      label={skill.nombre || skill} 
-                      size="small" 
-                      sx={{ fontSize: '0.7rem', height: '20px' }}
-                    />
-                  ))}
-                  {cv.habilidades.length > 4 && (
-                    <Chip 
-                      label={`+${cv.habilidades.length - 4} más`} 
-                      size="small" 
-                      color="default"
-                      sx={{ fontSize: '0.7rem', height: '20px' }}
-                    />
-                  )}
-                </Box>
-              </Box>
-            )}
 
             {currentView === 'rejected' && cv.motivoRechazo && (
               <Box 
@@ -310,6 +325,106 @@ export const CVCard = ({
           </IconButton>
         </CardActions>
       </Card>
+
+      {/* Popover con detalles */}
+      <Popover
+        open={open}
+        anchorEl={anchorEl}
+        onClose={handleClose}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'left',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'left',
+        }}
+        sx={{ maxWidth: 300 }}
+      >
+        <Box sx={{ p: 2, maxWidth: 280 }}>
+          <Typography variant="h6" sx={{ mb: 1, fontWeight: 'bold' }}>
+            {popoverContent.type === 'proyectos' && 'Proyectos'}
+            {popoverContent.type === 'habilidades' && 'Habilidades'}
+            {popoverContent.type === 'idiomas' && 'Idiomas'}
+            {popoverContent.type === 'certificaciones' && 'Certificaciones'}
+          </Typography>
+          
+          {popoverContent.type === 'proyectos' && (
+            <Box>
+              {popoverContent.data.map((proyecto, index) => (
+                <Box key={index} sx={{ mb: 1.5, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <Typography variant="body2" sx={{ fontWeight: 'medium', flex: 1, mr: 1 }}>
+                    {proyecto.nombre && proyecto.nombre.length > 20 
+                      ? `${proyecto.nombre.substring(0, 20)}...` 
+                      : proyecto.nombre}
+                  </Typography>
+                  {proyecto.url && (
+                    <Link 
+                      href={proyecto.url} 
+                      target="_blank" 
+                      rel="noopener" 
+                      sx={{ fontSize: '0.75rem', textDecoration: 'none' }}
+                    >
+                      🔗
+                    </Link>
+                  )}
+                </Box>
+              ))}
+            </Box>
+          )}
+          
+          {popoverContent.type === 'habilidades' && (
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+              {popoverContent.data.map((skill, index) => (
+                <Chip 
+                  key={index}
+                  label={skill.nombre || skill} 
+                  size="small" 
+                  variant="outlined"
+                  sx={{ fontSize: '0.7rem' }}
+                />
+              ))}
+            </Box>
+          )}
+          
+          {popoverContent.type === 'idiomas' && (
+            <Box>
+              {popoverContent.data.map((idioma, index) => (
+                <Box key={index} sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                  <Typography variant="body2">
+                    {idioma.idioma || idioma}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {idioma.nivel || 'Nivel especificado'}
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
+          )}
+          
+          {popoverContent.type === 'certificaciones' && (
+            <Box>
+              {popoverContent.data.map((cert, index) => (
+                <Box key={index} sx={{ mb: 1, p: 1, bgcolor: 'grey.50', borderRadius: 1 }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
+                    {cert.nombre}
+                  </Typography>
+                  {cert.institucion && (
+                    <Typography variant="caption" color="text.secondary">
+                      {cert.institucion}
+                    </Typography>
+                  )}
+                  {cert.fecha && (
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                      {cert.fecha}
+                    </Typography>
+                  )}
+                </Box>
+              ))}
+            </Box>
+          )}
+        </Box>
+      </Popover>
     </Box>
   );
 };
