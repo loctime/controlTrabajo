@@ -173,14 +173,24 @@ export const ExperienceForm = memo(({ newCv, handleChange }) => {
                 <FormControlLabel 
                   control={
                     <Checkbox 
-                      checked={experiencia.esActual}
+                      checked={experiencia.esActual || false}
                       onChange={(e) => {
-                        updateExperiencia(experiencia.id, 'esActual', e.target.checked);
-                        if (e.target.checked) {
-                          updateExperiencia(experiencia.id, 'fechaFin', 'Actualidad');
-                        } else {
-                          updateExperiencia(experiencia.id, 'fechaFin', '');
-                        }
+                        const isChecked = e.target.checked;
+                        const nuevasExperiencias = experiencias.map(exp => 
+                          exp.id === experiencia.id 
+                            ? { 
+                                ...exp, 
+                                esActual: isChecked,
+                                fechaFin: isChecked ? 'Actualidad' : ''
+                              } 
+                            : exp
+                        );
+                        handleChange({
+                          target: {
+                            name: 'experiencias',
+                            value: nuevasExperiencias
+                          }
+                        });
                       }}
                     />
                   } 

@@ -5,7 +5,7 @@ export const PersonalDataForm = memo(({ newCv, handleChange }) => {
   return (
     <>
       <Typography variant="h6" sx={{ mt: 3, mb: 2, color: 'primary.main' }}>
-        📋 Datos Personales
+        📋 Datos Personales y de contacto
       </Typography>
       
       <Grid container spacing={3}>
@@ -52,6 +52,31 @@ export const PersonalDataForm = memo(({ newCv, handleChange }) => {
             onChange={handleChange} 
             required 
             fullWidth 
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} md={4}>
+          <TextField 
+            variant="outlined" 
+            label="Teléfono" 
+            name="telefono" 
+            value={newCv.telefono || ""} 
+            onChange={handleChange} 
+            fullWidth 
+            placeholder="+34 123 456 789"
+            helperText="Número de contacto"
+          />
+        </Grid>
+        
+        <Grid item xs={12} sm={6} md={4}>
+          <TextField 
+            variant="outlined" 
+            label="Dirección" 
+            name="direccion" 
+            value={newCv.direccion || ""} 
+            onChange={handleChange} 
+            fullWidth 
+            placeholder="Calle Mayor 123, Ciudad"
+            helperText="Dirección completa (opcional)"
           />
         </Grid>
       </Grid>

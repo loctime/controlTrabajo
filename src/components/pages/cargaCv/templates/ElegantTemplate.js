@@ -71,18 +71,38 @@ export const generateElegantTemplate = async (cvData) => {
       // Intentar cargar imagen desde URL
       const img = await loadImageFromUrl(cvData.Foto);
       
-      // Crear canvas para procesar la imagen como círculo
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      const size = 50; // Tamaño de la imagen
-      canvas.width = size;
-      canvas.height = size;
-      
-      // Dibujar imagen circular
-      ctx.beginPath();
-      ctx.arc(size/2, size/2, size/2, 0, 2 * Math.PI);
-      ctx.clip();
-      ctx.drawImage(img, 0, 0, size, size);
+            // Crear canvas para procesar la imagen como círculo
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const size = 50; // Tamaño de la imagen
+            canvas.width = size;
+            canvas.height = size;
+            
+            // Calcular dimensiones manteniendo aspecto ratio
+            const imgAspect = img.width / img.height;
+            const canvasAspect = size / size; // 1:1 para círculo
+            
+            let drawWidth, drawHeight, offsetX, offsetY;
+            
+            if (imgAspect > canvasAspect) {
+              // Imagen más ancha que alta
+              drawHeight = size;
+              drawWidth = size * imgAspect;
+              offsetX = (size - drawWidth) / 2;
+              offsetY = 0;
+            } else {
+              // Imagen más alta que ancha
+              drawWidth = size;
+              drawHeight = size / imgAspect;
+              offsetX = 0;
+              offsetY = (size - drawHeight) / 2;
+            }
+            
+            // Dibujar imagen circular manteniendo proporciones
+            ctx.beginPath();
+            ctx.arc(size/2, size/2, size/2, 0, 2 * Math.PI);
+            ctx.clip();
+            ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
       
       // Convertir canvas a base64 y agregar al PDF
       const imgData = canvas.toDataURL('image/jpeg', 0.8);

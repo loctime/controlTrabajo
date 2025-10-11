@@ -20,7 +20,6 @@ import { PersonalDataForm } from "./components/PersonalDataForm";
 import { ProfessionalDataForm } from "./components/ProfessionalDataForm";
 import { LocationForm } from "./components/LocationForm";
 import { FilesForm } from "./components/FilesForm";
-import { ContactForm } from "./components/ContactForm";
 import { ExperienceForm } from "./components/ExperienceForm";
 import { EducationForm } from "./components/EducationForm";
 import { SkillsForm } from "./components/SkillsForm";
@@ -581,9 +580,6 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
             </Box>
             
             <PersonalDataForm newCv={newCv} handleChange={handleChange} />
-            <Divider sx={{ my: 3 }} />
-            
-            <ContactForm newCv={newCv} handleChange={handleChange} />
             <Divider sx={{ my: 3 }} />
             
             <ProfessionalDataForm newCv={newCv} handleChange={handleChange} />
