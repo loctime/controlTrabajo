@@ -212,11 +212,11 @@ export const generateModernTemplate = async (cvData) => {
   }
 
   // === MAIN CONTENT (Two columns) ===
-  // Ajustar anchos: izquierda 58%, derecha 38%
+  // Ajustar anchos: izquierda 52%, derecha 45% (más espacio para habilidades)
   const leftColumnX = 15;
-  const leftColumnWidth = pageWidth * 0.58;
-  const rightColumnX = leftColumnWidth + 20;
-  const rightColumnWidth = pageWidth * 0.38;
+  const leftColumnWidth = pageWidth * 0.52;
+  const rightColumnX = leftColumnWidth + 15;
+  const rightColumnWidth = pageWidth * 0.45;
 
   // Función helper para agregar header consistente en páginas adicionales
   const addConsistentHeader = (doc, pageNumber) => {
@@ -373,15 +373,14 @@ export const generateModernTemplate = async (cvData) => {
     
     rightY = addSectionTitle(doc, 'HABILIDADES', rightColumnX, rightY, primaryColor);
     
-    // Usar formato adaptativo para habilidades
-    rightY = renderAdaptiveList(
-      doc, 
-      cvData.habilidades, 
-      rightColumnX, 
-      rightY, 
-      rightColumnWidth - 10, 
-      rightColumnWidth / 2 - 5
-    );
+    // Usar formato compacto para habilidades (siempre con comas para mejor aprovechamiento del espacio)
+    const habilidadesText = cvData.habilidades.map(h => h.nombre || h).join(', ');
+    const splitHabilidades = doc.splitTextToSize(habilidadesText, rightColumnWidth - 10);
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(textColor);
+    doc.text(splitHabilidades, rightColumnX, rightY);
+    rightY += splitHabilidades.length * 4 + 10; // Más espacio entre secciones
   }
 
   // IDIOMAS
@@ -393,15 +392,19 @@ export const generateModernTemplate = async (cvData) => {
     
     rightY = addSectionTitle(doc, 'IDIOMAS', rightColumnX, rightY, primaryColor);
     
-    // Usar formato adaptativo para idiomas
-    rightY = renderAdaptiveList(
-      doc, 
-      cvData.idiomas, 
-      rightColumnX, 
-      rightY, 
-      rightColumnWidth - 10, 
-      rightColumnWidth / 2 - 5
-    );
+    // Usar formato compacto para idiomas
+    const idiomasText = cvData.idiomas.map(i => {
+      if (typeof i === 'object' && i.idioma) {
+        return `${i.idioma} (${i.nivel})`;
+      }
+      return i;
+    }).join(', ');
+    const splitIdiomas = doc.splitTextToSize(idiomasText, rightColumnWidth - 10);
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(textColor);
+    doc.text(splitIdiomas, rightColumnX, rightY);
+    rightY += splitIdiomas.length * 4 + 10; // Más espacio entre secciones
   }
 
   // CERTIFICACIONES
@@ -521,7 +524,7 @@ export const generateModernTemplate = async (cvData) => {
       doc.setFont('helvetica', 'bold');
       doc.text(proyecto.nombre || '', 15, currentY);
       
-      currentY += 5;
+      currentY += 8; // Más espacio después del título del proyecto
       doc.setFont('helvetica', 'normal');
       if (proyecto.descripcion) {
         const result = renderTextWithOverflow(doc, proyecto.descripcion, 15, currentY, pageWidth - 30, 9);
