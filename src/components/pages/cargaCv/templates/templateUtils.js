@@ -192,17 +192,33 @@ export const buildProfessionalTitle = (cvData) => {
   return parts.join(' - ');
 };
 
+// Función para limpiar texto de caracteres problemáticos
+export const cleanText = (text) => {
+  if (!text) return '';
+  return text
+    .replace(/[\u0000-\u001F\u007F-\u009F]/g, '') // Remover caracteres de control
+    .replace(/\u00A0/g, ' ') // Reemplazar espacios no rompibles
+    .replace(/\s+/g, ' ') // Normalizar espacios múltiples
+    .trim();
+};
+
 // Función para renderizar texto con control de overflow
 export const renderTextWithOverflow = (doc, text, x, y, maxWidth, fontSize = 10, checkOverflow = true) => {
   if (!text) return y;
   
+  // Limpiar el texto de caracteres problemáticos
+  const cleanTextContent = cleanText(text);
+  
   const pageHeight = doc.internal.pageSize.getHeight();
   const originalFontSize = doc.getFontSize();
+  const originalColor = doc.getTextColor();
   
   doc.setFontSize(fontSize);
   doc.setFont('helvetica', 'normal');
+  // Preservar el color del texto
+  doc.setTextColor(originalColor);
   
-  const splitText = doc.splitTextToSize(text, maxWidth);
+  const splitText = doc.splitTextToSize(cleanTextContent, maxWidth);
   const textHeight = splitText.length * 4;
   
   if (checkOverflow && y + textHeight > pageHeight - 30) {

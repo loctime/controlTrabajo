@@ -308,12 +308,15 @@ export const generateModernTemplate = async (cvData) => {
       }
       
       if (exp.descripcion) {
+        // Establecer color del texto antes de renderizar
+        doc.setTextColor(textColor);
         const result = renderTextWithOverflow(doc, exp.descripcion, leftColumnX, currentY, leftColumnWidth - 10, 9);
         if (result !== null) {
           currentY = result;
         } else {
           // Continuar en nueva página
           currentY = addNewPageWithHeader(doc);
+          doc.setTextColor(textColor); // Establecer color en la nueva página
           const result2 = renderTextWithOverflow(doc, exp.descripcion, leftColumnX, currentY, leftColumnWidth - 10, 9);
           currentY = result2 !== null ? result2 : currentY + 50;
         }
