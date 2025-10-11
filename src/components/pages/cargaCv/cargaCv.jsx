@@ -168,6 +168,214 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
     });
   }, [handleFileChange]);
 
+  // Función para llenar el formulario con datos de prueba
+  const fillWithTestData = useCallback(() => {
+    const testData = {
+      // Datos personales
+      Nombre: "Juan Carlos",
+      Apellido: "González Pérez",
+      Edad: "28",
+      Email: "juan.gonzalez@email.com",
+      
+      // Información de contacto
+      telefono: "+34 612 345 678",
+      direccion: "Calle Mayor 123, 3º A, Madrid",
+      linkedin: "https://linkedin.com/in/juancgonzalez",
+      sitioWeb: "https://juan-gonzalez.dev",
+      perfilProfesional: "Desarrollador Frontend con 5 años de experiencia en React, Vue.js y tecnologías web modernas. Apasionado por crear interfaces de usuario intuitivas y experiencias digitales excepcionales.",
+      
+      // Información profesional
+      categoriaGeneral: "Informática y Tecnología",
+      categoriaEspecifica: "Desarrollador Frontend",
+      
+      // Ubicación
+      ciudad: "San Nicolás",
+      localidad: "Centro",
+      
+      // Experiencias laborales
+      experiencias: [
+        {
+          id: "exp-1",
+          cargo: "Desarrollador Frontend Senior",
+          empresa: "TechCorp Solutions",
+          ubicacion: "San Nicolás, Argentina",
+          fechaInicio: "01/2022",
+          fechaFin: "Actualidad",
+          descripcion: "Liderazgo técnico en el desarrollo de aplicaciones web con React y TypeScript. Implementación de arquitecturas escalables y mejora de rendimiento en un 40%. Colaboración con equipos de diseño y backend para entregar productos de alta calidad.",
+          esActual: true
+        },
+        {
+          id: "exp-2",
+          cargo: "Desarrollador Frontend",
+          empresa: "Digital Agency Pro",
+          ubicacion: "Ramallo, Argentina",
+          fechaInicio: "03/2020",
+          fechaFin: "12/2021",
+          descripcion: "Desarrollo de sitios web y aplicaciones e-commerce para clientes internacionales. Uso de Vue.js, Nuxt.js y integración con APIs REST. Trabajo en equipo ágil con metodologías Scrum.",
+          esActual: false
+        },
+        {
+          id: "exp-3",
+          cargo: "Desarrollador Junior",
+          empresa: "StartupTech",
+          ubicacion: "San Nicolás, Argentina",
+          fechaInicio: "06/2019",
+          fechaFin: "02/2020",
+          descripcion: "Desarrollo de componentes React reutilizables y mantenimiento de código legacy. Participación en code reviews y mejora continua de procesos de desarrollo.",
+          esActual: false
+        }
+      ],
+      
+      // Educación
+      educacion: [
+        {
+          id: "edu-1",
+          titulo: "Grado en Ingeniería Informática",
+          institucion: "Universidad Nacional de Rosario",
+          ubicacion: "San Nicolás, Argentina",
+          fechaInicio: "09/2015",
+          fechaFin: "06/2019",
+          descripcion: "Especialización en Ingeniería del Software. Proyecto final: Aplicación web para gestión de inventarios con React y Node.js. Nota media: 8.2"
+        },
+        {
+          id: "edu-2",
+          titulo: "Certificación AWS Cloud Practitioner",
+          institucion: "Amazon Web Services",
+          ubicacion: "Online",
+          fechaInicio: "01/2023",
+          fechaFin: "03/2023",
+          descripcion: "Fundamentos de computación en la nube, servicios AWS y mejores prácticas de seguridad."
+        }
+      ],
+      
+      // Habilidades
+      habilidades: [
+        { id: "skill-1", nombre: "React", nivel: "Experto" },
+        { id: "skill-2", nombre: "TypeScript", nivel: "Avanzado" },
+        { id: "skill-3", nombre: "JavaScript", nivel: "Experto" },
+        { id: "skill-4", nombre: "Vue.js", nivel: "Avanzado" },
+        { id: "skill-5", nombre: "Node.js", nivel: "Intermedio" },
+        { id: "skill-6", nombre: "CSS/SASS", nivel: "Avanzado" },
+        { id: "skill-7", nombre: "Git", nivel: "Avanzado" },
+        { id: "skill-8", nombre: "Figma", nivel: "Intermedio" },
+        { id: "skill-9", nombre: "Trabajo en Equipo", nivel: "Avanzado" },
+        { id: "skill-10", nombre: "Resolución de Problemas", nivel: "Avanzado" }
+      ],
+      
+      // Idiomas
+      idiomas: [
+        { id: "lang-1", idioma: "Español", nivel: "Nativo" },
+        { id: "lang-2", idioma: "Inglés", nivel: "Avanzado" },
+        { id: "lang-3", idioma: "Francés", nivel: "Básico" }
+      ],
+      
+      // Certificaciones
+      certificaciones: [
+        {
+          id: "cert-1",
+          nombre: "AWS Cloud Practitioner",
+          institucion: "Amazon Web Services",
+          fecha: "03/2023",
+          url: "https://aws.amazon.com/certification/certified-cloud-practitioner/"
+        },
+        {
+          id: "cert-2",
+          nombre: "React Developer Certification",
+          institucion: "Meta (Facebook)",
+          fecha: "08/2022",
+          url: ""
+        }
+      ],
+      
+      // Proyectos
+      proyectos: [
+        {
+          id: "proj-1",
+          nombre: "E-commerce Platform",
+          descripcion: "Plataforma de comercio electrónico completa desarrollada con React, Node.js y MongoDB. Incluye sistema de pagos, gestión de inventarios y panel administrativo. Proyecto personal con más de 1000 usuarios registrados.",
+          tecnologias: "React, Node.js, MongoDB, Stripe, AWS",
+          url: "https://github.com/juan-gonzalez/ecommerce-platform"
+        },
+        {
+          id: "proj-2",
+          nombre: "Task Management App",
+          descripcion: "Aplicación de gestión de tareas con interfaz drag-and-drop, notificaciones en tiempo real y colaboración en equipo. Desarrollada con Vue.js y Firebase.",
+          tecnologias: "Vue.js, Firebase, Vuex, CSS Grid",
+          url: "https://taskmanager-demo.netlify.app"
+        }
+      ],
+      
+      // Referencias
+      referencias: [
+        {
+          id: "ref-1",
+          nombre: "María Rodríguez",
+          cargo: "Tech Lead",
+          empresa: "TechCorp Solutions",
+          telefono: "+34 611 234 567",
+          email: "maria.rodriguez@techcorp.com"
+        },
+        {
+          id: "ref-2",
+          nombre: "Carlos Martín",
+          cargo: "CTO",
+          empresa: "Digital Agency Pro",
+          telefono: "+34 622 345 678",
+          email: "carlos.martin@digitalagency.com"
+        }
+      ]
+    };
+    
+    setNewCv(prevCv => ({
+      ...prevCv,
+      ...testData
+    }));
+    
+    showAlert.success("Datos de prueba cargados", "El formulario se ha llenado automáticamente con datos de ejemplo para pruebas.");
+  }, []);
+
+  // Función para limpiar el formulario
+  const clearForm = useCallback(() => {
+    setNewCv({
+      // Datos actuales
+      Nombre: "",
+      Apellido: "",
+      Edad: "",
+      categoriaGeneral: "",
+      categoriaEspecifica: "",
+      ciudad: "",
+      localidad: "",
+      Email: "",
+      Foto: "",
+      cv: "",
+      estado: "pendiente",
+      versionCV: 1,
+      
+      // Nuevos campos expandidos
+      telefono: "",
+      direccion: "",
+      linkedin: "",
+      sitioWeb: "",
+      perfilProfesional: "",
+      
+      // Arrays de objetos
+      experiencias: [],
+      educacion: [],
+      habilidades: [],
+      idiomas: [],
+      certificaciones: [],
+      proyectos: [],
+      referencias: [],
+      
+      // Configuración de CV generado
+      cvGenerado: false,
+      plantillaSeleccionada: "moderna",
+      cvPdfUrl: ""
+    });
+    
+    showAlert.success("Formulario limpiado", "Todos los campos han sido limpiados.");
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!user) return;
@@ -229,13 +437,22 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
       }
       
       // Preparar datos según el modo
+      const finalCvUrl = tabValue === 0 ? cvPdfUrl : newCv.cv;
+      
+      console.log("📋 Datos del CV a guardar:", {
+        modo: tabValue === 0 ? "Generado" : "Subido manualmente",
+        cvUrl: finalCvUrl,
+        plantilla: tabValue === 0 ? selectedTemplate : "N/A"
+      });
+      
       const cvData = {
         ...newCv,
         estado: "pendiente",
         uid: user.uid,
+        cv: finalCvUrl, // Campo principal para compatibilidad con Dashboard
         cvGenerado: tabValue === 0, // true si es generador, false si es subida
         plantillaSeleccionada: tabValue === 0 ? selectedTemplate : null,
-        cvPdfUrl: tabValue === 0 ? cvPdfUrl : newCv.cv, // Usar PDF generado o archivo subido
+        cvPdfUrl: finalCvUrl, // URL del PDF (compatibilidad futura)
         fechaCreacion: new Date().toISOString(),
         versionCV: currentCv ? (currentCv.versionCV || 1) + 1 : 1
       };
@@ -280,9 +497,41 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
       p: 3
     }}>
       <Paper elevation={3} sx={{ p: 4 }}>
-        <Typography variant="h4" gutterBottom align="center">
-          {currentCv ? "Actualizar tu perfil y CV" : "Cargar perfil y tu CV"}
-        </Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+          <Typography variant="h4" sx={{ flex: 1, textAlign: 'center' }}>
+            {currentCv ? "Actualizar tu perfil y CV" : "Cargar perfil y tu CV"}
+          </Typography>
+          
+          {/* Botones de utilidad para pruebas */}
+          {!currentCv && (
+            <Box sx={{ display: 'flex', gap: 2, ml: 2 }}>
+              <Button
+                variant="outlined"
+                color="secondary"
+                onClick={fillWithTestData}
+                sx={{ 
+                  minWidth: 200,
+                  fontSize: '14px',
+                  fontWeight: 'bold'
+                }}
+              >
+                🧪 Llenar con datos de prueba
+              </Button>
+              <Button
+                variant="outlined"
+                color="error"
+                onClick={clearForm}
+                sx={{ 
+                  minWidth: 120,
+                  fontSize: '14px',
+                  fontWeight: 'bold'
+                }}
+              >
+                🗑️ Limpiar
+              </Button>
+            </Box>
+          )}
+        </Box>
 
         {/* Sistema de Pestañas */}
         <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
@@ -309,9 +558,27 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
         <Box component="form" onSubmit={handleSubmit}>
           {/* Pestaña 1: Generador de CV */}
           <TabPanel value={tabValue} index={0}>
-            <Typography variant="h6" sx={{ mb: 3, color: 'primary.main', textAlign: 'center' }}>
-              Crea tu CV profesional paso a paso
-            </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 3 }}>
+              <Typography variant="h6" sx={{ color: 'primary.main', textAlign: 'center', mr: 2 }}>
+                Crea tu CV profesional paso a paso
+              </Typography>
+              {!currentCv && (
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  size="small"
+                  onClick={fillWithTestData}
+                  sx={{ 
+                    fontSize: '12px',
+                    fontWeight: 'bold',
+                    px: 2,
+                    py: 0.5
+                  }}
+                >
+                  🧪 Datos de prueba
+                </Button>
+              )}
+            </Box>
             
             <PersonalDataForm newCv={newCv} handleChange={handleChange} />
             <Divider sx={{ my: 3 }} />
