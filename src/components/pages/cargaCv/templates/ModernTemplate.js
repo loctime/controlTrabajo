@@ -85,11 +85,11 @@ export const generateModernTemplate = async (cvData) => {
     try {
       console.log('📸 Cargando imagen de perfil:', cvData.Foto);
       
-      // Crear círculo de fondo con sombra (mejor posicionado para el layout)
+      // Crear círculo de fondo con sombra (posicionado en el color claro)
       doc.setFillColor('#ffffff');
-      doc.circle(20, 28, 18, 'F');
+      doc.circle(20, 30, 18, 'F');
       doc.setFillColor('#f8fafc');
-      doc.circle(20, 28, 16, 'F');
+      doc.circle(20, 30, 16, 'F');
       
       // Cargar imagen desde URL
       const img = await loadImageFromUrl(cvData.Foto);
@@ -127,39 +127,39 @@ export const generateModernTemplate = async (cvData) => {
       ctx.clip();
       ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
       
-      // Convertir canvas a base64 y agregar al PDF (mejor posicionado para el layout)
+      // Convertir canvas a base64 y agregar al PDF (posicionado en el color claro)
       const imgData = canvas.toDataURL('image/jpeg', 0.8);
-      doc.addImage(imgData, 'JPEG', 4, 12, 32, 32);
+      doc.addImage(imgData, 'JPEG', 4, 14, 32, 32);
       
       console.log('✅ Imagen de perfil cargada correctamente');
     } catch (error) {
       console.log('⚠️ Error al cargar imagen de perfil:', error);
       
-      // Fallback: mostrar placeholder con mejor diseño (mejor posicionado para el layout)
+      // Fallback: mostrar placeholder con mejor diseño (posicionado en el color claro)
       doc.setFillColor('#ffffff');
-      doc.circle(20, 28, 16, 'F');
+      doc.circle(20, 30, 16, 'F');
       doc.setFillColor('#e5e7eb');
-      doc.circle(20, 28, 14, 'F');
+      doc.circle(20, 30, 14, 'F');
       
       doc.setTextColor('#6b7280');
       doc.setFontSize(8);
-      doc.text('FOTO', 20, 31, { align: 'center' });
+      doc.text('FOTO', 20, 33, { align: 'center' });
     }
   }
 
   // === HEADER CON TODO EL ANCHO ===
   
-  // NOMBRE PRINCIPAL - Posicionado para no tapar la foto
+  // NOMBRE PRINCIPAL - Posicionado para no tapar la foto y quedar en el color claro
   doc.setTextColor('#ffffff');
   doc.setFontSize(32); // Más grande para mejor legibilidad
   doc.setFont('helvetica', 'bold');
   const fullName = `${cvData.Nombre || ''} ${cvData.Apellido || ''}`;
   // Ajustar ancho para dejar espacio a la foto (que está en x=4, ancho=32, más margen)
   const splitName = doc.splitTextToSize(fullName, pageWidth - 55); 
-  doc.text(splitName, 50, 12); // Empezar después de la foto
+  doc.text(splitName, 50, 15); // Un poco más abajo para quedar en el color claro
   
   // Calcular posición Y después del nombre (ajustado para márgenes más estrechos)
-  let currentHeaderY = 12 + (splitName.length * 8); // Más espacio para fuente más grande
+  let currentHeaderY = 15 + (splitName.length * 8); // Más espacio para fuente más grande
   
   // SIN LÍNEA DECORATIVA - Para evitar que tape el texto
   currentHeaderY += 5;
@@ -169,27 +169,31 @@ export const generateModernTemplate = async (cvData) => {
     doc.setFontSize(13);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor('#e2e8f0');
-    doc.text(`${cvData.Edad} años`, pageWidth - 25, 18);
+    doc.text(`${cvData.Edad} años`, pageWidth - 25, 21);
   }
 
-  // TÍTULO PROFESIONAL - Alineado con el nombre
+  // TÍTULO PROFESIONAL - Posicionado en el color medio (después de y=30)
   const professionalTitle = buildProfessionalTitle(cvData);
   if (professionalTitle) {
     doc.setFontSize(14);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor('#f1f5f9');
     const splitTitle = doc.splitTextToSize(professionalTitle, pageWidth - 55);
-    doc.text(splitTitle, 50, currentHeaderY);
-    currentHeaderY += (splitTitle.length * 6) + 8;
+    // Asegurar que esté en el color medio (después de y=30)
+    const titleY = Math.max(currentHeaderY, 32);
+    doc.text(splitTitle, 50, titleY);
+    currentHeaderY = titleY + (splitTitle.length * 6) + 8;
   }
 
-  // INFORMACIÓN DE CONTACTO - Alineado con el nombre (más grande y mejor espaciado)
+  // INFORMACIÓN DE CONTACTO - Posicionado en el color oscuro (después de y=45)
   doc.setFontSize(10);
   doc.setTextColor('#e2e8f0');
   const contactInfo = buildContactInfo(cvData);
   const contactText = contactInfo.join(' • ');
   const splitContact = doc.splitTextToSize(contactText, pageWidth - 55);
-  doc.text(splitContact, 50, currentHeaderY);
+  // Asegurar que esté en el color oscuro (después de y=45)
+  const contactY = Math.max(currentHeaderY, 47);
+  doc.text(splitContact, 50, contactY);
 
   // === PERFIL PROFESIONAL ===
   let currentY = 75; // Ajustado para el header más grande con más espacio
