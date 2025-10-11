@@ -59,7 +59,7 @@ export const generateModernCVWord = async (cvData) => {
           }),
         ],
         alignment: options.alignment || AlignmentType.LEFT,
-        spacing: options.spacing || { before: 50, after: 100 },
+        spacing: options.spacing || { before: 25, after: 50 },
       });
     };
 
@@ -75,7 +75,7 @@ export const generateModernCVWord = async (cvData) => {
             font: "Calibri",
           }),
         ],
-        spacing: { before: 200, after: 100 },
+        spacing: { before: 100, after: 50 },
         alignment: isSidebar ? AlignmentType.CENTER : AlignmentType.LEFT,
       });
     };
@@ -87,7 +87,7 @@ export const generateModernCVWord = async (cvData) => {
           size: 100,
           type: WidthType.PERCENTAGE,
         },
-        columnWidths: [3200, 6800], // Ancho máximo: 32% izquierda, 68% derecha
+        columnWidths: [3500, 7500], // Ancho ultra máximo: 32% izquierda, 68% derecha
         rows: [
           new TableRow({
             children: [
@@ -151,10 +151,10 @@ export const generateModernCVWord = async (cvData) => {
                   color: primaryColor,
                 },
                 margins: {
-                  top: 100,
-                  bottom: 100,
-                  left: 100,
-                  right: 100,
+                  top: 50,
+                  bottom: 50,
+                  left: 50,
+                  right: 50,
                 },
               }),
 
@@ -166,21 +166,21 @@ export const generateModernCVWord = async (cvData) => {
                     bold: true,
                     size: 48,
                     color: primaryColor,
-                    spacing: { before: 100, after: 50 },
+                    spacing: { before: 50, after: 25 },
                   }),
 
                   // EDAD
                   createStyledParagraph(`${cvData.Edad} años`, {
                     size: 24,
                     color: secondaryColor,
-                    spacing: { before: 0, after: 100 },
+                    spacing: { before: 0, after: 50 },
                   }),
 
                   // TÍTULO PROFESIONAL
                   createStyledParagraph(buildProfessionalTitle(cvData), {
                     size: 28,
                     color: textColor,
-                    spacing: { before: 0, after: 200 },
+                    spacing: { before: 0, after: 100 },
                   }),
 
                   // PERFIL PROFESIONAL
@@ -188,7 +188,7 @@ export const generateModernCVWord = async (cvData) => {
                     createSectionTitle('PERFIL PROFESIONAL'),
                     createStyledParagraph(cvData.perfilProfesional, {
                       size: 22,
-                      spacing: { before: 0, after: 150 },
+                      spacing: { before: 0, after: 75 },
                     }),
                   ] : []),
 
@@ -200,7 +200,7 @@ export const generateModernCVWord = async (cvData) => {
                         bold: true,
                         size: 26,
                         color: primaryColor,
-                        spacing: { before: 200, after: 100 },
+                        spacing: { before: 100, after: 50 },
                       }),
                       createStyledParagraph(`${exp.empresa || ''} | ${exp.fechaInicio || ''} - ${exp.fechaFin || ''}`, {
                         size: 22,
@@ -230,7 +230,7 @@ export const generateModernCVWord = async (cvData) => {
                         bold: true,
                         size: 26,
                         color: primaryColor,
-                        spacing: { before: 200, after: 100 },
+                        spacing: { before: 100, after: 50 },
                       }),
                       createStyledParagraph(`${edu.institucion || ''} | ${edu.fechaInicio || ''} - ${edu.fechaFin || ''}`, {
                         size: 22,
@@ -260,7 +260,7 @@ export const generateModernCVWord = async (cvData) => {
                         bold: true,
                         size: 24,
                         color: primaryColor,
-                        spacing: { before: 200, after: 100 },
+                        spacing: { before: 100, after: 50 },
                       }),
                       createStyledParagraph(`${cert.institucion || ''} | ${cert.fecha || ''}`, {
                         size: 22,
@@ -286,7 +286,7 @@ export const generateModernCVWord = async (cvData) => {
                         bold: true,
                         size: 24,
                         color: primaryColor,
-                        spacing: { before: 200, after: 100 },
+                        spacing: { before: 100, after: 50 },
                       }),
                       createStyledParagraph(proyecto.descripcion || '', {
                         size: 22,
@@ -311,7 +311,7 @@ export const generateModernCVWord = async (cvData) => {
                           bold: true,
                           size: 24,
                           color: primaryColor,
-                          spacing: { before: 200, after: 100 },
+                          spacing: { before: 100, after: 50 },
                         }),
                       ] : []),
                       createStyledParagraph(
@@ -338,10 +338,10 @@ export const generateModernCVWord = async (cvData) => {
                   ] : []),
                 ],
                 margins: {
-                  top: 100,
-                  bottom: 100,
-                  left: 100,
-                  right: 100,
+                  top: 50,
+                  bottom: 50,
+                  left: 50,
+                  right: 50,
                 },
               }),
             ],
@@ -356,10 +356,10 @@ export const generateModernCVWord = async (cvData) => {
         properties: {
           page: {
             margin: {
-              top: 200,      // 0.14 pulgadas
-              right: 200,    // 0.14 pulgadas  
-              bottom: 200,   // 0.14 pulgadas
-              left: 200,     // 0.14 pulgadas
+              top: 100,      // 0.07 pulgadas
+              right: 100,    // 0.07 pulgadas  
+              bottom: 100,   // 0.07 pulgadas
+              left: 100,     // 0.07 pulgadas
             },
           },
         },
