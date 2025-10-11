@@ -413,9 +413,9 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
           return;
         }
         
-        // Generar PDF
-        const pdfDoc = pdfGeneratorService.generateCVPdf(newCv, selectedTemplate);
-        const pdfBlob = pdfGeneratorService.getPDFAsBlob(pdfDoc);
+         // Generar PDF
+         const pdfDoc = await pdfGeneratorService.generateCVPdf(newCv, selectedTemplate);
+         const pdfBlob = pdfGeneratorService.getPDFAsBlob(pdfDoc);
         
         // Crear archivo para subir
         const fileName = `CV_${newCv.Nombre}_${newCv.Apellido}_${selectedTemplate}.pdf`;

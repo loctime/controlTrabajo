@@ -1,7 +1,41 @@
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import { getDownloadUrl } from '../../../../lib/controlFileStorage';
 
-export const generateModernTemplate = (cvData) => {
+// Función auxiliar para cargar imagen desde URL usando ControlFile API
+const loadImageFromUrl = async (imageUrl) => {
+  try {
+    console.log('📸 Cargando imagen usando ControlFile API:', imageUrl);
+    
+    // Usar getDownloadUrl para obtener la URL directa de descarga
+    const downloadUrl = await getDownloadUrl(imageUrl);
+    console.log('✅ URL de descarga obtenida para imagen:', downloadUrl);
+    
+    // Ahora cargar la imagen desde la URL directa
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      
+      img.onload = () => {
+        console.log('✅ Imagen cargada exitosamente:', downloadUrl);
+        resolve(img);
+      };
+      
+      img.onerror = (error) => {
+        console.error('❌ Error al cargar imagen desde URL directa:', error);
+        reject(new Error('Error al cargar la imagen desde la URL de descarga'));
+      };
+      
+      img.src = downloadUrl;
+    });
+    
+  } catch (error) {
+    console.error('❌ Error al obtener URL de descarga:', error);
+    throw new Error(`No se pudo obtener la URL de descarga para la imagen: ${error.message}`);
+  }
+};
+
+export const generateModernTemplate = async (cvData) => {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
@@ -24,20 +58,43 @@ export const generateModernTemplate = (cvData) => {
   // Foto de perfil (si existe)
   if (cvData.Foto) {
     try {
-      // Crear círculo para la foto
+      console.log('📸 Cargando imagen de perfil:', cvData.Foto);
+      
+      // Crear círculo de fondo blanco
       doc.setFillColor('#ffffff');
       doc.circle(25, 25, 20, 'F');
       
-      // Aquí se podría agregar la imagen, pero por simplicidad usamos un placeholder
+      // Cargar imagen desde URL
+      const img = await loadImageFromUrl(cvData.Foto);
+      
+      // Crear canvas para procesar la imagen como círculo
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const size = 36; // Tamaño de la imagen
+      canvas.width = size;
+      canvas.height = size;
+      
+      // Dibujar imagen circular
+      ctx.beginPath();
+      ctx.arc(size/2, size/2, size/2, 0, 2 * Math.PI);
+      ctx.clip();
+      ctx.drawImage(img, 0, 0, size, size);
+      
+      // Convertir canvas a base64 y agregar al PDF
+      const imgData = canvas.toDataURL('image/jpeg', 0.8);
+      doc.addImage(imgData, 'JPEG', 7, 7, 36, 36);
+      
+      console.log('✅ Imagen de perfil cargada correctamente');
+    } catch (error) {
+      console.log('⚠️ Error al cargar imagen de perfil:', error);
+      
+      // Fallback: mostrar placeholder
       doc.setFillColor(primaryColor);
       doc.circle(25, 25, 18, 'F');
       
-      // Texto placeholder
       doc.setTextColor('#ffffff');
-      doc.setFontSize(12);
+      doc.setFontSize(10);
       doc.text('FOTO', 25, 28, { align: 'center' });
-    } catch (error) {
-      console.log('Error al procesar foto:', error);
     }
   }
 
@@ -55,10 +112,10 @@ export const generateModernTemplate = (cvData) => {
   // Información de contacto
   doc.setFontSize(10);
   const contactInfo = [];
-  if (cvData.Email) contactInfo.push(`📧 ${cvData.Email}`);
-  if (cvData.telefono) contactInfo.push(`📞 ${cvData.telefono}`);
-  if (cvData.ciudad) contactInfo.push(`📍 ${cvData.ciudad}`);
-  if (cvData.linkedin) contactInfo.push(`💼 LinkedIn`);
+  if (cvData.Email) contactInfo.push(`Email: ${cvData.Email}`);
+  if (cvData.telefono) contactInfo.push(`Tel: ${cvData.telefono}`);
+  if (cvData.ciudad) contactInfo.push(`Ciudad: ${cvData.ciudad}`);
+  if (cvData.linkedin) contactInfo.push(`LinkedIn`);
 
   doc.text(contactInfo.join(' • '), 60, 40);
 
@@ -90,7 +147,7 @@ export const generateModernTemplate = (cvData) => {
     doc.setTextColor(primaryColor);
     doc.setFontSize(12);
     doc.setFont('helvetica', 'bold');
-    doc.text('💼 EXPERIENCIA LABORAL', leftColumnX, currentY);
+    doc.text('EXPERIENCIA LABORAL', leftColumnX, currentY);
     currentY += 8;
 
     cvData.experiencias.forEach((exp, index) => {
@@ -118,7 +175,7 @@ export const generateModernTemplate = (cvData) => {
     doc.setTextColor(primaryColor);
     doc.setFontSize(12);
     doc.setFont('helvetica', 'bold');
-    doc.text('🎓 EDUCACIÓN', leftColumnX, currentY);
+    doc.text('EDUCACIÓN', leftColumnX, currentY);
     currentY += 8;
 
     cvData.educacion.forEach((edu) => {
@@ -143,7 +200,7 @@ export const generateModernTemplate = (cvData) => {
     doc.setTextColor(primaryColor);
     doc.setFontSize(12);
     doc.setFont('helvetica', 'bold');
-    doc.text('🛠️ HABILIDADES', rightColumnX, rightY);
+    doc.text('HABILIDADES', rightColumnX, rightY);
     rightY += 8;
 
     cvData.habilidades.forEach((skill) => {
@@ -161,7 +218,7 @@ export const generateModernTemplate = (cvData) => {
     doc.setTextColor(primaryColor);
     doc.setFontSize(12);
     doc.setFont('helvetica', 'bold');
-    doc.text('🌍 IDIOMAS', rightColumnX, rightY);
+    doc.text('IDIOMAS', rightColumnX, rightY);
     rightY += 8;
 
     cvData.idiomas.forEach((idioma) => {
@@ -179,7 +236,7 @@ export const generateModernTemplate = (cvData) => {
     doc.setTextColor(primaryColor);
     doc.setFontSize(12);
     doc.setFont('helvetica', 'bold');
-    doc.text('🏆 CERTIFICACIONES', rightColumnX, rightY);
+    doc.text('CERTIFICACIONES', rightColumnX, rightY);
     rightY += 8;
 
     cvData.certificaciones.forEach((cert) => {
@@ -201,7 +258,7 @@ export const generateModernTemplate = (cvData) => {
     doc.setTextColor(primaryColor);
     doc.setFontSize(12);
     doc.setFont('helvetica', 'bold');
-    doc.text('🚀 PROYECTOS', rightColumnX, rightY);
+    doc.text('PROYECTOS', rightColumnX, rightY);
     rightY += 8;
 
     cvData.proyectos.forEach((proyecto) => {
@@ -228,7 +285,7 @@ export const generateModernTemplate = (cvData) => {
     doc.setTextColor(primaryColor);
     doc.setFontSize(12);
     doc.setFont('helvetica', 'bold');
-    doc.text('👥 REFERENCIAS', leftColumnX, refY);
+    doc.text('REFERENCIAS', leftColumnX, refY);
     
     let refCurrentY = refY + 8;
     cvData.referencias.slice(0, 2).forEach((ref) => {
@@ -242,8 +299,8 @@ export const generateModernTemplate = (cvData) => {
       doc.text(`${ref.cargo || ''} en ${ref.empresa || ''}`, leftColumnX, refCurrentY);
       
       refCurrentY += 4;
-      if (ref.telefono) doc.text(`📞 ${ref.telefono}`, leftColumnX, refCurrentY);
-      if (ref.email) doc.text(`📧 ${ref.email}`, leftColumnX + 40, refCurrentY);
+      if (ref.telefono) doc.text(`Tel: ${ref.telefono}`, leftColumnX, refCurrentY);
+      if (ref.email) doc.text(`Email: ${ref.email}`, leftColumnX + 40, refCurrentY);
       
       refCurrentY += 8;
     });

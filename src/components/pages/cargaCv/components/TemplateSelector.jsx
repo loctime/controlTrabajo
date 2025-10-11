@@ -29,7 +29,7 @@ export const TemplateSelector = memo(({ selectedTemplate, onTemplateChange }) =>
       >
         <Grid container spacing={3}>
           {/* Plantilla Moderna */}
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} md={4}>
             <Card 
               sx={{ 
                 border: selectedTemplate === 'moderna' ? '2px solid #1976d2' : '1px solid #e0e0e0',
@@ -137,8 +137,139 @@ export const TemplateSelector = memo(({ selectedTemplate, onTemplateChange }) =>
             </Card>
           </Grid>
 
+          {/* Plantilla Elegante */}
+          <Grid item xs={12} md={4}>
+            <Card 
+              sx={{ 
+                border: selectedTemplate === 'elegante' ? '2px solid #1976d2' : '1px solid #e0e0e0',
+                backgroundColor: selectedTemplate === 'elegante' ? '#f0f8ff' : 'white',
+                transition: 'all 0.3s ease'
+              }}
+            >
+              <CardActionArea onClick={() => onTemplateChange('elegante')}>
+                <CardContent>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                    <FormControlLabel 
+                      value="elegante" 
+                      control={<Radio />} 
+                      label="" 
+                      sx={{ m: 0, mr: 1 }}
+                    />
+                    <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#2E5266' }}>
+                      💼 Plantilla Elegante
+                    </Typography>
+                  </Box>
+                  
+                  {/* Preview visual de la plantilla elegante */}
+                  <Box sx={{ 
+                    border: '1px solid #ddd', 
+                    borderRadius: 1, 
+                    p: 2, 
+                    backgroundColor: 'white',
+                    mb: 2
+                  }}>
+                    {/* Two column layout with colored left sidebar */}
+                    <Box sx={{ display: 'flex', gap: 1, fontSize: '10px' }}>
+                      {/* Left column - colored */}
+                      <Box sx={{ 
+                        flex: 0.4, 
+                        backgroundColor: '#2E5266', 
+                        color: 'white', 
+                        p: 1, 
+                        borderRadius: 1,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center'
+                      }}>
+                        <Box sx={{ 
+                          width: 20, 
+                          height: 20, 
+                          backgroundColor: 'white', 
+                          borderRadius: '50%',
+                          mb: 1,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: '#2E5266',
+                          fontSize: '8px'
+                        }}>
+                          👤
+                        </Box>
+                        <Typography sx={{ fontSize: '8px', mb: 0.5, textAlign: 'center' }}>
+                          CONTACTO
+                        </Typography>
+                        <Typography sx={{ fontSize: '7px', mb: 0.3 }}>
+                          📍 Dirección
+                        </Typography>
+                        <Typography sx={{ fontSize: '7px', mb: 0.3 }}>
+                          📞 Teléfono
+                        </Typography>
+                        <Typography sx={{ fontSize: '7px', mb: 0.5 }}>
+                          ✉️ Email
+                        </Typography>
+                        <Typography sx={{ fontSize: '8px', mb: 0.5, textAlign: 'center' }}>
+                          APTITUDES
+                        </Typography>
+                        <Typography sx={{ fontSize: '7px' }}>
+                          • Trabajo en equipo
+                        </Typography>
+                      </Box>
+                      
+                      {/* Right column - white */}
+                      <Box sx={{ flex: 0.6 }}>
+                        <Typography sx={{ 
+                          fontWeight: 'bold', 
+                          color: '#2E5266', 
+                          fontSize: '12px',
+                          mb: 1
+                        }}>
+                          JUAN PÉREZ
+                        </Typography>
+                        
+                        <Typography sx={{ 
+                          fontWeight: 'bold', 
+                          fontSize: '8px',
+                          color: '#333',
+                          borderBottom: '1px solid #ccc',
+                          pb: 0.3,
+                          mb: 0.5
+                        }}>
+                          IDIOMAS
+                        </Typography>
+                        <Typography sx={{ fontSize: '7px', mb: 1 }}>
+                          • Español • Inglés
+                        </Typography>
+                        
+                        <Typography sx={{ 
+                          fontWeight: 'bold', 
+                          fontSize: '8px',
+                          color: '#333',
+                          borderBottom: '1px solid #ccc',
+                          pb: 0.3,
+                          mb: 0.5
+                        }}>
+                          EXPERIENCIA
+                        </Typography>
+                        <Typography sx={{ fontSize: '7px' }}>
+                          Desarrollador en TechCorp
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </Box>
+                  
+                  <Typography variant="body2" color="text.secondary">
+                    <strong>Ideal para:</strong> Profesionales, ejecutivos, consultores, especialistas técnicos
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                    <strong>Características:</strong> Columna izquierda colorida, diseño asimétrico, muy profesional
+                  </Typography>
+                </CardContent>
+              </CardActionArea>
+            </Card>
+          </Grid>
+
           {/* Plantilla Clásica */}
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} md={4}>
             <Card 
               sx={{ 
                 border: selectedTemplate === 'clasica' ? '2px solid #1976d2' : '1px solid #e0e0e0',
@@ -246,7 +377,10 @@ export const TemplateSelector = memo(({ selectedTemplate, onTemplateChange }) =>
           • <strong>Plantilla Moderna:</strong> Perfecta para sectores creativos, tecnología, marketing y profesiones que valoran la innovación
         </Typography>
         <Typography variant="body2" sx={{ mb: 1 }}>
-          • <strong>Plantilla Clásica:</strong> Ideal para sectores tradicionales, corporativos, finanzas y roles que requieren formalidad
+          • <strong>Plantilla Elegante:</strong> Ideal para profesionales, ejecutivos, consultores y especialistas técnicos que buscan un diseño sofisticado
+        </Typography>
+        <Typography variant="body2" sx={{ mb: 1 }}>
+          • <strong>Plantilla Clásica:</strong> Perfecta para sectores tradicionales, corporativos, finanzas y roles que requieren formalidad
         </Typography>
         <Typography variant="body2">
           • Puedes cambiar de plantilla en cualquier momento antes de generar tu CV final

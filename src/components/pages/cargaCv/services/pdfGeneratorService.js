@@ -1,5 +1,6 @@
 import { generateModernTemplate } from '../templates/ModernTemplate';
 import { generateClassicTemplate } from '../templates/ClassicTemplate';
+import { generateElegantTemplate } from '../templates/ElegantTemplate';
 
 /**
  * Servicio principal para generar CVs en PDF
@@ -9,9 +10,9 @@ export const pdfGeneratorService = {
    * Genera un CV en PDF usando la plantilla especificada
    * @param {Object} cvData - Datos del CV
    * @param {string} template - Plantilla a usar ('moderna' o 'clasica')
-   * @returns {jsPDF} Documento PDF generado
+   * @returns {Promise<jsPDF>} Documento PDF generado
    */
-  generateCVPdf: (cvData, template = 'moderna') => {
+  generateCVPdf: async (cvData, template = 'moderna') => {
     try {
       // Validar datos básicos
       if (!cvData || !cvData.Nombre || !cvData.Apellido) {
@@ -22,14 +23,17 @@ export const pdfGeneratorService = {
       let pdfDoc;
       switch (template) {
         case 'moderna':
-          pdfDoc = generateModernTemplate(cvData);
+          pdfDoc = await generateModernTemplate(cvData);
           break;
         case 'clasica':
           pdfDoc = generateClassicTemplate(cvData);
           break;
+        case 'elegante':
+          pdfDoc = await generateElegantTemplate(cvData);
+          break;
         default:
           console.warn(`Plantilla '${template}' no reconocida, usando plantilla moderna por defecto`);
-          pdfDoc = generateModernTemplate(cvData);
+          pdfDoc = await generateModernTemplate(cvData);
       }
 
       return pdfDoc;
@@ -66,9 +70,9 @@ export const pdfGeneratorService = {
    * @param {string} template - Plantilla a usar
    * @param {string} filename - Nombre del archivo (opcional)
    */
-  generateAndDownload: (cvData, template = 'moderna', filename = null) => {
+  generateAndDownload: async (cvData, template = 'moderna', filename = null) => {
     try {
-      const pdfDoc = pdfGeneratorService.generateCVPdf(cvData, template);
+      const pdfDoc = await pdfGeneratorService.generateCVPdf(cvData, template);
       
       // Generar nombre de archivo automático si no se proporciona
       if (!filename) {
@@ -184,6 +188,13 @@ export const pdfGeneratorService = {
         description: 'Diseño contemporáneo con colores vibrantes y layout de dos columnas',
         icon: '🎨',
         suitableFor: ['Desarrolladores', 'Diseñadores', 'Marketing', 'Creativos']
+      },
+      {
+        id: 'elegante',
+        name: 'Plantilla Elegante',
+        description: 'Diseño profesional con columna izquierda colorida y layout asimétrico',
+        icon: '💼',
+        suitableFor: ['Profesionales', 'Ejecutivos', 'Consultores', 'Especialistas técnicos']
       },
       {
         id: 'clasica',
