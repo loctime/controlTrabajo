@@ -85,11 +85,11 @@ export const generateModernTemplate = async (cvData) => {
     try {
       console.log('📸 Cargando imagen de perfil:', cvData.Foto);
       
-      // Crear círculo de fondo con sombra (ajustado para header más grande)
+      // Crear círculo de fondo con sombra (ajustado para header más cerca del borde)
       doc.setFillColor('#ffffff');
-      doc.circle(20, 30, 18, 'F');
+      doc.circle(20, 25, 18, 'F');
       doc.setFillColor('#f8fafc');
-      doc.circle(20, 30, 16, 'F');
+      doc.circle(20, 25, 16, 'F');
       
       // Cargar imagen desde URL
       const img = await loadImageFromUrl(cvData.Foto);
@@ -127,23 +127,23 @@ export const generateModernTemplate = async (cvData) => {
       ctx.clip();
       ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
       
-      // Convertir canvas a base64 y agregar al PDF (ajustado para header más grande)
+      // Convertir canvas a base64 y agregar al PDF (ajustado para header más cerca del borde)
       const imgData = canvas.toDataURL('image/jpeg', 0.8);
-      doc.addImage(imgData, 'JPEG', 4, 14, 32, 32);
+      doc.addImage(imgData, 'JPEG', 4, 9, 32, 32);
       
       console.log('✅ Imagen de perfil cargada correctamente');
     } catch (error) {
       console.log('⚠️ Error al cargar imagen de perfil:', error);
       
-      // Fallback: mostrar placeholder con mejor diseño (ajustado para header más grande)
+      // Fallback: mostrar placeholder con mejor diseño (ajustado para header más cerca del borde)
       doc.setFillColor('#ffffff');
-      doc.circle(20, 30, 16, 'F');
+      doc.circle(20, 25, 16, 'F');
       doc.setFillColor('#e5e7eb');
-      doc.circle(20, 30, 14, 'F');
+      doc.circle(20, 25, 14, 'F');
       
       doc.setTextColor('#6b7280');
       doc.setFontSize(8);
-      doc.text('FOTO', 20, 33, { align: 'center' });
+      doc.text('FOTO', 20, 28, { align: 'center' });
     }
   }
 
@@ -155,10 +155,10 @@ export const generateModernTemplate = async (cvData) => {
   doc.setFont('helvetica', 'bold');
   const fullName = `${cvData.Nombre || ''} ${cvData.Apellido || ''}`;
   const splitName = doc.splitTextToSize(fullName, pageWidth - 45); // Usar casi todo el ancho
-  doc.text(splitName, 15, 18); // Ajustado para el header más grande
+  doc.text(splitName, 15, 12); // Más cerca del borde superior
   
   // Calcular posición Y después del nombre (ajustado para márgenes más estrechos)
-  let currentHeaderY = 18 + (splitName.length * 8); // Más espacio para fuente más grande
+  let currentHeaderY = 12 + (splitName.length * 8); // Más espacio para fuente más grande
   
   // SIN LÍNEA DECORATIVA - Para evitar que tape el texto
   currentHeaderY += 5;
@@ -168,7 +168,7 @@ export const generateModernTemplate = async (cvData) => {
     doc.setFontSize(13);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor('#e2e8f0');
-    doc.text(`${cvData.Edad} años`, pageWidth - 25, 25);
+    doc.text(`${cvData.Edad} años`, pageWidth - 25, 18);
   }
 
   // TÍTULO PROFESIONAL - Usando todo el ancho
@@ -263,8 +263,8 @@ export const generateModernTemplate = async (cvData) => {
     addConsistentHeader(doc, pageCounter);
     
     // Resetear posiciones Y pero mantener la columna actual (márgenes más estrechos)
-    leftY = 50;
-    rightY = 50;
+    leftY = 48;
+    rightY = 48;
     
     return currentColumn === 'left' ? leftY : rightY;
   };
@@ -326,7 +326,7 @@ export const generateModernTemplate = async (cvData) => {
     doc.setFont('helvetica', 'bold');
     const fullName = `${cvData.Nombre || ''} ${cvData.Apellido || ''}`;
     const splitHeaderName = doc.splitTextToSize(fullName, pageWidth - 50);
-    doc.text(splitHeaderName, 10, 15);
+    doc.text(splitHeaderName, 10, 10);
     
     // Título profesional - debajo del nombre
     doc.setFontSize(10);
@@ -335,16 +335,16 @@ export const generateModernTemplate = async (cvData) => {
     const professionalTitle = buildProfessionalTitle(cvData);
     if (professionalTitle) {
       const splitTitle = doc.splitTextToSize(professionalTitle, pageWidth - 50);
-      doc.text(splitTitle, 10, 28);
+      doc.text(splitTitle, 10, 23);
     }
     
     // Número de página (opcional)
     if (pageNumber > 1) {
       doc.setFontSize(9);
-      doc.text(`Página ${pageNumber}`, pageWidth - 25, 26);
+      doc.text(`Página ${pageNumber}`, pageWidth - 25, 21);
     }
     
-    return 50; // Retornar Y inicial para el contenido (más cerca del header)
+    return 48; // Retornar Y inicial para el contenido (más cerca del header)
   };
 
   // Función personalizada para agregar nueva página con header consistente
