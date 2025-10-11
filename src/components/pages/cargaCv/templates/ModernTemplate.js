@@ -246,8 +246,25 @@ export const generateModernTemplate = async (cvData) => {
     return contentY;
   };
 
-  // Función simplificada para renderizar secciones sin verificación de altura
-  const renderSection = (doc, sectionName, renderFunction) => {
+  // Función para verificar si hay suficiente espacio para una sección completa
+  const hasSpaceForSection = (sectionName, estimatedContentHeight = 50) => {
+    // Calcular altura del título (aproximadamente 15px)
+    const titleHeight = 15;
+    const totalNeededHeight = titleHeight + estimatedContentHeight;
+    const availableSpace = pageHeight - contentY - 30; // 30px para footer
+    return availableSpace >= totalNeededHeight;
+  };
+
+  // Función para agregar sección con verificación inteligente
+  const addSectionWithSmartPaging = (doc, sectionName, renderFunction, estimatedHeight = 50) => {
+    // Si no hay espacio suficiente para título + contenido mínimo, crear nueva página
+    if (!hasSpaceForSection(sectionName, estimatedHeight)) {
+      addFooter(doc, `Página ${pageCounter}`);
+      doc.addPage();
+      pageCounter++;
+      contentY = addConsistentHeader(doc, pageCounter);
+    }
+    
     contentY = addSectionTitle(doc, sectionName, contentX, contentY, primaryColor);
     contentY = renderFunction(doc, contentX, contentY, contentWidth);
     return contentY;
@@ -316,10 +333,19 @@ export const generateModernTemplate = async (cvData) => {
   
   // EXPERIENCIA LABORAL
   if (cvData.experiencias && cvData.experiencias.length > 0) {
+    // Verificar si hay espacio para título + al menos una experiencia
+    const estimatedHeight = 60; // Altura estimada para una experiencia
+    if (!hasSpaceForSection('EXPERIENCIA LABORAL', estimatedHeight)) {
+      addFooter(doc, `Página ${pageCounter}`);
+      doc.addPage();
+      pageCounter++;
+      contentY = addConsistentHeader(doc, pageCounter);
+    }
+    
     contentY = addSectionTitle(doc, 'EXPERIENCIA LABORAL', contentX, contentY, primaryColor);
 
     cvData.experiencias.forEach((exp, index) => {
-      // Verificar si necesitamos nueva página
+      // Verificar si necesitamos nueva página para cada experiencia
       if (contentY > pageHeight - 80) {
         addFooter(doc, `Página ${pageCounter}`);
         doc.addPage();
@@ -358,10 +384,19 @@ export const generateModernTemplate = async (cvData) => {
 
   // EDUCACIÓN
   if (cvData.educacion && cvData.educacion.length > 0) {
+    // Verificar si hay espacio para título + al menos una educación
+    const estimatedHeight = 40; // Altura estimada para una educación
+    if (!hasSpaceForSection('EDUCACIÓN', estimatedHeight)) {
+      addFooter(doc, `Página ${pageCounter}`);
+      doc.addPage();
+      pageCounter++;
+      contentY = addConsistentHeader(doc, pageCounter);
+    }
+    
     contentY = addSectionTitle(doc, 'EDUCACIÓN', contentX, contentY, primaryColor);
 
     cvData.educacion.forEach((edu) => {
-      // Verificar si necesitamos nueva página
+      // Verificar si necesitamos nueva página para cada educación
       if (contentY > pageHeight - 80) {
         addFooter(doc, `Página ${pageCounter}`);
         doc.addPage();
@@ -395,8 +430,9 @@ export const generateModernTemplate = async (cvData) => {
 
   // HABILIDADES
   if (cvData.habilidades && cvData.habilidades.length > 0) {
-    // Verificar si necesitamos nueva página
-    if (contentY > pageHeight - 80) {
+    // Verificar si hay espacio para título + contenido de habilidades
+    const estimatedHeight = 30; // Altura estimada para habilidades
+    if (!hasSpaceForSection('HABILIDADES', estimatedHeight)) {
       addFooter(doc, `Página ${pageCounter}`);
       doc.addPage();
       pageCounter++;
@@ -417,8 +453,9 @@ export const generateModernTemplate = async (cvData) => {
 
   // IDIOMAS
   if (cvData.idiomas && cvData.idiomas.length > 0) {
-    // Verificar si necesitamos nueva página
-    if (contentY > pageHeight - 80) {
+    // Verificar si hay espacio para título + contenido de idiomas
+    const estimatedHeight = 25; // Altura estimada para idiomas
+    if (!hasSpaceForSection('IDIOMAS', estimatedHeight)) {
       addFooter(doc, `Página ${pageCounter}`);
       doc.addPage();
       pageCounter++;
@@ -444,10 +481,19 @@ export const generateModernTemplate = async (cvData) => {
 
   // CERTIFICACIONES
   if (cvData.certificaciones && cvData.certificaciones.length > 0) {
+    // Verificar si hay espacio para título + al menos una certificación
+    const estimatedHeight = 25; // Altura estimada para una certificación
+    if (!hasSpaceForSection('CERTIFICACIONES', estimatedHeight)) {
+      addFooter(doc, `Página ${pageCounter}`);
+      doc.addPage();
+      pageCounter++;
+      contentY = addConsistentHeader(doc, pageCounter);
+    }
+    
     contentY = addSectionTitle(doc, 'CERTIFICACIONES', contentX, contentY, primaryColor);
 
     cvData.certificaciones.forEach((cert) => {
-      // Verificar si necesitamos nueva página
+      // Verificar si necesitamos nueva página para cada certificación
       if (contentY > pageHeight - 80) {
         addFooter(doc, `Página ${pageCounter}`);
         doc.addPage();
@@ -479,10 +525,19 @@ export const generateModernTemplate = async (cvData) => {
 
   // REFERENCIAS
   if (cvData.referencias && cvData.referencias.length > 0) {
+    // Verificar si hay espacio para título + al menos una referencia
+    const estimatedHeight = 25; // Altura estimada para una referencia
+    if (!hasSpaceForSection('REFERENCIAS', estimatedHeight)) {
+      addFooter(doc, `Página ${pageCounter}`);
+      doc.addPage();
+      pageCounter++;
+      contentY = addConsistentHeader(doc, pageCounter);
+    }
+    
     contentY = addSectionTitle(doc, 'REFERENCIAS', contentX, contentY, primaryColor);
     
     cvData.referencias.slice(0, 3).forEach((ref) => {
-      // Verificar si necesitamos nueva página
+      // Verificar si necesitamos nueva página para cada referencia
       if (contentY > pageHeight - 80) {
         addFooter(doc, `Página ${pageCounter}`);
         doc.addPage();
@@ -530,10 +585,19 @@ export const generateModernTemplate = async (cvData) => {
 
   // PROYECTOS
   if (cvData.proyectos && cvData.proyectos.length > 0) {
+    // Verificar si hay espacio para título + al menos un proyecto
+    const estimatedHeight = 50; // Altura estimada para un proyecto
+    if (!hasSpaceForSection('PROYECTOS', estimatedHeight)) {
+      addFooter(doc, `Página ${pageCounter}`);
+      doc.addPage();
+      pageCounter++;
+      contentY = addConsistentHeader(doc, pageCounter);
+    }
+    
     contentY = addSectionTitle(doc, 'PROYECTOS', contentX, contentY, primaryColor);
 
     cvData.proyectos.forEach((proyecto) => {
-      // Verificar si necesitamos nueva página
+      // Verificar si necesitamos nueva página para cada proyecto
       if (contentY > pageHeight - 80) {
         addFooter(doc, `Página ${pageCounter}`);
         doc.addPage();
