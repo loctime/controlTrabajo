@@ -8,16 +8,41 @@ export const LocationForm = memo(({
 }) => {
   return (
     <>
-      <Box sx={{ mt: 3, mb: 2 }}>
-        <Typography variant="h6" sx={{ color: 'primary.main' }}>
+      <Box sx={{ 
+        mt: 4, 
+        mb: 3,
+        p: 3,
+        background: 'linear-gradient(135deg, #e1f5fe 0%, #b3e5fc 100%)',
+        borderRadius: '12px',
+        border: '2px solid #03a9f4',
+        boxShadow: '0 4px 12px rgba(3, 169, 244, 0.15)'
+      }}>
+        <Typography variant="h4" sx={{ 
+          color: '#0277bd',
+          fontWeight: 'bold',
+          fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' },
+          textShadow: '0 1px 2px rgba(0,0,0,0.1)'
+        }}>
           📍 Ubicación
         </Typography>
-        <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block' }}>
+        <Typography variant="body1" sx={{ 
+          color: '#424242',
+          fontSize: '1rem',
+          fontWeight: 500,
+          mt: 1
+        }}>
           Completa tu información de ubicación
         </Typography>
       </Box>
       
-      <Grid container spacing={3}>
+      <Box sx={{ 
+        p: 3,
+        backgroundColor: '#fafafa',
+        borderRadius: '12px',
+        border: '1px solid #e0e0e0',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+      }}>
+        <Grid container spacing={3}>
         <Grid item xs={12} sm={6}>
           <FormControl fullWidth required>
             <InputLabel id="ciudad-label">Ciudad *</InputLabel>
@@ -46,7 +71,8 @@ export const LocationForm = memo(({
             fullWidth 
           />
         </Grid>
-      </Grid>
+        </Grid>
+      </Box>
     </>
   );
 });

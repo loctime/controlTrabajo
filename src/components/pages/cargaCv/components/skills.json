@@ -1,0 +1,164 @@
+[
+    {
+      "categoria": "Programación y Desarrollo",
+      "habilidades": [
+        "HTML", "CSS", "SASS", "JavaScript", "TypeScript", "React", "Next.js", "Vue.js", "Angular", "Svelte", "Node.js", "Express",
+        "Python", "Django", "Flask", "FastAPI", "Java", "Spring Boot", "Kotlin", "C", "C++", "C#", "PHP", "Laravel", "Ruby", "Ruby on Rails",
+        "Go", "Rust", "Swift", "Perl", "Bash", "Shell Script", "PowerShell", "SQL", "PostgreSQL", "MySQL", "SQLite", "MariaDB",
+        "MongoDB", "Firebase", "Redis", "Cassandra", "GraphQL", "API REST", "Axios", "Prisma", "Sequelize",
+        "Docker", "Kubernetes", "CI/CD", "Git", "GitHub", "GitLab", "Bitbucket",
+        "AWS", "Google Cloud", "Azure", "Vercel", "Render", "Heroku", "DigitalOcean", "Netlify",
+        "Linux", "Ubuntu", "Debian", "CLI", "Visual Studio Code", "WebStorm",
+        "Testing", "Jest", "Cypress", "Mocha", "Chai", "Unit Testing", "End-to-End Testing",
+        "Data Structures", "Algorithms", "API Design", "Microservices", "Clean Code", "Design Patterns", "SOLID Principles"
+      ]
+    },
+    {
+      "categoria": "Diseño y Creatividad",
+      "habilidades": [
+        "Adobe Photoshop", "Adobe Illustrator", "Adobe InDesign", "Figma", "Sketch", "Adobe XD", "Canva", "CorelDRAW",
+        "Premiere Pro", "After Effects", "DaVinci Resolve", "Final Cut Pro", "Blender", "Cinema 4D", "3ds Max",
+        "Diseño Gráfico", "Diseño UX/UI", "Diseño Web", "Diseño de Interiores", "Diseño Industrial", "Diseño de Moda",
+        "Maquetación", "Fotografía", "Edición de Video", "Edición de Imagen", "Animación 2D", "Animación 3D", "Modelado 3D",
+        "Storyboarding", "Diseño de Marca", "Identidad Visual", "Tipografía", "Colorimetría", "Composición Visual"
+      ]
+    },
+    {
+      "categoria": "Marketing y Ventas",
+      "habilidades": [
+        "Marketing Digital", "SEO", "SEM", "Google Ads", "Meta Ads", "Instagram Ads", "TikTok Ads",
+        "Content Marketing", "Email Marketing", "Copywriting", "Community Management", "Social Media Management",
+        "Google Analytics", "Google Tag Manager", "CRM", "HubSpot", "Salesforce", "Zoho CRM",
+        "E-commerce", "Shopify", "WooCommerce", "Mercado Shops", "Dropshipping", "Customer Journey",
+        "Funnel de Ventas", "Branding", "Posicionamiento de Marca", "Relaciones Públicas", "Ventas B2B", "Ventas B2C",
+        "Negociación Comercial", "Prospección de Clientes", "Cierre de Ventas", "Atención al Cliente", "Telemarketing",
+        "Estrategia Comercial", "Gestión de Cuentas", "Retención de Clientes"
+      ]
+    },
+    {
+      "categoria": "Administración y Oficina",
+      "habilidades": [
+        "Microsoft Word", "Microsoft Excel", "Microsoft PowerPoint", "Microsoft Access", "Google Sheets", "Google Docs",
+        "Office 365", "Gestión de Documentos", "Gestión de Agenda", "Redacción de Informes", "Atención Telefónica",
+        "Archivo y Correspondencia", "Facturación", "Contabilidad", "Presupuestos", "Gestión de Compras", "Inventarios",
+        "Gestión de Proveedores", "ERP", "SAP", "Odoo", "Tango", "Análisis de Costos", "Gestión de Pagos y Cobros",
+        "Control de Gastos", "Conciliaciones Bancarias", "Planificación de Reuniones", "Gestión de Contratos"
+      ]
+    },
+    {
+      "categoria": "Recursos Humanos",
+      "habilidades": [
+        "Reclutamiento y Selección", "Entrevistas Laborales", "Onboarding", "Evaluación de Desempeño", "Desarrollo Organizacional",
+        "Capacitación y Formación", "Gestión del Talento", "Gestión de Nóminas", "Compensaciones y Beneficios",
+        "Clima Laboral", "Comunicación Interna", "Legislación Laboral", "Resolución de Conflictos", "Gestión de Personal",
+        "Gestión por Competencias", "Evaluaciones Psicolaborales", "Outplacement", "Gestión de Turnos", "Cultura Organizacional"
+      ]
+    },
+    {
+      "categoria": "Seguridad, Higiene y Medio Ambiente",
+      "habilidades": [
+        "Prevención de Riesgos Laborales", "Higiene y Seguridad Industrial", "Evaluación de Riesgos (IPER)", "ATS (Análisis Seguro de Trabajo)",
+        "ISO 45001", "ISO 9001", "ISO 14001", "OHSAS 18001", "Legislación en Seguridad", "Plan de Emergencias",
+        "Primeros Auxilios", "Ergonomía", "Seguridad Eléctrica", "Seguridad contra Incendios",
+        "Auditorías Internas", "Capacitaciones de Seguridad", "Investigación de Accidentes", "Gestión Ambiental",
+        "Control de Sustancias Peligrosas", "Gestión de Residuos", "Mediciones Ambientales", "Monitoreo Ocupacional"
+      ]
+    },
+    {
+      "categoria": "Construcción, Industria y Oficios",
+      "habilidades": [
+        "Albañilería", "Carpintería", "Electricidad", "Fontanería", "Pintura", "Soldadura", "Herrería", "Yeso y Pladur",
+        "Lectura de Planos", "AutoCAD", "Revit", "Topografía", "Cálculo de Estructuras",
+        "Mecánica Industrial", "Tornería", "Fresado", "Neumática", "Hidráulica",
+        "Control de Calidad", "Producción", "Lean Manufacturing", "Six Sigma",
+        "Mantenimiento Preventivo", "Mantenimiento Correctivo", "Operación de Maquinaria Pesada",
+        "Operador de Grúas", "Carretilla Elevadora", "Montajes Electromecánicos"
+      ]
+    },
+    {
+      "categoria": "Educación y Formación",
+      "habilidades": [
+        "Docencia", "Pedagogía", "Psicopedagogía", "Diseño Curricular", "Planificación Didáctica", "Evaluación Educativa",
+        "Tutoría", "Orientación Educativa", "Educación Infantil", "Educación Especial", "Educación para Adultos",
+        "E-learning", "Moodle", "Google Classroom", "Formación Profesional", "Metodologías Activas", "Gamificación"
+      ]
+    },
+    {
+      "categoria": "Salud y Cuidados",
+      "habilidades": [
+        "Enfermería", "Primeros Auxilios", "Cuidado de Ancianos", "Cuidado Infantil", "Fisioterapia", "Farmacia",
+        "Análisis Clínicos", "Radiología", "Odontología", "Nutrición", "Psicología", "Atención Domiciliaria",
+        "Geriatría", "Pediatría", "Medicina General", "RCP", "Manejo de Medicamentos", "Control de Signos Vitales"
+      ]
+    },
+    {
+      "categoria": "Hostelería y Turismo",
+      "habilidades": [
+        "Cocina", "Repostería", "Panadería", "Barista", "Camarero", "Sumiller", "Gestión Hotelera", "Recepción Hotelera",
+        "Housekeeping", "Guía Turístico", "Organización de Eventos", "Catering", "Manipulación de Alimentos",
+        "APPCC", "Servicio de Restaurante", "Coctelería", "Atención al Cliente", "Reservas Online"
+      ]
+    },
+    {
+      "categoria": "Transporte y Logística",
+      "habilidades": [
+        "Conducción", "Carnet B", "Carnet C", "Carnet D", "CAP", "ADR", "Gestión de Almacén",
+        "Inventarios", "Cadena de Suministro", "Picking", "Packing", "Gestión de Pedidos",
+        "Distribución", "Rutas de Reparto", "Transporte Internacional", "Gestión de Flotas",
+        "Planificación Logística", "Gestión de Stock", "Control de Entradas y Salidas"
+      ]
+    },
+    {
+      "categoria": "Legal, Finanzas y Negocios",
+      "habilidades": [
+        "Derecho Laboral", "Derecho Civil", "Derecho Mercantil", "Asesoría Legal", "Gestión de Contratos",
+        "Contabilidad Financiera", "Análisis Financiero", "Auditoría", "Fiscalidad", "Impuestos", "Tesorería",
+        "Gestión de Presupuestos", "Banca", "Inversiones", "Seguros", "Análisis de Riesgos", "Plan de Negocios",
+        "Emprendimiento", "Gestión de Empresas", "Compliance", "Due Diligence"
+      ]
+    },
+    {
+      "categoria": "Agricultura, Medio Ambiente y Energía",
+      "habilidades": [
+        "Agricultura", "Jardinería", "Paisajismo", "Riego", "Cultivos", "Maquinaria Agrícola", "Ganadería",
+        "Veterinaria", "Selvicultura", "Energías Renovables", "Paneles Solares", "Eólica", "Biogás", "Sostenibilidad",
+        "Gestión Ambiental", "Reciclaje", "Gestión de Residuos", "Evaluación de Impacto Ambiental"
+      ]
+    },
+    {
+      "categoria": "Gestión de Proyectos y Dirección",
+      "habilidades": [
+        "Gestión de Proyectos", "Scrum", "Agile", "Kanban", "Lean", "PMP", "Prince2", "Jira", "Trello", "Asana", "Monday",
+        "Microsoft Project", "Gestión de Presupuestos", "Gestión de Riesgos", "Planificación Estratégica",
+        "Control de Avance", "Evaluación de Resultados", "Gestión de Equipos", "Gestión del Cambio"
+      ]
+    },
+    {
+      "categoria": "Ciberseguridad y Tecnología Avanzada",
+      "habilidades": [
+        "Seguridad Informática", "Ciberseguridad", "Hacking Ético", "Pentesting", "Gestión de Incidentes",
+        "Firewall", "VPN", "Criptografía", "Autenticación Multifactor", "Auditoría de Seguridad",
+        "Análisis Forense", "SOC", "SIEM", "Protección de Datos (GDPR)", "Seguridad en la Nube",
+        "Blockchain", "Criptomonedas", "Smart Contracts", "Internet de las Cosas (IoT)",
+        "Inteligencia Artificial", "Machine Learning", "Deep Learning", "Procesamiento de Imágenes"
+      ]
+    },
+    {
+      "categoria": "Soft Skills y Competencias Transversales",
+      "habilidades": [
+        "Comunicación Efectiva", "Trabajo en Equipo", "Liderazgo", "Empatía", "Adaptabilidad", "Creatividad",
+        "Pensamiento Crítico", "Resolución de Problemas", "Negociación", "Proactividad", "Iniciativa",
+        "Gestión del Tiempo", "Responsabilidad", "Organización", "Atención al Detalle", "Resiliencia",
+        "Autonomía", "Escucha Activa", "Inteligencia Emocional", "Gestión del Estrés",
+        "Orientación a Resultados", "Capacidad de Aprendizaje", "Visión Estratégica", "Motivación", "Colaboración"
+      ]
+    },
+    {
+      "categoria": "Idiomas",
+      "habilidades": [
+        "Español", "Inglés", "Francés", "Alemán", "Portugués", "Italiano", "Chino", "Japonés",
+        "Coreano", "Árabe", "Ruso", "Catalán", "Euskera", "Gallego", "Valenciano"
+      ]
+    }
+  ]
+  

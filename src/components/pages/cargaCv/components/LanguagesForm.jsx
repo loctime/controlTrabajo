@@ -81,16 +81,47 @@ export const LanguagesForm = memo(({ newCv, handleChange }) => {
 
   return (
     <>
-      <Typography variant="h6" sx={{ mt: 3, mb: 2, color: 'primary.main' }}>
-        🌍 Idiomas
-      </Typography>
+      <Box sx={{ 
+        mt: 4, 
+        mb: 3,
+        p: 3,
+        background: 'linear-gradient(135deg, #fce4ec 0%, #f8bbd9 100%)',
+        borderRadius: '12px',
+        border: '2px solid #e91e63',
+        boxShadow: '0 4px 12px rgba(233, 30, 99, 0.15)'
+      }}>
+        <Typography variant="h4" sx={{ 
+          color: '#ad1457',
+          fontWeight: 'bold',
+          fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' },
+          textShadow: '0 1px 2px rgba(0,0,0,0.1)'
+        }}>
+          🌍 Idiomas
+        </Typography>
+      </Box>
       
-      <Typography variant="body2" sx={{ mb: 3, color: 'text.secondary' }}>
-        Especifica los idiomas que dominas y tu nivel de competencia en cada uno.
+      <Typography variant="body1" sx={{ 
+        mb: 4, 
+        color: '#424242',
+        fontSize: '1.1rem',
+        fontWeight: 500,
+        p: 2,
+        backgroundColor: '#f5f5f5',
+        borderRadius: '8px',
+        borderLeft: '4px solid #e91e63'
+      }}>
+        🌐 Especifica los idiomas que dominas y tu nivel de competencia en cada uno.
       </Typography>
 
       {/* Formulario para agregar nuevo idioma */}
-      <Box sx={{ mb: 3, p: 2, border: '1px solid #e0e0e0', borderRadius: 1, backgroundColor: '#f9f9f9' }}>
+      <Box sx={{ 
+        mb: 4, 
+        p: 3, 
+        border: '2px solid #fce4ec', 
+        borderRadius: '12px', 
+        backgroundColor: '#fafafa',
+        boxShadow: '0 2px 8px rgba(233, 30, 99, 0.1)'
+      }}>
         <Grid container spacing={2} alignItems="center">
           <Grid item xs={12} sm={6} md={4}>
             <Autocomplete

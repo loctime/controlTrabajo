@@ -1,4 +1,4 @@
-import React, { useState, memo, useCallback } from 'react';
+import React, { useState, memo, useCallback, useMemo } from 'react';
 import { 
   Grid, 
   TextField, 
@@ -14,29 +14,27 @@ import {
 } from '@mui/material';
 import { Add } from '@mui/icons-material';
 import { v4 as uuidv4 } from 'uuid';
+import skillsData from './skills.json';
 
-// Lista de habilidades comunes
-const SKILLS_SUGERIDAS = [
-  'JavaScript', 'Python', 'Java', 'C++', 'C#', 'PHP', 'Ruby', 'Go',
-  'React', 'Vue.js', 'Angular', 'Node.js', 'Express', 'Django', 'Laravel',
-  'HTML', 'CSS', 'SASS', 'Bootstrap', 'Material-UI', 'Tailwind CSS',
-  'MySQL', 'PostgreSQL', 'MongoDB', 'Redis', 'Firebase',
-  'AWS', 'Azure', 'Google Cloud', 'Docker', 'Kubernetes',
-  'Git', 'GitHub', 'GitLab', 'Jenkins', 'CI/CD',
-  'Photoshop', 'Illustrator', 'Figma', 'Sketch', 'Adobe XD',
-  'Excel', 'PowerPoint', 'Word', 'Google Analytics', 'SEO',
-  'Marketing Digital', 'Redes Sociales', 'Email Marketing',
-  'Atención al Cliente', 'Ventas', 'Negociación', 'Liderazgo',
-  'Trabajo en Equipo', 'Comunicación', 'Resolución de Problemas',
-  'Gestión de Proyectos', 'Scrum', 'Agile', 'Lean',
-  'Inglés', 'Francés', 'Alemán', 'Portugués', 'Italiano'
-];
+// Extraer todas las habilidades en una lista plana
+const SKILLS_SUGERIDAS = skillsData.flatMap(categoria => categoria.habilidades).sort();
+
+// Obtener todas las categorías disponibles
+const CATEGORIAS = skillsData.map(item => item.categoria);
 
 export const SkillsForm = memo(({ newCv, handleChange }) => {
   const [nuevaHabilidad, setNuevaHabilidad] = useState('');
   const [nivelHabilidad, setNivelHabilidad] = useState('Intermedio');
+  const [categoriaFiltro, setCategoriaFiltro] = useState('Todas');
   
   const habilidades = newCv.habilidades || [];
+
+  // Filtrar habilidades por categoría seleccionada
+  const habilidadesFiltradas = useMemo(() => {
+    if (categoriaFiltro === 'Todas') return SKILLS_SUGERIDAS;
+    const categoriaData = skillsData.find(cat => cat.categoria === categoriaFiltro);
+    return categoriaData ? categoriaData.habilidades.sort() : [];
+  }, [categoriaFiltro]);
 
   const addHabilidad = useCallback(() => {
     if (nuevaHabilidad.trim()) {
@@ -79,36 +77,97 @@ export const SkillsForm = memo(({ newCv, handleChange }) => {
 
   return (
     <>
-      <Typography variant="h6" sx={{ mt: 3, mb: 2, color: 'primary.main' }}>
-        🛠️ Habilidades y Competencias
-      </Typography>
+      <Box sx={{ 
+        mt: 4, 
+        mb: 3,
+        p: 3,
+        background: 'linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%)',
+        borderRadius: '12px',
+        border: '2px solid #9c27b0',
+        boxShadow: '0 4px 12px rgba(156, 39, 176, 0.15)'
+      }}>
+        <Typography variant="h4" sx={{ 
+          color: '#6a1b9a',
+          fontWeight: 'bold',
+          fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' },
+          textShadow: '0 1px 2px rgba(0,0,0,0.1)'
+        }}>
+          🛠️ Habilidades y Competencias
+        </Typography>
+      </Box>
       
-      <Typography variant="body2" sx={{ mb: 3, color: 'text.secondary' }}>
-        Agrega tus habilidades técnicas y competencias profesionales. Incluye tanto habilidades duras como blandas.
+      <Typography variant="body1" sx={{ 
+        mb: 4, 
+        color: '#424242',
+        fontSize: '1.1rem',
+        fontWeight: 500,
+        p: 2,
+        backgroundColor: '#f5f5f5',
+        borderRadius: '8px',
+        borderLeft: '4px solid #9c27b0'
+      }}>
+        ⭐ Agrega tus habilidades técnicas y competencias profesionales. Incluye tanto habilidades duras como blandas.
       </Typography>
 
       {/* Formulario para agregar nueva habilidad */}
-      <Box sx={{ mb: 3, p: 2, border: '1px solid #e0e0e0', borderRadius: 1, backgroundColor: '#f9f9f9' }}>
+      <Box sx={{ 
+        mb: 4, 
+        p: 3, 
+        border: '2px solid #e1bee7', 
+        borderRadius: '12px', 
+        backgroundColor: '#fafafa',
+        boxShadow: '0 2px 8px rgba(156, 39, 176, 0.1)'
+       }}>
         <Grid container spacing={2} alignItems="center">
+          <Grid item xs={12} sm={6} md={3}>
+            <FormControl fullWidth size="small">
+              <InputLabel>Categoría</InputLabel>
+              <Select
+                value={categoriaFiltro}
+                label="Categoría"
+                onChange={(e) => setCategoriaFiltro(e.target.value)}
+              >
+                <MenuItem value="Todas">📋 Todas las categorías</MenuItem>
+                {CATEGORIAS.map((cat) => (
+                  <MenuItem key={cat} value={cat}>{cat}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
+          
           <Grid item xs={12} sm={6} md={4}>
             <Autocomplete
               freeSolo
-              options={SKILLS_SUGERIDAS}
+              options={habilidadesFiltradas}
               value={nuevaHabilidad}
               onInputChange={(event, newValue) => setNuevaHabilidad(newValue)}
+              filterOptions={(options, { inputValue }) => {
+                if (!inputValue) return options.slice(0, 50);
+                return options.filter(option =>
+                  option.toLowerCase().includes(inputValue.toLowerCase())
+                );
+              }}
               renderInput={(params) => (
                 <TextField
                   {...params}
-                  label="Nombre de la habilidad"
-                  placeholder="Ej: JavaScript, Marketing Digital..."
+                  label="Buscar o escribir habilidad"
+                  placeholder="Escribe para buscar o agregar nueva..."
                   variant="outlined"
                   size="small"
+                  helperText={`${habilidadesFiltradas.length} sugerencias ${categoriaFiltro !== 'Todas' ? `en ${categoriaFiltro}` : 'disponibles'} · Presiona Enter para agregar`}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && nuevaHabilidad.trim()) {
+                      e.preventDefault();
+                      addHabilidad();
+                    }
+                  }}
                 />
               )}
+              noOptionsText="Escribe tu propia habilidad"
             />
           </Grid>
           
-          <Grid item xs={12} sm={4} md={3}>
+          <Grid item xs={12} sm={6} md={3}>
             <FormControl fullWidth size="small">
               <InputLabel>Nivel</InputLabel>
               <Select
@@ -124,7 +183,7 @@ export const SkillsForm = memo(({ newCv, handleChange }) => {
             </FormControl>
           </Grid>
           
-          <Grid item xs={12} sm={2} md={2}>
+          <Grid item xs={12} sm={6} md={2}>
             <Button 
               variant="contained" 
               startIcon={<Add />} 
@@ -171,10 +230,12 @@ export const SkillsForm = memo(({ newCv, handleChange }) => {
       {/* Sugerencias rápidas */}
       <Box sx={{ mt: 3 }}>
         <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold' }}>
-          Sugerencias populares:
+          {categoriaFiltro !== 'Todas' 
+            ? `✨ Sugerencias de ${categoriaFiltro}:` 
+            : '✨ Sugerencias populares:'}
         </Typography>
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-          {SKILLS_SUGERIDAS.slice(0, 10).map((skill) => (
+          {habilidadesFiltradas.slice(0, 15).map((skill) => (
             <Chip
               key={skill}
               label={skill}

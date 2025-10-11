@@ -56,30 +56,87 @@ export const CertificationsForm = memo(({ newCv, handleChange }) => {
 
   return (
     <>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 3, mb: 2 }}>
-        <Typography variant="h6" sx={{ color: 'primary.main' }}>
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        mt: 4, 
+        mb: 3,
+        p: 3,
+        background: 'linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%)',
+        borderRadius: '12px',
+        border: '2px solid #ffc107',
+        boxShadow: '0 4px 12px rgba(255, 193, 7, 0.15)'
+      }}>
+        <Typography variant="h4" sx={{ 
+          color: '#f57f17',
+          fontWeight: 'bold',
+          fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' },
+          textShadow: '0 1px 2px rgba(0,0,0,0.1)'
+        }}>
           🏆 Certificaciones
         </Typography>
         <Button 
-          variant="outlined" 
+          variant="contained" 
           startIcon={<Add />} 
           onClick={addCertificacion}
-          size="small"
+          sx={{
+            background: 'linear-gradient(135deg, #ffc107 0%, #ff9800 100%)',
+            color: 'white',
+            fontWeight: 'bold',
+            px: 3,
+            py: 1,
+            borderRadius: '8px',
+            boxShadow: '0 3px 8px rgba(255, 193, 7, 0.3)',
+            '&:hover': {
+              background: 'linear-gradient(135deg, #ff9800 0%, #f57c00 100%)',
+              transform: 'translateY(-1px)',
+              boxShadow: '0 5px 12px rgba(255, 193, 7, 0.4)'
+            },
+            transition: 'all 0.3s ease'
+          }}
         >
           Agregar Certificación
         </Button>
       </Box>
       
-      <Typography variant="body2" sx={{ mb: 3, color: 'text.secondary' }}>
-        Incluye certificaciones profesionales, cursos especializados, licencias o acreditaciones relevantes.
+      <Typography variant="body1" sx={{ 
+        mb: 4, 
+        color: '#424242',
+        fontSize: '1.1rem',
+        fontWeight: 500,
+        p: 2,
+        backgroundColor: '#f5f5f5',
+        borderRadius: '8px',
+        borderLeft: '4px solid #ffc107'
+      }}>
+        🎯 Incluye certificaciones profesionales, cursos especializados, licencias o acreditaciones relevantes.
       </Typography>
 
       {certificaciones.map((cert, index) => (
-        <Card key={cert.id} sx={{ mb: 3, border: '1px solid #e0e0e0' }}>
-          <CardContent>
+        <Card key={cert.id} sx={{ 
+          mb: 4, 
+          border: '2px solid #fff8e1',
+          borderRadius: '12px',
+          boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+          transition: 'all 0.3s ease',
+          '&:hover': {
+            boxShadow: '0 8px 24px rgba(255, 193, 7, 0.15)',
+            transform: 'translateY(-2px)'
+          }
+        }}>
+          <CardContent sx={{ p: 3 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
-                Certificación {index + 1}
+              <Typography variant="h5" sx={{ 
+                fontWeight: 'bold', 
+                color: '#f57f17',
+                fontSize: '1.3rem',
+                background: 'linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%)',
+                p: 1.5,
+                borderRadius: '8px',
+                border: '1px solid #ffc107'
+              }}>
+                🏆 Certificación {index + 1}
               </Typography>
               <IconButton 
                 onClick={() => removeCertificacion(cert.id)}

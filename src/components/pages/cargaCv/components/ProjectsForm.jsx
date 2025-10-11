@@ -56,30 +56,87 @@ export const ProjectsForm = memo(({ newCv, handleChange }) => {
 
   return (
     <>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 3, mb: 2 }}>
-        <Typography variant="h6" sx={{ color: 'primary.main' }}>
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        mt: 4, 
+        mb: 3,
+        p: 3,
+        background: 'linear-gradient(135deg, #e8eaf6 0%, #c5cae9 100%)',
+        borderRadius: '12px',
+        border: '2px solid #3f51b5',
+        boxShadow: '0 4px 12px rgba(63, 81, 181, 0.15)'
+      }}>
+        <Typography variant="h4" sx={{ 
+          color: '#283593',
+          fontWeight: 'bold',
+          fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' },
+          textShadow: '0 1px 2px rgba(0,0,0,0.1)'
+        }}>
           🚀 Proyectos
         </Typography>
         <Button 
-          variant="outlined" 
+          variant="contained" 
           startIcon={<Add />} 
           onClick={addProyecto}
-          size="small"
+          sx={{
+            background: 'linear-gradient(135deg, #3f51b5 0%, #283593 100%)',
+            color: 'white',
+            fontWeight: 'bold',
+            px: 3,
+            py: 1,
+            borderRadius: '8px',
+            boxShadow: '0 3px 8px rgba(63, 81, 181, 0.3)',
+            '&:hover': {
+              background: 'linear-gradient(135deg, #283593 0%, #1a237e 100%)',
+              transform: 'translateY(-1px)',
+              boxShadow: '0 5px 12px rgba(63, 81, 181, 0.4)'
+            },
+            transition: 'all 0.3s ease'
+          }}
         >
           Agregar Proyecto
         </Button>
       </Box>
       
-      <Typography variant="body2" sx={{ mb: 3, color: 'text.secondary' }}>
-        Incluye proyectos personales, académicos o profesionales que demuestren tus habilidades y experiencia.
+      <Typography variant="body1" sx={{ 
+        mb: 4, 
+        color: '#424242',
+        fontSize: '1.1rem',
+        fontWeight: 500,
+        p: 2,
+        backgroundColor: '#f5f5f5',
+        borderRadius: '8px',
+        borderLeft: '4px solid #3f51b5'
+      }}>
+        💡 Incluye proyectos personales, académicos o profesionales que demuestren tus habilidades y experiencia.
       </Typography>
 
       {proyectos.map((proyecto, index) => (
-        <Card key={proyecto.id} sx={{ mb: 3, border: '1px solid #e0e0e0' }}>
-          <CardContent>
+        <Card key={proyecto.id} sx={{ 
+          mb: 4, 
+          border: '2px solid #e8eaf6',
+          borderRadius: '12px',
+          boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+          transition: 'all 0.3s ease',
+          '&:hover': {
+            boxShadow: '0 8px 24px rgba(63, 81, 181, 0.15)',
+            transform: 'translateY(-2px)'
+          }
+        }}>
+          <CardContent sx={{ p: 3 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
-                Proyecto {index + 1}
+              <Typography variant="h5" sx={{ 
+                fontWeight: 'bold', 
+                color: '#283593',
+                fontSize: '1.3rem',
+                background: 'linear-gradient(135deg, #e8eaf6 0%, #c5cae9 100%)',
+                p: 1.5,
+                borderRadius: '8px',
+                border: '1px solid #9fa8da'
+              }}>
+                🚀 Proyecto {index + 1}
               </Typography>
               <IconButton 
                 onClick={() => removeProyecto(proyecto.id)}

@@ -57,30 +57,87 @@ export const ReferencesForm = memo(({ newCv, handleChange }) => {
 
   return (
     <>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 3, mb: 2 }}>
-        <Typography variant="h6" sx={{ color: 'primary.main' }}>
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        mt: 4, 
+        mb: 3,
+        p: 3,
+        background: 'linear-gradient(135deg, #f1f8e9 0%, #dcedc8 100%)',
+        borderRadius: '12px',
+        border: '2px solid #689f38',
+        boxShadow: '0 4px 12px rgba(104, 159, 56, 0.15)'
+      }}>
+        <Typography variant="h4" sx={{ 
+          color: '#33691e',
+          fontWeight: 'bold',
+          fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' },
+          textShadow: '0 1px 2px rgba(0,0,0,0.1)'
+        }}>
           👥 Referencias Laborales
         </Typography>
         <Button 
-          variant="outlined" 
+          variant="contained" 
           startIcon={<Add />} 
           onClick={addReferencia}
-          size="small"
+          sx={{
+            background: 'linear-gradient(135deg, #689f38 0%, #558b2f 100%)',
+            color: 'white',
+            fontWeight: 'bold',
+            px: 3,
+            py: 1,
+            borderRadius: '8px',
+            boxShadow: '0 3px 8px rgba(104, 159, 56, 0.3)',
+            '&:hover': {
+              background: 'linear-gradient(135deg, #558b2f 0%, #388e3c 100%)',
+              transform: 'translateY(-1px)',
+              boxShadow: '0 5px 12px rgba(104, 159, 56, 0.4)'
+            },
+            transition: 'all 0.3s ease'
+          }}
         >
           Agregar Referencia
         </Button>
       </Box>
       
-      <Typography variant="body2" sx={{ mb: 3, color: 'text.secondary' }}>
-        Incluye referencias de personas que puedan hablar sobre tu trabajo y competencias profesionales.
+      <Typography variant="body1" sx={{ 
+        mb: 4, 
+        color: '#424242',
+        fontSize: '1.1rem',
+        fontWeight: 500,
+        p: 2,
+        backgroundColor: '#f5f5f5',
+        borderRadius: '8px',
+        borderLeft: '4px solid #689f38'
+      }}>
+        🤝 Incluye referencias de personas que puedan hablar sobre tu trabajo y competencias profesionales.
       </Typography>
 
       {referencias.map((referencia, index) => (
-        <Card key={referencia.id} sx={{ mb: 3, border: '1px solid #e0e0e0' }}>
-          <CardContent>
+        <Card key={referencia.id} sx={{ 
+          mb: 4, 
+          border: '2px solid #f1f8e9',
+          borderRadius: '12px',
+          boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+          transition: 'all 0.3s ease',
+          '&:hover': {
+            boxShadow: '0 8px 24px rgba(104, 159, 56, 0.15)',
+            transform: 'translateY(-2px)'
+          }
+        }}>
+          <CardContent sx={{ p: 3 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
-                Referencia {index + 1}
+              <Typography variant="h5" sx={{ 
+                fontWeight: 'bold', 
+                color: '#33691e',
+                fontSize: '1.3rem',
+                background: 'linear-gradient(135deg, #f1f8e9 0%, #dcedc8 100%)',
+                p: 1.5,
+                borderRadius: '8px',
+                border: '1px solid #aed581'
+              }}>
+                👥 Referencia {index + 1}
               </Typography>
               <IconButton 
                 onClick={() => removeReferencia(referencia.id)}

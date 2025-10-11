@@ -1,0 +1,43 @@
+[
+    {
+      "nombre": "HTML",
+      "categoria": "Programación y Desarrollo",
+      "niveles": ["Básico", "Intermedio", "Avanzado", "Experto"]
+    },
+    {
+      "nombre": "CSS",
+      "categoria": "Programación y Desarrollo",
+      "niveles": ["Básico", "Intermedio", "Avanzado", "Experto"]
+    },
+    {
+      "nombre": "React",
+      "categoria": "Programación y Desarrollo",
+      "niveles": ["Básico", "Intermedio", "Avanzado", "Experto"]
+    },
+    {
+      "nombre": "Photoshop",
+      "categoria": "Diseño y Creatividad",
+      "niveles": ["Básico", "Intermedio", "Avanzado", "Experto"]
+    },
+    {
+      "nombre": "Excel",
+      "categoria": "Administración y Oficina",
+      "niveles": ["Básico", "Intermedio", "Avanzado", "Experto"]
+    },
+    {
+      "nombre": "Prevención de Riesgos Laborales",
+      "categoria": "Seguridad, Higiene y Medio Ambiente",
+      "niveles": ["Básico", "Intermedio", "Avanzado", "Experto"]
+    },
+    {
+      "nombre": "Comunicación Efectiva",
+      "categoria": "Soft Skills y Competencias Transversales",
+      "niveles": ["Básico", "Intermedio", "Avanzado"]
+    },
+    {
+      "nombre": "Inglés",
+      "categoria": "Idiomas",
+      "niveles": ["Básico", "Intermedio", "Avanzado", "Fluido", "Nativo"]
+    }
+  ]
+  

@@ -1,14 +1,36 @@
 import React, { memo } from 'react';
-import { Grid, TextField, Typography } from '@mui/material';
+import { Grid, TextField, Typography, Box } from '@mui/material';
 
 export const PersonalDataForm = memo(({ newCv, handleChange }) => {
   return (
     <>
-      <Typography variant="h6" sx={{ mt: 3, mb: 2, color: 'primary.main' }}>
-        📋 Datos Personales y de contacto
-      </Typography>
+      <Box sx={{ 
+        mt: 4, 
+        mb: 3,
+        p: 3,
+        background: 'linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%)',
+        borderRadius: '12px',
+        border: '2px solid #ff9800',
+        boxShadow: '0 4px 12px rgba(255, 152, 0, 0.15)'
+      }}>
+        <Typography variant="h4" sx={{ 
+          color: '#e65100',
+          fontWeight: 'bold',
+          fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' },
+          textShadow: '0 1px 2px rgba(0,0,0,0.1)'
+        }}>
+          📋 Datos Personales y de contacto
+        </Typography>
+      </Box>
       
-      <Grid container spacing={3}>
+      <Box sx={{ 
+        p: 3,
+        backgroundColor: '#fafafa',
+        borderRadius: '12px',
+        border: '1px solid #e0e0e0',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+      }}>
+        <Grid container spacing={3}>
         <Grid item xs={12} sm={6} md={4}>
           <TextField 
             variant="outlined" 
@@ -79,7 +101,8 @@ export const PersonalDataForm = memo(({ newCv, handleChange }) => {
             helperText="Dirección completa (opcional)"
           />
         </Grid>
-      </Grid>
+        </Grid>
+      </Box>
     </>
   );
 });

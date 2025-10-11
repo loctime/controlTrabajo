@@ -580,34 +580,34 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
             </Box>
             
             <PersonalDataForm newCv={newCv} handleChange={handleChange} />
-            <Divider sx={{ my: 3 }} />
+            <Box sx={{ my: 4, height: '2px', background: 'linear-gradient(90deg, transparent, #66bb6a, transparent)', borderRadius: '1px' }} />
             
             <ProfessionalDataForm newCv={newCv} handleChange={handleChange} />
-            <Divider sx={{ my: 3 }} />
+            <Box sx={{ my: 4, height: '2px', background: 'linear-gradient(90deg, transparent, #4caf50, transparent)', borderRadius: '1px' }} />
             
             <LocationForm newCv={newCv} handleChange={handleChange} />
-            <Divider sx={{ my: 3 }} />
+            <Box sx={{ my: 4, height: '2px', background: 'linear-gradient(90deg, transparent, #03a9f4, transparent)', borderRadius: '1px' }} />
             
             <ExperienceForm newCv={newCv} handleChange={handleChange} />
-            <Divider sx={{ my: 3 }} />
+            <Box sx={{ my: 4, height: '2px', background: 'linear-gradient(90deg, transparent, #66bb6a, transparent)', borderRadius: '1px' }} />
             
             <EducationForm newCv={newCv} handleChange={handleChange} />
-            <Divider sx={{ my: 3 }} />
+            <Box sx={{ my: 4, height: '2px', background: 'linear-gradient(90deg, transparent, #2196f3, transparent)', borderRadius: '1px' }} />
             
             <SkillsForm newCv={newCv} handleChange={handleChange} />
-            <Divider sx={{ my: 3 }} />
+            <Box sx={{ my: 4, height: '2px', background: 'linear-gradient(90deg, transparent, #9c27b0, transparent)', borderRadius: '1px' }} />
             
             <LanguagesForm newCv={newCv} handleChange={handleChange} />
-            <Divider sx={{ my: 3 }} />
+            <Box sx={{ my: 4, height: '2px', background: 'linear-gradient(90deg, transparent, #e91e63, transparent)', borderRadius: '1px' }} />
             
             <CertificationsForm newCv={newCv} handleChange={handleChange} />
-            <Divider sx={{ my: 3 }} />
+            <Box sx={{ my: 4, height: '2px', background: 'linear-gradient(90deg, transparent, #ffc107, transparent)', borderRadius: '1px' }} />
             
             <ProjectsForm newCv={newCv} handleChange={handleChange} />
-            <Divider sx={{ my: 3 }} />
+            <Box sx={{ my: 4, height: '2px', background: 'linear-gradient(90deg, transparent, #3f51b5, transparent)', borderRadius: '1px' }} />
             
             <ReferencesForm newCv={newCv} handleChange={handleChange} />
-            <Divider sx={{ my: 3 }} />
+            <Box sx={{ my: 4, height: '2px', background: 'linear-gradient(90deg, transparent, #689f38, transparent)', borderRadius: '1px' }} />
             
             <TemplateSelector 
               selectedTemplate={selectedTemplate} 
@@ -676,13 +676,13 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
             </Typography>
             
             <PersonalDataForm newCv={newCv} handleChange={handleChange} />
-            <Divider sx={{ my: 3 }} />
+            <Box sx={{ my: 4, height: '2px', background: 'linear-gradient(90deg, transparent, #ff9800, transparent)', borderRadius: '1px' }} />
             
             <ProfessionalDataForm newCv={newCv} handleChange={handleChange} />
-            <Divider sx={{ my: 3 }} />
+            <Box sx={{ my: 4, height: '2px', background: 'linear-gradient(90deg, transparent, #4caf50, transparent)', borderRadius: '1px' }} />
             
             <LocationForm newCv={newCv} handleChange={handleChange} />
-            <Divider sx={{ my: 3 }} />
+            <Box sx={{ my: 4, height: '2px', background: 'linear-gradient(90deg, transparent, #03a9f4, transparent)', borderRadius: '1px' }} />
             
             <FilesForm
               onImageChange={handleImageChange}
