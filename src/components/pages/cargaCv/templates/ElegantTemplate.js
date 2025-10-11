@@ -157,8 +157,9 @@ export const generateElegantTemplate = async (cvData) => {
   
   const contactInfo = buildContactInfo(cvData);
   contactInfo.forEach(info => {
-    doc.text(info, 10, leftY);
-    leftY += 5;
+    const splitInfo = doc.splitTextToSize(info, leftColumnWidth - 20);
+    doc.text(splitInfo, 10, leftY);
+    leftY += splitInfo.length * 5;
   });
   
   leftY += 10;
@@ -265,14 +266,17 @@ export const generateElegantTemplate = async (cvData) => {
     doc.setTextColor('#ffffff');
     doc.setFontSize(16);
     doc.setFont('helvetica', 'bold');
-    doc.text(`${cvData.Nombre || ''} ${cvData.Apellido || ''}`, 15, 20);
+    const fullName = `${cvData.Nombre || ''} ${cvData.Apellido || ''}`;
+    const splitHeaderName = doc.splitTextToSize(fullName, pageWidth - 60);
+    doc.text(splitHeaderName, 15, 20);
     
     // Título profesional
     doc.setFontSize(12);
     doc.setFont('helvetica', 'normal');
     const professionalTitle = buildProfessionalTitle(cvData);
     if (professionalTitle) {
-      doc.text(professionalTitle, 15, 30);
+      const splitTitle = doc.splitTextToSize(professionalTitle, pageWidth - 60);
+      doc.text(splitTitle, 15, 30);
     }
     
     // Número de página (opcional)
@@ -299,8 +303,10 @@ export const generateElegantTemplate = async (cvData) => {
   doc.setTextColor(primaryColor);
   doc.setFontSize(20);
   doc.setFont('helvetica', 'bold');
-  doc.text(`${cvData.Nombre || ''} ${cvData.Apellido || ''}`, rightColumnX, rightY);
-  rightY += 15;
+  const fullName = `${cvData.Nombre || ''} ${cvData.Apellido || ''}`;
+  const splitName = doc.splitTextToSize(fullName, rightColumnWidth);
+  doc.text(splitName, rightColumnX, rightY);
+  rightY += splitName.length * 6;
 
   // Edad (opcional, solo si está completada)
   if (cvData.Edad) {
@@ -526,19 +532,41 @@ export const generateElegantTemplate = async (cvData) => {
         refCurrentY = addNewPageWithHeader(doc);
       }
       
-      doc.setFontSize(9);
-      doc.setFont('helvetica', 'bold');
-      doc.text(ref.nombre || '', rightColumnX, refCurrentY);
-      
-      refCurrentY += 4;
-      doc.setFont('helvetica', 'normal');
-      doc.text(`${ref.cargo || ''} en ${ref.empresa || ''}`, rightColumnX, refCurrentY);
-      
-      refCurrentY += 4;
-      if (ref.telefono) doc.text(`Tel: ${ref.telefono}`, rightColumnX, refCurrentY);
-      if (ref.email) doc.text(`Email: ${ref.email}`, rightColumnX + 40, refCurrentY);
-      
-      refCurrentY += 8;
+      // Solo renderizar si la referencia tiene datos
+      if (ref && (ref.nombre || ref.cargo || ref.empresa)) {
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(textColor);
+        
+        if (ref.nombre) {
+          doc.text(ref.nombre, rightColumnX, refCurrentY);
+          refCurrentY += 4;
+        }
+        
+        doc.setFont('helvetica', 'normal');
+        if (ref.cargo && ref.empresa) {
+          doc.text(`${ref.cargo} en ${ref.empresa}`, rightColumnX, refCurrentY);
+          refCurrentY += 4;
+        } else if (ref.cargo) {
+          doc.text(ref.cargo, rightColumnX, refCurrentY);
+          refCurrentY += 4;
+        } else if (ref.empresa) {
+          doc.text(ref.empresa, rightColumnX, refCurrentY);
+          refCurrentY += 4;
+        }
+        
+        if (ref.telefono) {
+          doc.text(`Tel: ${ref.telefono}`, rightColumnX, refCurrentY);
+        }
+        if (ref.email) {
+          doc.text(`Email: ${ref.email}`, rightColumnX + 40, refCurrentY);
+        }
+        if (ref.telefono || ref.email) {
+          refCurrentY += 4;
+        }
+        
+        refCurrentY += 8;
+      }
     });
   }
 

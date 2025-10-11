@@ -36,14 +36,17 @@ export const generateClassicTemplate = (cvData) => {
     doc.setTextColor('#ffffff');
     doc.setFontSize(16);
     doc.setFont('helvetica', 'bold');
-    doc.text(`${cvData.Nombre || ''} ${cvData.Apellido || ''}`, 15, 20);
+    const fullName = `${cvData.Nombre || ''} ${cvData.Apellido || ''}`;
+    const splitHeaderName = doc.splitTextToSize(fullName, pageWidth - 60);
+    doc.text(splitHeaderName, 15, 20);
     
     // Título profesional
     doc.setFontSize(12);
     doc.setFont('helvetica', 'normal');
     const professionalTitle = buildProfessionalTitle(cvData);
     if (professionalTitle) {
-      doc.text(professionalTitle, 15, 30);
+      const splitTitle = doc.splitTextToSize(professionalTitle, pageWidth - 60);
+      doc.text(splitTitle, 15, 30);
     }
     
     // Número de página (opcional)
@@ -75,8 +78,10 @@ export const generateClassicTemplate = (cvData) => {
   doc.setTextColor(primaryColor);
   doc.setFontSize(18);
   doc.setFont('helvetica', 'bold');
-  doc.text(`${cvData.Nombre || ''} ${cvData.Apellido || ''}`, 15, currentY);
-  currentY += 8;
+  const fullName = `${cvData.Nombre || ''} ${cvData.Apellido || ''}`;
+  const splitName = doc.splitTextToSize(fullName, pageWidth - 30);
+  doc.text(splitName, 15, currentY);
+  currentY += splitName.length * 6;
 
   // Edad (opcional, solo si está completada)
   if (cvData.Edad) {
@@ -91,16 +96,19 @@ export const generateClassicTemplate = (cvData) => {
   if (professionalTitle) {
     doc.setFontSize(12);
     doc.setFont('helvetica', 'normal');
-    doc.text(professionalTitle, 15, currentY);
-    currentY += 5;
+    const splitTitle = doc.splitTextToSize(professionalTitle, pageWidth - 30);
+    doc.text(splitTitle, 15, currentY);
+    currentY += splitTitle.length * 5;
   }
 
   // Información de contacto completa
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
   const contactInfo = buildContactInfo(cvData);
-  doc.text(contactInfo.join(' • '), 15, currentY);
-  currentY += 15;
+  const contactText = contactInfo.join(' • ');
+  const splitContact = doc.splitTextToSize(contactText, pageWidth - 30);
+  doc.text(splitContact, 15, currentY);
+  currentY += splitContact.length * 4 + 5;
 
   // === PERFIL PROFESIONAL ===
   if (cvData.perfilProfesional) {
@@ -404,7 +412,7 @@ export const generateClassicTemplate = (cvData) => {
   if (cvData.referencias && cvData.referencias.length > 0) {
     // Verificar si necesita nueva página
     if (checkPageOverflow(doc, currentY + 40)) {
-      currentY = addNewPage(doc);
+      currentY = addNewPageWithHeader(doc);
     }
     
     currentY = addSectionTitle(doc, 'REFERENCIAS', 15, currentY, primaryColor);
@@ -416,22 +424,45 @@ export const generateClassicTemplate = (cvData) => {
     cvData.referencias.slice(0, 3).forEach((ref) => {
       // Verificar overflow antes de cada referencia
       if (checkPageOverflow(doc, refCurrentY + 20)) {
-        refCurrentY = addNewPage(doc);
+        refCurrentY = addNewPageWithHeader(doc);
       }
       
-      doc.setFontSize(10);
-      doc.setFont('helvetica', 'bold');
-      doc.text(ref.nombre || '', 15, refCurrentY);
-      
-      refCurrentY += 5;
-      doc.setFont('helvetica', 'normal');
-      doc.text(`${ref.cargo || ''} en ${ref.empresa || ''}`, 15, refCurrentY);
-      
-      refCurrentY += 4;
-      if (ref.telefono) doc.text(`Tel: ${ref.telefono}`, 15, refCurrentY);
-      if (ref.email) doc.text(`Email: ${ref.email}`, 15 + 40, refCurrentY);
-      
-      refCurrentY += 8;
+      // Solo renderizar si la referencia tiene datos
+      if (ref && (ref.nombre || ref.cargo || ref.empresa)) {
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(primaryColor);
+        
+        if (ref.nombre) {
+          doc.text(ref.nombre, 15, refCurrentY);
+          refCurrentY += 5;
+        }
+        
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor('#424242');
+        if (ref.cargo && ref.empresa) {
+          doc.text(`${ref.cargo} en ${ref.empresa}`, 15, refCurrentY);
+          refCurrentY += 4;
+        } else if (ref.cargo) {
+          doc.text(ref.cargo, 15, refCurrentY);
+          refCurrentY += 4;
+        } else if (ref.empresa) {
+          doc.text(ref.empresa, 15, refCurrentY);
+          refCurrentY += 4;
+        }
+        
+        if (ref.telefono) {
+          doc.text(`Tel: ${ref.telefono}`, 15, refCurrentY);
+        }
+        if (ref.email) {
+          doc.text(`Email: ${ref.email}`, 15 + 40, refCurrentY);
+        }
+        if (ref.telefono || ref.email) {
+          refCurrentY += 4;
+        }
+        
+        refCurrentY += 8;
+      }
     });
   }
 

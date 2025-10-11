@@ -133,7 +133,9 @@ export const generateModernTemplate = async (cvData) => {
   doc.setTextColor('#ffffff');
   doc.setFontSize(24);
   doc.setFont('helvetica', 'bold');
-  doc.text(`${cvData.Nombre || ''} ${cvData.Apellido || ''}`, 60, 25);
+  const fullName = `${cvData.Nombre || ''} ${cvData.Apellido || ''}`;
+  const splitName = doc.splitTextToSize(fullName, pageWidth - 120);
+  doc.text(splitName, 60, 25);
 
   // Edad (opcional, solo si está completada)
   if (cvData.Edad) {
@@ -147,7 +149,8 @@ export const generateModernTemplate = async (cvData) => {
   doc.setFont('helvetica', 'normal');
   const professionalTitle = buildProfessionalTitle(cvData);
   if (professionalTitle) {
-    doc.text(professionalTitle, 60, cvData.Edad ? 39 : 35);
+    const splitTitle = doc.splitTextToSize(professionalTitle, pageWidth - 120);
+    doc.text(splitTitle, 60, cvData.Edad ? 39 : 35);
   }
 
   // Información de contacto completa
@@ -155,7 +158,8 @@ export const generateModernTemplate = async (cvData) => {
   const contactInfo = buildContactInfo(cvData);
   const contactText = contactInfo.join(' • ');
   const contactY = cvData.Edad ? 46 : 42;
-  doc.text(contactText, 60, contactY);
+  const splitContact = doc.splitTextToSize(contactText, pageWidth - 120);
+  doc.text(splitContact, 60, contactY);
 
   // === PERFIL PROFESIONAL ===
   let currentY = 75;
@@ -192,14 +196,17 @@ export const generateModernTemplate = async (cvData) => {
     doc.setTextColor('#ffffff');
     doc.setFontSize(16);
     doc.setFont('helvetica', 'bold');
-    doc.text(`${cvData.Nombre || ''} ${cvData.Apellido || ''}`, 15, 20);
+    const fullName = `${cvData.Nombre || ''} ${cvData.Apellido || ''}`;
+    const splitHeaderName = doc.splitTextToSize(fullName, pageWidth - 60);
+    doc.text(splitHeaderName, 15, 20);
     
     // Título profesional
     doc.setFontSize(12);
     doc.setFont('helvetica', 'normal');
     const professionalTitle = buildProfessionalTitle(cvData);
     if (professionalTitle) {
-      doc.text(professionalTitle, 15, 30);
+      const splitTitle = doc.splitTextToSize(professionalTitle, pageWidth - 60);
+      doc.text(splitTitle, 15, 30);
     }
     
     // Número de página (opcional)
@@ -406,20 +413,41 @@ export const generateModernTemplate = async (cvData) => {
         refCurrentY = addNewPageWithHeader(doc);
       }
       
-      doc.setTextColor(textColor);
-      doc.setFontSize(9);
-      doc.setFont('helvetica', 'bold');
-      doc.text(ref.nombre || '', 15, refCurrentY);
-      
-      refCurrentY += 4;
-      doc.setFont('helvetica', 'normal');
-      doc.text(`${ref.cargo || ''} en ${ref.empresa || ''}`, 15, refCurrentY);
-      
-      refCurrentY += 4;
-      if (ref.telefono) doc.text(`Tel: ${ref.telefono}`, 15, refCurrentY);
-      if (ref.email) doc.text(`Email: ${ref.email}`, 15 + 40, refCurrentY);
-      
-      refCurrentY += 8;
+      // Solo renderizar si la referencia tiene datos
+      if (ref && (ref.nombre || ref.cargo || ref.empresa)) {
+        doc.setTextColor(textColor);
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'bold');
+        
+        if (ref.nombre) {
+          doc.text(ref.nombre, 15, refCurrentY);
+          refCurrentY += 4;
+        }
+        
+        doc.setFont('helvetica', 'normal');
+        if (ref.cargo && ref.empresa) {
+          doc.text(`${ref.cargo} en ${ref.empresa}`, 15, refCurrentY);
+          refCurrentY += 4;
+        } else if (ref.cargo) {
+          doc.text(ref.cargo, 15, refCurrentY);
+          refCurrentY += 4;
+        } else if (ref.empresa) {
+          doc.text(ref.empresa, 15, refCurrentY);
+          refCurrentY += 4;
+        }
+        
+        if (ref.telefono) {
+          doc.text(`Tel: ${ref.telefono}`, 15, refCurrentY);
+        }
+        if (ref.email) {
+          doc.text(`Email: ${ref.email}`, 15 + 40, refCurrentY);
+        }
+        if (ref.telefono || ref.email) {
+          refCurrentY += 4;
+        }
+        
+        refCurrentY += 8;
+      }
     });
   }
 
