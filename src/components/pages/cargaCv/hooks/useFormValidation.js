@@ -160,6 +160,34 @@ export const useFormValidation = () => {
           newWarnings.perfilProfesional = result.warnings;
         }
       }
+
+      // Validar certificaciones si existen
+      if (cvData.certificaciones && cvData.certificaciones.length > 0) {
+        cvData.certificaciones.forEach((cert, index) => {
+          // Validar que cada certificación tenga al menos una forma de verificación
+          if (!cert.url && !cert.archivoUrl) {
+            newErrors[`certificaciones_${index}_certificado`] = ['Debes proporcionar una URL o subir un archivo del certificado'];
+          }
+          
+          // Validar campos obligatorios de certificación
+          const certFields = {
+            nombre: { required: true, minLength: 2, maxLength: 100 },
+            institucion: { required: true, minLength: 2, maxLength: 100 },
+            fechaObtencion: { required: true, date: true }
+          };
+
+          Object.entries(certFields).forEach(([field, rules]) => {
+            const result = validateField(
+              `${field} (Certificación ${index + 1})`,
+              cert[field],
+              rules
+            );
+            if (result.errors.length > 0) {
+              newErrors[`certificaciones_${index}_${field}`] = result.errors;
+            }
+          });
+        });
+      }
     }
 
     // Validaciones opcionales con warnings

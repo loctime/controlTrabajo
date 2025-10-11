@@ -1,4 +1,4 @@
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useRef } from 'react';
 import { 
   Grid, 
   TextField, 
@@ -9,11 +9,16 @@ import {
   Card,
   CardContent
 } from '@mui/material';
-import { Add, Delete } from '@mui/icons-material';
+import { Add, Delete, CloudUpload } from '@mui/icons-material';
 import { v4 as uuidv4 } from 'uuid';
+import { uploadFile, ensureAppFolder, createPublicShareLink, getDirectDownloadUrl } from '../../../../lib/controlFileStorage';
 
 export const CertificationsForm = memo(({ newCv, handleChange }) => {
   const certificaciones = newCv.certificaciones || [];
+  const fileInputRefs = useRef({});
+  
+  // Estado para mostrar progreso de subida
+  const [uploadingFiles, setUploadingFiles] = React.useState({});
 
   const addCertificacion = useCallback(() => {
     const nuevaCertificacion = {
@@ -41,6 +46,81 @@ export const CertificationsForm = memo(({ newCv, handleChange }) => {
       }
     });
   }, [certificaciones, handleChange]);
+
+  const handleFileUpload = useCallback(async (certId, file) => {
+    if (!file) return;
+    
+    // Validar tipo de archivo
+    const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
+    if (!allowedTypes.includes(file.type)) {
+      alert('Solo se permiten archivos PDF, JPG o PNG');
+      return;
+    }
+    
+    // Validar tamaño (máximo 5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      alert('El archivo debe ser menor a 5MB');
+      return;
+    }
+    
+    try {
+      // Marcar como subiendo
+      setUploadingFiles(prev => ({ ...prev, [certId]: true }));
+      
+      // 1. Crear/obtener carpeta principal "BolsaTrabajo"
+      console.log('📁 Obteniendo carpeta BolsaTrabajo...');
+      const folderId = await ensureAppFolder();
+      
+      // 2. Subir archivo directamente a la carpeta BolsaTrabajo
+      console.log(`📤 Subiendo certificado "${file.name}" a BolsaTrabajo...`);
+      const fileId = await uploadFile(file, folderId, (progress) => {
+        console.log(`Progreso de certificado: ${progress}%`);
+      });
+      
+      console.log(`✅ Certificado subido con ID:`, fileId);
+      
+      // 3. Crear enlace público y obtener URL de descarga directa
+      console.log(`🔗 Creando enlace público para certificado con fileId:`, fileId);
+      let finalUrl;
+      
+      try {
+        const shareUrl = await createPublicShareLink(fileId, 8760); // 1 año
+        console.log(`✅ Enlace público creado:`, shareUrl);
+        
+        // 4. Obtener URL de descarga directa desde el share link
+        console.log(`📥 Obteniendo URL de descarga directa...`);
+        finalUrl = await getDirectDownloadUrl(shareUrl);
+        console.log(`✅ URL de descarga directa obtenida:`, finalUrl);
+        
+      } catch (shareError) {
+        console.error(`❌ Error creando share link para certificado:`, shareError);
+        console.log(`⚠️ Guardando fileId directamente como fallback`);
+        finalUrl = fileId;
+      }
+      
+      // 5. Guardar en el formulario
+      updateCertificacion(certId, 'url', finalUrl);
+      updateCertificacion(certId, 'archivoUrl', file.name);
+      
+      alert(`Certificado "${file.name}" subido exitosamente`);
+      
+    } catch (error) {
+      console.error('Error subiendo certificado:', error);
+      alert('Error al subir el archivo. Inténtalo nuevamente.');
+    } finally {
+      // Quitar estado de subiendo
+      setUploadingFiles(prev => {
+        const newState = { ...prev };
+        delete newState[certId];
+        return newState;
+      });
+    }
+  }, []);
+
+  const handleFileInputClick = useCallback((certId) => {
+    fileInputRefs.current[certId]?.click();
+  }, []);
 
   const updateCertificacion = useCallback((id, field, value) => {
     const nuevasCertificaciones = certificaciones.map(cert => 
@@ -183,15 +263,46 @@ export const CertificationsForm = memo(({ newCv, handleChange }) => {
               </Grid>
               
               <Grid item xs={12} sm={6}>
-                <TextField 
-                  variant="outlined" 
-                  label="URL del certificado (opcional)" 
-                  value={cert.url} 
-                  onChange={(e) => updateCertificacion(cert.id, 'url', e.target.value)}
-                  fullWidth 
-                  placeholder="https://..."
-                  helperText="Enlace para verificar el certificado"
-                />
+                <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
+                  <TextField 
+                    variant="outlined" 
+                    label="URL del certificado" 
+                    value={cert.url || ""} 
+                    onChange={(e) => updateCertificacion(cert.id, 'url', e.target.value)}
+                    placeholder="https://..."
+                    helperText="Enlace para verificar"
+                    error={!cert.url && !cert.archivoUrl}
+                    sx={{ flexGrow: 1 }}
+                  />
+                  
+                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5 }}>
+                    <input
+                      ref={(el) => fileInputRefs.current[cert.id] = el}
+                      type="file"
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      onChange={(e) => handleFileUpload(cert.id, e.target.files[0])}
+                      style={{ display: 'none' }}
+                    />
+                    <Button
+                      variant="outlined"
+                      startIcon={<CloudUpload />}
+                      onClick={() => handleFileInputClick(cert.id)}
+                      size="small"
+                      sx={{ minWidth: 120 }}
+                      disabled={uploadingFiles[cert.id]}
+                    >
+                      {uploadingFiles[cert.id] ? 'Subiendo...' : 'Subir'}
+                    </Button>
+                    {cert.archivoUrl && (
+                      <Typography variant="caption" sx={{ color: 'success.main', textAlign: 'center', fontSize: '0.65rem' }}>
+                        ✓ {cert.archivoUrl}
+                      </Typography>
+                    )}
+                    <Typography variant="caption" sx={{ color: 'text.secondary', textAlign: 'center', fontSize: '0.6rem' }}>
+                      PDF, JPG, PNG<br/>Máx. 5MB
+                    </Typography>
+                  </Box>
+                </Box>
               </Grid>
             </Grid>
           </CardContent>
@@ -211,29 +322,7 @@ export const CertificationsForm = memo(({ newCv, handleChange }) => {
         </Card>
       )}
 
-      {/* Sugerencias de tipos de certificaciones */}
-      <Box sx={{ mt: 3, p: 2, backgroundColor: '#f0f8ff', borderRadius: 1 }}>
-        <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
-          💡 Tipos de certificaciones que puedes incluir:
-        </Typography>
-        <Box component="ul" sx={{ pl: 2, m: 0 }}>
-          <Typography component="li" variant="body2" sx={{ mb: 0.5 }}>
-            Certificaciones técnicas (AWS, Google Cloud, Microsoft, etc.)
-          </Typography>
-          <Typography component="li" variant="body2" sx={{ mb: 0.5 }}>
-            Certificaciones de idiomas (TOEFL, IELTS, DELE, etc.)
-          </Typography>
-          <Typography component="li" variant="body2" sx={{ mb: 0.5 }}>
-            Cursos especializados y bootcamps
-          </Typography>
-          <Typography component="li" variant="body2" sx={{ mb: 0.5 }}>
-            Licencias profesionales
-          </Typography>
-          <Typography component="li" variant="body2">
-            Acreditaciones de competencias específicas
-          </Typography>
-        </Box>
-      </Box>
+     
     </>
   );
 });
