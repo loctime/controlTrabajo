@@ -169,86 +169,102 @@ export const LanguagesForm = memo(({ newCv, handleChange }) => {
         <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold' }}>
           ✨ Idiomas disponibles ({IDIOMAS_DISPONIBLES.length} total):
         </Typography>
-        <Typography variant="caption" sx={{ mb: 2, color: 'text.secondary', display: 'block' }}>
-          Haz clic en cualquier idioma para agregarlo rápidamente
-        </Typography>
+         <Typography variant="caption" sx={{ mb: 2, color: 'text.secondary', display: 'block' }}>
+           Haz clic en cualquier idioma para agregarlo rápidamente • Shift+scroll para desplazarte horizontalmente
+         </Typography>
         
-        {/* Diseño de 3 filas con scroll horizontal */}
-        <Box sx={{ 
-          display: 'flex', 
-          flexDirection: 'column',
-          gap: 1,
-          maxHeight: '120px', // Altura para aproximadamente 3 filas
-          overflowY: 'auto',
-          overflowX: 'hidden',
-          '&::-webkit-scrollbar': {
-            width: '6px',
-          },
-          '&::-webkit-scrollbar-track': {
-            backgroundColor: '#f1f1f1',
-            borderRadius: '3px',
-          },
-          '&::-webkit-scrollbar-thumb': {
-            backgroundColor: '#c1c1c1',
-            borderRadius: '3px',
-            '&:hover': {
-              backgroundColor: '#a8a8a8',
-            },
-          },
-        }}>
-          {/* Dividir en 3 filas */}
-          {[
-            IDIOMAS_DISPONIBLES.filter((_, index) => index % 3 === 0),
-            IDIOMAS_DISPONIBLES.filter((_, index) => index % 3 === 1),
-            IDIOMAS_DISPONIBLES.filter((_, index) => index % 3 === 2)
-          ].map((fila, filaIndex) => (
-            <Box key={filaIndex} sx={{ 
-              display: 'flex', 
-              gap: 1, 
-              overflowX: 'auto',
-              pb: 0.5,
-              '&::-webkit-scrollbar': {
-                height: '4px',
-              },
-              '&::-webkit-scrollbar-track': {
-                backgroundColor: '#f8f8f8',
-                borderRadius: '2px',
-              },
-              '&::-webkit-scrollbar-thumb': {
-                backgroundColor: '#d0d0d0',
-                borderRadius: '2px',
-                '&:hover': {
-                  backgroundColor: '#b0b0b0',
-                },
-              },
-            }}>
-              {fila.map((idioma) => (
-                <Chip
-                  key={idioma}
-                  label={idioma}
-                  variant="outlined"
-                  size="small"
-                  onClick={() => {
-                    setNuevoIdioma(idioma);
-                  }}
-                  sx={{ 
-                    cursor: 'pointer',
-                    flexShrink: 0,
-                    whiteSpace: 'nowrap',
-                    fontSize: '0.75rem',
-                    height: '24px',
-                    '&:hover': { 
-                      backgroundColor: 'primary.light', 
-                      color: 'white',
-                      transform: 'scale(1.05)',
-                      transition: 'all 0.2s ease'
-                    } 
-                  }}
-                />
-              ))}
-            </Box>
-          ))}
-        </Box>
+         {/* Diseño de 3 filas con scroll sincronizado - como tabla */}
+         <Box sx={{ 
+           width: '100%',
+           overflowX: 'auto',
+           maxHeight: '120px',
+           overflowY: 'auto',
+           cursor: 'grab', // Indicar que se puede arrastrar
+           '&:active': {
+             cursor: 'grabbing', // Cambiar cursor cuando se arrastra
+           },
+           '&::-webkit-scrollbar': {
+             width: '8px',
+             height: '8px',
+           },
+           '&::-webkit-scrollbar-track': {
+             backgroundColor: '#f1f1f1',
+             borderRadius: '4px',
+           },
+           '&::-webkit-scrollbar-thumb': {
+             backgroundColor: '#c1c1c1',
+             borderRadius: '4px',
+             '&:hover': {
+               backgroundColor: '#a8a8a8',
+             },
+           },
+           // Mejorar la experiencia de scroll del mouse
+           '&::-webkit-scrollbar-corner': {
+             backgroundColor: '#f1f1f1',
+           },
+         }}>
+           <Box sx={{ 
+             display: 'flex',
+             flexDirection: 'column',
+             gap: 1,
+             minWidth: 'max-content', // Esto hace que el contenido determine el ancho total
+             width: '100%'
+           }}>
+             {/* Dividir en 3 filas - todas se mueven juntas */}
+             {[
+               IDIOMAS_DISPONIBLES.filter((_, index) => index % 3 === 0),
+               IDIOMAS_DISPONIBLES.filter((_, index) => index % 3 === 1),
+               IDIOMAS_DISPONIBLES.filter((_, index) => index % 3 === 2)
+             ].map((fila, filaIndex) => (
+               <Box key={filaIndex} sx={{ 
+                 display: 'flex', 
+                 gap: 1,
+                 pb: 0.5,
+                 alignItems: 'center'
+               }}>
+                 {fila.map((idioma) => (
+                   <Chip
+                     key={idioma}
+                     label={idioma}
+                     variant="outlined"
+                     size="small"
+                     onClick={() => {
+                       // Agregar directamente el idioma sin pasar por el campo de texto
+                       const nuevoIdiomaObj = {
+                         id: uuidv4(),
+                         idioma: idioma.trim(),
+                         nivel: nivelIdioma
+                       };
+                       
+                       handleChange({
+                         target: {
+                           name: 'idiomas',
+                           value: [...idiomas, nuevoIdiomaObj]
+                         }
+                       });
+                       
+                       setNuevoIdioma(''); // Limpiar el campo
+                     }}
+                     sx={{ 
+                       cursor: 'pointer',
+                       flexShrink: 0,
+                       whiteSpace: 'nowrap',
+                       fontSize: '0.75rem',
+                       height: '24px',
+                       minWidth: 'fit-content',
+                       '&:hover': { 
+                         backgroundColor: 'primary.light', 
+                         color: 'white',
+                         transform: 'scale(1.05)',
+                         transition: 'all 0.2s ease'
+                       } 
+                     }}
+                   />
+                 ))}
+               </Box>
+             ))}
+           </Box>
+         </Box>
       </Box>
 
       {/* Mensaje informativo para móviles */}

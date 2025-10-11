@@ -206,84 +206,100 @@ export const SkillsForm = memo(({ newCv, handleChange }) => {
                : `✨ Habilidades disponibles (${habilidadesFiltradas.length} total):`}
            </Typography>
            <Typography variant="caption" sx={{ mb: 2, color: 'text.secondary', display: 'block' }}>
-             Haz clic en cualquier habilidad para agregarla rápidamente
+             Haz clic en cualquier habilidad para agregarla rápidamente • Shift+scroll para desplazarte horizontalmente
            </Typography>
            
-           {/* Diseño de 3 filas con scroll horizontal */}
+           {/* Diseño de 3 filas con scroll sincronizado - como tabla */}
            <Box sx={{ 
-             display: 'flex', 
-             flexDirection: 'column',
-             gap: 1,
-             maxHeight: '120px', // Altura para aproximadamente 3 filas
+             width: '100%',
+             overflowX: 'auto',
+             maxHeight: '120px',
              overflowY: 'auto',
-             overflowX: 'hidden',
+             cursor: 'grab', // Indicar que se puede arrastrar
+             '&:active': {
+               cursor: 'grabbing', // Cambiar cursor cuando se arrastra
+             },
              '&::-webkit-scrollbar': {
-               width: '6px',
+               width: '8px',
+               height: '8px',
              },
              '&::-webkit-scrollbar-track': {
                backgroundColor: '#f1f1f1',
-               borderRadius: '3px',
+               borderRadius: '4px',
              },
              '&::-webkit-scrollbar-thumb': {
                backgroundColor: '#c1c1c1',
-               borderRadius: '3px',
+               borderRadius: '4px',
                '&:hover': {
                  backgroundColor: '#a8a8a8',
                },
              },
+             // Mejorar la experiencia de scroll del mouse
+             '&::-webkit-scrollbar-corner': {
+               backgroundColor: '#f1f1f1',
+             },
            }}>
-             {/* Dividir en 3 filas */}
-             {[
-               habilidadesFiltradas.filter((_, index) => index % 3 === 0),
-               habilidadesFiltradas.filter((_, index) => index % 3 === 1),
-               habilidadesFiltradas.filter((_, index) => index % 3 === 2)
-             ].map((fila, filaIndex) => (
-               <Box key={filaIndex} sx={{ 
-                 display: 'flex', 
-                 gap: 1, 
-                 overflowX: 'auto',
-                 pb: 0.5,
-                 '&::-webkit-scrollbar': {
-                   height: '4px',
-                 },
-                 '&::-webkit-scrollbar-track': {
-                   backgroundColor: '#f8f8f8',
-                   borderRadius: '2px',
-                 },
-                 '&::-webkit-scrollbar-thumb': {
-                   backgroundColor: '#d0d0d0',
-                   borderRadius: '2px',
-                   '&:hover': {
-                     backgroundColor: '#b0b0b0',
-                   },
-                 },
-               }}>
-                 {fila.map((skill) => (
-                   <Chip
-                     key={skill}
-                     label={skill}
-                     variant="outlined"
-                     size="small"
-                     onClick={() => {
-                       setNuevaHabilidad(skill);
-                     }}
-                     sx={{ 
-                       cursor: 'pointer',
-                       flexShrink: 0,
-                       whiteSpace: 'nowrap',
-                       fontSize: '0.75rem',
-                       height: '24px',
-                       '&:hover': { 
-                         backgroundColor: 'primary.light', 
-                         color: 'white',
-                         transform: 'scale(1.05)',
-                         transition: 'all 0.2s ease'
-                       } 
-                     }}
-                   />
-                 ))}
-               </Box>
-             ))}
+             <Box sx={{ 
+               display: 'flex',
+               flexDirection: 'column',
+               gap: 1,
+               minWidth: 'max-content', // Esto hace que el contenido determine el ancho total
+               width: '100%'
+             }}>
+               {/* Dividir en 3 filas - todas se mueven juntas */}
+               {[
+                 habilidadesFiltradas.filter((_, index) => index % 3 === 0),
+                 habilidadesFiltradas.filter((_, index) => index % 3 === 1),
+                 habilidadesFiltradas.filter((_, index) => index % 3 === 2)
+               ].map((fila, filaIndex) => (
+                 <Box key={filaIndex} sx={{ 
+                   display: 'flex', 
+                   gap: 1,
+                   pb: 0.5,
+                   alignItems: 'center'
+                 }}>
+                   {fila.map((skill) => (
+                     <Chip
+                       key={skill}
+                       label={skill}
+                       variant="outlined"
+                       size="small"
+                       onClick={() => {
+                         // Agregar directamente la habilidad sin pasar por el campo de texto
+                         const habilidad = {
+                           id: uuidv4(),
+                           nombre: skill.trim(),
+                           nivel: nivelHabilidad
+                         };
+                         
+                         handleChange({
+                           target: {
+                             name: 'habilidades',
+                             value: [...habilidades, habilidad]
+                           }
+                         });
+                         
+                         setNuevaHabilidad(''); // Limpiar el campo
+                       }}
+                       sx={{ 
+                         cursor: 'pointer',
+                         flexShrink: 0,
+                         whiteSpace: 'nowrap',
+                         fontSize: '0.75rem',
+                         height: '24px',
+                         minWidth: 'fit-content',
+                         '&:hover': { 
+                           backgroundColor: 'primary.light', 
+                           color: 'white',
+                           transform: 'scale(1.05)',
+                           transition: 'all 0.2s ease'
+                         } 
+                       }}
+                     />
+                   ))}
+                 </Box>
+               ))}
+             </Box>
            </Box>
          </Box>
       </Box>
