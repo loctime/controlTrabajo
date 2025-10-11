@@ -7,8 +7,9 @@ import {
   IconButton,
   CircularProgress
 } from '@mui/material';
-import { Close, Download, Visibility, Refresh } from '@mui/icons-material';
+import { Close, Download, Visibility, Refresh, Description } from '@mui/icons-material';
 import { pdfGeneratorService } from '../services/pdfGeneratorService';
+import { generateModernCVWord } from '../templates/ModernTemplateWord';
 
 const CVPreview = ({ 
   open, 
@@ -18,6 +19,7 @@ const CVPreview = ({
   onTemplateChange 
 }) => {
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isGeneratingWord, setIsGeneratingWord] = useState(false);
   const [pdfUrl, setPdfUrl] = useState(null);
   const [isLoadingPreview, setIsLoadingPreview] = useState(false);
 
@@ -88,6 +90,35 @@ const CVPreview = ({
       alert(`Error al generar el CV: ${error.message}`);
     } finally {
       setIsGenerating(false);
+    }
+  };
+
+  const handleGenerateAndDownloadWord = async () => {
+    try {
+      setIsGeneratingWord(true);
+      
+      // Validar datos antes de generar
+      const validation = pdfGeneratorService.validateCVData(cvData);
+      if (!validation.isValid) {
+        alert(`Error: ${validation.errors.join(', ')}`);
+        return;
+      }
+
+      // Generar y descargar Word
+      const success = await generateModernCVWord(cvData);
+      
+      if (success) {
+        // Cerrar modal después de descarga exitosa
+        onClose();
+      } else {
+        alert('Error al generar el documento Word');
+      }
+      
+    } catch (error) {
+      console.error('Error al generar Word:', error);
+      alert(`Error al generar el documento Word: ${error.message}`);
+    } finally {
+      setIsGeneratingWord(false);
     }
   };
 
@@ -223,17 +254,44 @@ const CVPreview = ({
             <Button
               variant="outlined"
               onClick={onClose}
-              disabled={isGenerating}
+              disabled={isGenerating || isGeneratingWord}
             >
               Cancelar
             </Button>
+            
+            {/* Botón para descargar Word */}
+            <Button
+              variant="outlined"
+              color="secondary"
+              startIcon={isGeneratingWord ? <CircularProgress size={16} /> : <Description />}
+              onClick={handleGenerateAndDownloadWord}
+              disabled={isGenerating || isGeneratingWord}
+              sx={{ 
+                borderColor: '#3b82f6',
+                color: '#3b82f6',
+                '&:hover': {
+                  borderColor: '#2563eb',
+                  backgroundColor: '#eff6ff'
+                }
+              }}
+            >
+              {isGeneratingWord ? 'Generando...' : 'Descargar Word (Editable)'}
+            </Button>
+            
+            {/* Botón principal para descargar PDF */}
             <Button
               variant="contained"
               startIcon={isGenerating ? <CircularProgress size={16} /> : <Download />}
               onClick={handleGenerateAndDownload}
-              disabled={isGenerating}
+              disabled={isGenerating || isGeneratingWord}
+              sx={{ 
+                backgroundColor: '#1e3a8a',
+                '&:hover': {
+                  backgroundColor: '#1e40af'
+                }
+              }}
             >
-              {isGenerating ? 'Generando...' : 'Generar y Descargar PDF'}
+              {isGenerating ? 'Generando...' : 'Descargar PDF (Recomendado)'}
             </Button>
           </Box>
         </Box>
