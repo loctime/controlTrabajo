@@ -10,6 +10,7 @@ import {
 import { Close, Download, Visibility, Refresh, Description } from '@mui/icons-material';
 import { pdfGeneratorService } from '../services/pdfGeneratorService';
 import { generateModernCVWord } from '../templates/ModernTemplateWord';
+import { generateModernCVWord as generateClassicCVWord } from '../templates/ClassicTemplateWord';
 
 const CVPreview = ({ 
   open, 
@@ -93,7 +94,7 @@ const CVPreview = ({
     }
   };
 
-  const handleGenerateAndDownloadWord = async () => {
+  const handleGenerateAndDownloadWordModern = async () => {
     try {
       setIsGeneratingWord(true);
       
@@ -104,19 +105,48 @@ const CVPreview = ({
         return;
       }
 
-      // Generar y descargar Word
+      // Generar y descargar Word moderno
       const success = await generateModernCVWord(cvData);
       
       if (success) {
         // Cerrar modal después de descarga exitosa
         onClose();
       } else {
-        alert('Error al generar el documento Word');
+        alert('Error al generar el documento Word moderno');
       }
       
     } catch (error) {
-      console.error('Error al generar Word:', error);
-      alert(`Error al generar el documento Word: ${error.message}`);
+      console.error('Error al generar Word moderno:', error);
+      alert(`Error al generar el documento Word moderno: ${error.message}`);
+    } finally {
+      setIsGeneratingWord(false);
+    }
+  };
+
+  const handleGenerateAndDownloadWordClassic = async () => {
+    try {
+      setIsGeneratingWord(true);
+      
+      // Validar datos antes de generar
+      const validation = pdfGeneratorService.validateCVData(cvData);
+      if (!validation.isValid) {
+        alert(`Error: ${validation.errors.join(', ')}`);
+        return;
+      }
+
+      // Generar y descargar Word clásico
+      const success = await generateClassicCVWord(cvData);
+      
+      if (success) {
+        // Cerrar modal después de descarga exitosa
+        onClose();
+      } else {
+        alert('Error al generar el documento Word clásico');
+      }
+      
+    } catch (error) {
+      console.error('Error al generar Word clásico:', error);
+      alert(`Error al generar el documento Word clásico: ${error.message}`);
     } finally {
       setIsGeneratingWord(false);
     }
@@ -259,12 +289,12 @@ const CVPreview = ({
               Cancelar
             </Button>
             
-            {/* Botón para descargar Word */}
+            {/* Botón Word Moderno */}
             <Button
               variant="outlined"
               color="secondary"
               startIcon={isGeneratingWord ? <CircularProgress size={16} /> : <Description />}
-              onClick={handleGenerateAndDownloadWord}
+              onClick={handleGenerateAndDownloadWordModern}
               disabled={isGenerating || isGeneratingWord}
               sx={{ 
                 borderColor: '#3b82f6',
@@ -275,7 +305,26 @@ const CVPreview = ({
                 }
               }}
             >
-              {isGeneratingWord ? 'Generando...' : 'Descargar Word (Editable)'}
+              {isGeneratingWord ? 'Generando...' : 'Word Moderno'}
+            </Button>
+
+            {/* Botón Word Clásico */}
+            <Button
+              variant="outlined"
+              color="secondary"
+              startIcon={isGeneratingWord ? <CircularProgress size={16} /> : <Description />}
+              onClick={handleGenerateAndDownloadWordClassic}
+              disabled={isGenerating || isGeneratingWord}
+              sx={{ 
+                borderColor: '#059669',
+                color: '#059669',
+                '&:hover': {
+                  borderColor: '#047857',
+                  backgroundColor: '#ecfdf5'
+                }
+              }}
+            >
+              {isGeneratingWord ? 'Generando...' : 'Word Clásico'}
             </Button>
             
             {/* Botón principal para descargar PDF */}

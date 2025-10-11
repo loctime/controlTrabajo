@@ -13,6 +13,7 @@ import { ProjectsForm } from './ProjectsForm';
 import { ReferencesForm } from './ReferencesForm';
 import { TemplateSelector } from './TemplateSelector';
 import { generateModernCVWord } from '../templates/ModernTemplateWord';
+import { generateModernCVWord as generateClassicCVWord } from '../templates/ClassicTemplateWord';
 
 export const CVGeneratorTab = ({
   newCv,
@@ -28,16 +29,31 @@ export const CVGeneratorTab = ({
 }) => {
   const [isGeneratingWord, setIsGeneratingWord] = useState(false);
 
-  const handleDownloadWord = async () => {
+  const handleDownloadWordModern = async () => {
     try {
       setIsGeneratingWord(true);
       const success = await generateModernCVWord(newCv);
       if (!success) {
-        alert('Error al generar el documento Word');
+        alert('Error al generar el documento Word moderno');
       }
     } catch (error) {
-      console.error('Error al generar Word:', error);
-      alert(`Error al generar el documento Word: ${error.message}`);
+      console.error('Error al generar Word moderno:', error);
+      alert(`Error al generar el documento Word moderno: ${error.message}`);
+    } finally {
+      setIsGeneratingWord(false);
+    }
+  };
+
+  const handleDownloadWordClassic = async () => {
+    try {
+      setIsGeneratingWord(true);
+      const success = await generateClassicCVWord(newCv);
+      if (!success) {
+        alert('Error al generar el documento Word clásico');
+      }
+    } catch (error) {
+      console.error('Error al generar Word clásico:', error);
+      alert(`Error al generar el documento Word clásico: ${error.message}`);
     } finally {
       setIsGeneratingWord(false);
     }
@@ -145,15 +161,16 @@ export const CVGeneratorTab = ({
             Vista Previa
           </Button>
           
+          {/* Botón Word Moderno */}
           <Button 
             variant="outlined"
             color="secondary"
             size="large"
-            onClick={handleDownloadWord}
+            onClick={handleDownloadWordModern}
             disabled={isGeneratingWord}
             startIcon={isGeneratingWord ? <CircularProgress size={16} /> : <Description />}
             sx={{ 
-              px: 4, 
+              px: 3, 
               py: 1.5,
               borderColor: '#3b82f6',
               color: '#3b82f6',
@@ -163,7 +180,29 @@ export const CVGeneratorTab = ({
               }
             }}
           >
-            {isGeneratingWord ? 'Generando...' : 'Descargar Word'}
+            {isGeneratingWord ? 'Generando...' : 'Word Moderno'}
+          </Button>
+
+          {/* Botón Word Clásico */}
+          <Button 
+            variant="outlined"
+            color="secondary"
+            size="large"
+            onClick={handleDownloadWordClassic}
+            disabled={isGeneratingWord}
+            startIcon={isGeneratingWord ? <CircularProgress size={16} /> : <Description />}
+            sx={{ 
+              px: 3, 
+              py: 1.5,
+              borderColor: '#059669',
+              color: '#059669',
+              '&:hover': {
+                borderColor: '#047857',
+                backgroundColor: '#ecfdf5'
+              }
+            }}
+          >
+            {isGeneratingWord ? 'Generando...' : 'Word Clásico'}
           </Button>
           
           <Button 
