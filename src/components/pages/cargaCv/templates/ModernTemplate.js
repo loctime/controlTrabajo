@@ -255,6 +255,36 @@ export const generateModernTemplate = async (cvData) => {
     return availableSpace >= totalNeededHeight;
   };
 
+  // Función más inteligente que evalúa si vale la pena crear nueva página
+  const shouldCreateNewPage = (sectionName, estimatedContentHeight = 50, isCompact = false) => {
+    const titleHeight = 15;
+    const totalNeededHeight = titleHeight + estimatedContentHeight;
+    const availableSpace = pageHeight - contentY - 30;
+    
+    // Si hay suficiente espacio, no crear nueva página
+    if (availableSpace >= totalNeededHeight) {
+      return false;
+    }
+    
+    // Para secciones compactas (habilidades, idiomas), ser más permisivo
+    if (isCompact) {
+      // Solo crear nueva página si queda menos del 20% del espacio de la página
+      const spacePercentage = availableSpace / (pageHeight - 30);
+      if (spacePercentage > 0.2 && estimatedContentHeight <= 40) {
+        return false; // Hay suficiente espacio para secciones pequeñas
+      }
+    }
+    
+    // Para secciones grandes, ser más estricto
+    if (estimatedContentHeight > 60) {
+      // Solo crear nueva página si queda menos del 30% del espacio
+      const spacePercentage = availableSpace / (pageHeight - 30);
+      return spacePercentage < 0.3;
+    }
+    
+    return true; // Crear nueva página por defecto
+  };
+
   // Función para agregar sección con verificación inteligente
   const addSectionWithSmartPaging = (doc, sectionName, renderFunction, estimatedHeight = 50) => {
     // Si no hay espacio suficiente para título + contenido mínimo, crear nueva página
@@ -430,9 +460,9 @@ export const generateModernTemplate = async (cvData) => {
 
   // HABILIDADES
   if (cvData.habilidades && cvData.habilidades.length > 0) {
-    // Verificar si hay espacio para título + contenido de habilidades
+    // Verificar si hay espacio para título + contenido de habilidades (sección compacta)
     const estimatedHeight = 30; // Altura estimada para habilidades
-    if (!hasSpaceForSection('HABILIDADES', estimatedHeight)) {
+    if (shouldCreateNewPage('HABILIDADES', estimatedHeight, true)) { // true = isCompact
       addFooter(doc, `Página ${pageCounter}`);
       doc.addPage();
       pageCounter++;
@@ -453,9 +483,9 @@ export const generateModernTemplate = async (cvData) => {
 
   // IDIOMAS
   if (cvData.idiomas && cvData.idiomas.length > 0) {
-    // Verificar si hay espacio para título + contenido de idiomas
+    // Verificar si hay espacio para título + contenido de idiomas (sección compacta)
     const estimatedHeight = 25; // Altura estimada para idiomas
-    if (!hasSpaceForSection('IDIOMAS', estimatedHeight)) {
+    if (shouldCreateNewPage('IDIOMAS', estimatedHeight, true)) { // true = isCompact
       addFooter(doc, `Página ${pageCounter}`);
       doc.addPage();
       pageCounter++;
@@ -481,9 +511,9 @@ export const generateModernTemplate = async (cvData) => {
 
   // CERTIFICACIONES
   if (cvData.certificaciones && cvData.certificaciones.length > 0) {
-    // Verificar si hay espacio para título + al menos una certificación
+    // Verificar si hay espacio para título + al menos una certificación (sección mediana)
     const estimatedHeight = 25; // Altura estimada para una certificación
-    if (!hasSpaceForSection('CERTIFICACIONES', estimatedHeight)) {
+    if (shouldCreateNewPage('CERTIFICACIONES', estimatedHeight, true)) { // true = isCompact (certificaciones son compactas)
       addFooter(doc, `Página ${pageCounter}`);
       doc.addPage();
       pageCounter++;
@@ -525,9 +555,9 @@ export const generateModernTemplate = async (cvData) => {
 
   // REFERENCIAS
   if (cvData.referencias && cvData.referencias.length > 0) {
-    // Verificar si hay espacio para título + al menos una referencia
+    // Verificar si hay espacio para título + al menos una referencia (sección mediana)
     const estimatedHeight = 25; // Altura estimada para una referencia
-    if (!hasSpaceForSection('REFERENCIAS', estimatedHeight)) {
+    if (shouldCreateNewPage('REFERENCIAS', estimatedHeight, true)) { // true = isCompact (referencias son compactas)
       addFooter(doc, `Página ${pageCounter}`);
       doc.addPage();
       pageCounter++;
