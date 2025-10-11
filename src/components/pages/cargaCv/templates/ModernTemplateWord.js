@@ -59,7 +59,7 @@ export const generateModernCVWord = async (cvData) => {
           }),
         ],
         alignment: options.alignment || AlignmentType.LEFT,
-        spacing: options.spacing || { before: 100, after: 150 },
+        spacing: options.spacing || { before: 50, after: 100 },
       });
     };
 
@@ -75,7 +75,7 @@ export const generateModernCVWord = async (cvData) => {
             font: "Calibri",
           }),
         ],
-        spacing: { before: 400, after: 200 },
+        spacing: { before: 200, after: 100 },
         alignment: isSidebar ? AlignmentType.CENTER : AlignmentType.LEFT,
       });
     };
@@ -87,6 +87,7 @@ export const generateModernCVWord = async (cvData) => {
           size: 100,
           type: WidthType.PERCENTAGE,
         },
+        columnWidths: [3200, 6800], // Ancho máximo: 32% izquierda, 68% derecha
         rows: [
           new TableRow({
             children: [
@@ -150,14 +151,10 @@ export const generateModernCVWord = async (cvData) => {
                   color: primaryColor,
                 },
                 margins: {
-                  top: 400,
-                  bottom: 400,
-                  left: 400,
-                  right: 400,
-                },
-                width: {
-                  size: 30,
-                  type: WidthType.PERCENTAGE,
+                  top: 100,
+                  bottom: 100,
+                  left: 100,
+                  right: 100,
                 },
               }),
 
@@ -169,21 +166,21 @@ export const generateModernCVWord = async (cvData) => {
                     bold: true,
                     size: 48,
                     color: primaryColor,
-                    spacing: { before: 200, after: 100 },
+                    spacing: { before: 100, after: 50 },
                   }),
 
                   // EDAD
                   createStyledParagraph(`${cvData.Edad} años`, {
                     size: 24,
                     color: secondaryColor,
-                    spacing: { before: 0, after: 150 },
+                    spacing: { before: 0, after: 100 },
                   }),
 
                   // TÍTULO PROFESIONAL
                   createStyledParagraph(buildProfessionalTitle(cvData), {
                     size: 28,
                     color: textColor,
-                    spacing: { before: 0, after: 400 },
+                    spacing: { before: 0, after: 200 },
                   }),
 
                   // PERFIL PROFESIONAL
@@ -191,7 +188,7 @@ export const generateModernCVWord = async (cvData) => {
                     createSectionTitle('PERFIL PROFESIONAL'),
                     createStyledParagraph(cvData.perfilProfesional, {
                       size: 22,
-                      spacing: { before: 0, after: 300 },
+                      spacing: { before: 0, after: 150 },
                     }),
                   ] : []),
 
@@ -341,14 +338,10 @@ export const generateModernCVWord = async (cvData) => {
                   ] : []),
                 ],
                 margins: {
-                  top: 400,
-                  bottom: 400,
-                  left: 400,
-                  right: 400,
-                },
-                width: {
-                  size: 70,
-                  type: WidthType.PERCENTAGE,
+                  top: 100,
+                  bottom: 100,
+                  left: 100,
+                  right: 100,
                 },
               }),
             ],
@@ -360,7 +353,16 @@ export const generateModernCVWord = async (cvData) => {
     // Crear documento
     const doc = new Document({
       sections: [{
-        properties: {},
+        properties: {
+          page: {
+            margin: {
+              top: 200,      // 0.14 pulgadas
+              right: 200,    // 0.14 pulgadas  
+              bottom: 200,   // 0.14 pulgadas
+              left: 200,     // 0.14 pulgadas
+            },
+          },
+        },
         children: [
           createTwoColumnLayout(),
         ],
