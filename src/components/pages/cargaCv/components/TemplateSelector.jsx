@@ -368,24 +368,7 @@ export const TemplateSelector = memo(({ selectedTemplate, onTemplateChange }) =>
         </Grid>
       </RadioGroup>
 
-      {/* Información adicional */}
-      <Box sx={{ mt: 3, p: 2, backgroundColor: '#f9f9f9', borderRadius: 1 }}>
-        <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
-          💡 Consejos para elegir tu plantilla:
-        </Typography>
-        <Typography variant="body2" sx={{ mb: 1 }}>
-          • <strong>Plantilla Moderna:</strong> Perfecta para sectores creativos, tecnología, marketing y profesiones que valoran la innovación
-        </Typography>
-        <Typography variant="body2" sx={{ mb: 1 }}>
-          • <strong>Plantilla Elegante:</strong> Ideal para profesionales, ejecutivos, consultores y especialistas técnicos que buscan un diseño sofisticado
-        </Typography>
-        <Typography variant="body2" sx={{ mb: 1 }}>
-          • <strong>Plantilla Clásica:</strong> Perfecta para sectores tradicionales, corporativos, finanzas y roles que requieren formalidad
-        </Typography>
-        <Typography variant="body2">
-          • Puedes cambiar de plantilla en cualquier momento antes de generar tu CV final
-        </Typography>
-      </Box>
+      
     </>
   );
 });

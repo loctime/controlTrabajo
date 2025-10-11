@@ -233,16 +233,7 @@
         "Liderazgo Colaborativo", "Trabajo Multicultural", "Flexibilidad Mental",
         "Innovación", "Autocrítica", "Empoderamiento", "Resolución de Conflictos Complejos"
       ]
-    },
-    {
-      "categoria": "Idiomas",
-      "habilidades": [
-        "Español", "Inglés", "Francés", "Alemán", "Portugués", "Italiano", "Chino", "Japonés",
-        "Coreano", "Árabe", "Ruso", "Catalán", "Euskera", "Gallego", "Valenciano",
-        "Lengua de Señas Argentina (LSA)", "Esperanto", "Hindi", "Turco", "Hebreo", "Sueco", "Noruego", "Danés", "Holandés",
-        "Polaco", "Checo", "Griego", "Tailandés", "Vietnamita", "Tagalo", "Finés", "Ucraniano", "Rumano", "Búlgaro"
-      ]
-    },
+  },
     {
       "categoria": "Audiovisual y Medios",
       "habilidades": [

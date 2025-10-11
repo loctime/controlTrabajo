@@ -1,4 +1,4 @@
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useRef } from 'react';
 import { 
   Grid, 
   TextField, 
@@ -9,11 +9,16 @@ import {
   Card,
   CardContent
 } from '@mui/material';
-import { Add, Delete } from '@mui/icons-material';
+import { Add, Delete, CloudUpload } from '@mui/icons-material';
 import { v4 as uuidv4 } from 'uuid';
+import { uploadFile, ensureAppFolder, createPublicShareLink, getDirectDownloadUrl } from '../../../../lib/controlFileStorage';
 
 export const EducationForm = memo(({ newCv, handleChange }) => {
   const educacion = newCv.educacion || [];
+  const fileInputRefs = useRef({});
+  
+  // Estado para mostrar progreso de subida
+  const [uploadingFiles, setUploadingFiles] = React.useState({});
 
   const addEducacion = useCallback(() => {
     const nuevaEducacion = {
@@ -55,6 +60,81 @@ export const EducationForm = memo(({ newCv, handleChange }) => {
       }
     });
   }, [educacion, handleChange]);
+
+  const handleFileUpload = useCallback(async (eduId, file) => {
+    if (!file) return;
+    
+    // Validar tipo de archivo
+    const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
+    if (!allowedTypes.includes(file.type)) {
+      alert('Solo se permiten archivos PDF, JPG o PNG');
+      return;
+    }
+    
+    // Validar tamaño (máximo 5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      alert('El archivo debe ser menor a 5MB');
+      return;
+    }
+    
+    try {
+      // Marcar como subiendo
+      setUploadingFiles(prev => ({ ...prev, [eduId]: true }));
+      
+      // 1. Crear/obtener carpeta principal "BolsaTrabajo"
+      console.log('📁 Obteniendo carpeta BolsaTrabajo...');
+      const folderId = await ensureAppFolder();
+      
+      // 2. Subir archivo directamente a la carpeta BolsaTrabajo
+      console.log(`📤 Subiendo diploma "${file.name}" a BolsaTrabajo...`);
+      const fileId = await uploadFile(file, folderId, (progress) => {
+        console.log(`Progreso de diploma: ${progress}%`);
+      });
+      
+      console.log(`✅ Diploma subido con ID:`, fileId);
+      
+      // 3. Crear enlace público y obtener URL de descarga directa
+      console.log(`🔗 Creando enlace público para diploma con fileId:`, fileId);
+      let finalUrl;
+      
+      try {
+        const shareUrl = await createPublicShareLink(fileId, 8760); // 1 año
+        console.log(`✅ Enlace público creado:`, shareUrl);
+        
+        // 4. Obtener URL de descarga directa desde el share link
+        console.log(`📥 Obteniendo URL de descarga directa...`);
+        finalUrl = await getDirectDownloadUrl(shareUrl);
+        console.log(`✅ URL de descarga directa obtenida:`, finalUrl);
+        
+      } catch (shareError) {
+        console.error(`❌ Error creando share link para diploma:`, shareError);
+        console.log(`⚠️ Guardando fileId directamente como fallback`);
+        finalUrl = fileId;
+      }
+      
+      // 5. Guardar en el formulario
+      updateEducacion(eduId, 'diplomaUrl', finalUrl);
+      updateEducacion(eduId, 'diplomaArchivo', file.name);
+      
+      alert(`Diploma "${file.name}" subido exitosamente`);
+      
+    } catch (error) {
+      console.error('Error subiendo diploma:', error);
+      alert('Error al subir el archivo. Inténtalo nuevamente.');
+    } finally {
+      // Quitar estado de subiendo
+      setUploadingFiles(prev => {
+        const newState = { ...prev };
+        delete newState[eduId];
+        return newState;
+      });
+    }
+  }, [updateEducacion]);
+
+  const handleFileInputClick = useCallback((eduId) => {
+    fileInputRefs.current[eduId]?.click();
+  }, []);
 
   return (
     <>
@@ -207,7 +287,7 @@ export const EducationForm = memo(({ newCv, handleChange }) => {
                 />
               </Grid>
               
-              <Grid item xs={12}>
+              <Grid item xs={12} md={7}>
                 <TextField 
                   variant="outlined" 
                   label="Descripción adicional" 
@@ -215,10 +295,62 @@ export const EducationForm = memo(({ newCv, handleChange }) => {
                   onChange={(e) => updateEducacion(edu.id, 'descripcion', e.target.value)}
                   fullWidth 
                   multiline
-                  rows={2}
+                  rows={4}
                   placeholder="Menciones honoríficas, proyectos destacados, promedio, etc."
                   helperText="Información adicional relevante (opcional)"
                 />
+              </Grid>
+              
+              <Grid item xs={12} md={5}>
+                <Box sx={{ 
+                  p: 2, 
+                  border: '2px dashed #90caf9',
+                  borderRadius: '8px',
+                  backgroundColor: '#f0f7ff',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 1,
+                  height: '100%',
+                  justifyContent: 'center'
+                }}>
+                  <Typography variant="subtitle2" sx={{ color: '#1565c0', fontWeight: 'bold' }}>
+                    📄 Diploma
+                  </Typography>
+                  <input
+                    ref={(el) => fileInputRefs.current[edu.id] = el}
+                    type="file"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    onChange={(e) => handleFileUpload(edu.id, e.target.files[0])}
+                    style={{ display: 'none' }}
+                  />
+                  <Button
+                    variant="contained"
+                    startIcon={<CloudUpload />}
+                    onClick={() => handleFileInputClick(edu.id)}
+                    size="small"
+                    disabled={uploadingFiles[edu.id]}
+                    sx={{
+                      background: 'linear-gradient(135deg, #2196f3 0%, #1976d2 100%)',
+                      color: 'white',
+                      fontWeight: 'bold',
+                      px: 2,
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
+                      }
+                    }}
+                  >
+                    {uploadingFiles[edu.id] ? 'Subiendo...' : 'Subir'}
+                  </Button>
+                  {edu.diplomaArchivo && (
+                    <Typography variant="caption" sx={{ color: 'success.main', textAlign: 'center', fontWeight: 'bold' }}>
+                      ✓ {edu.diplomaArchivo}
+                    </Typography>
+                  )}
+                  <Typography variant="caption" sx={{ color: 'text.secondary', textAlign: 'center', fontSize: '0.7rem' }}>
+                    PDF, JPG, PNG<br/>Máx. 5MB
+                  </Typography>
+                </Box>
               </Grid>
             </Grid>
           </CardContent>

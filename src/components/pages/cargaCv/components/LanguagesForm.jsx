@@ -311,26 +311,7 @@ export const LanguagesForm = memo(({ newCv, handleChange }) => {
         </Box>
       )}
 
-      {/* Información sobre niveles */}
-      <Box sx={{ mt: 3, p: 2, backgroundColor: '#f0f8ff', borderRadius: 1 }}>
-        <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
-          📚 Niveles de competencia (Marco Común Europeo):
-        </Typography>
-        <Box component="ul" sx={{ pl: 2, m: 0 }}>
-          <Typography component="li" variant="body2" sx={{ mb: 0.5 }}>
-            <strong>Básico (A1-A2):</strong> Puedes comunicarte de forma básica en situaciones familiares
-          </Typography>
-          <Typography component="li" variant="body2" sx={{ mb: 0.5 }}>
-            <strong>Intermedio (B1-B2):</strong> Puedes mantener conversaciones fluidas y expresar ideas complejas
-          </Typography>
-          <Typography component="li" variant="body2" sx={{ mb: 0.5 }}>
-            <strong>Avanzado (C1-C2):</strong> Dominio avanzado del idioma, casi nativo
-          </Typography>
-          <Typography component="li" variant="body2">
-            <strong>Nativo:</strong> Lengua materna o nivel nativo equivalente
-          </Typography>
-        </Box>
-      </Box>
+     
     </>
   );
 });

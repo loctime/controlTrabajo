@@ -7,13 +7,18 @@ import {
   Button, 
   IconButton, 
   Card,
-  CardContent
+  CardContent,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem
 } from '@mui/material';
 import { Add, Delete } from '@mui/icons-material';
 import { v4 as uuidv4 } from 'uuid';
 
 export const ReferencesForm = memo(({ newCv, handleChange }) => {
   const referencias = newCv.referencias || [];
+  const experiencias = newCv.experiencias || [];
 
   const addReferencia = useCallback(() => {
     const nuevaReferencia = {
@@ -22,7 +27,8 @@ export const ReferencesForm = memo(({ newCv, handleChange }) => {
       cargo: "",
       empresa: "",
       telefono: "",
-      email: ""
+      email: "",
+      experienciaId: ""
     };
     
     handleChange({
@@ -54,6 +60,37 @@ export const ReferencesForm = memo(({ newCv, handleChange }) => {
       }
     });
   }, [referencias, handleChange]);
+
+  const vincularExperiencia = useCallback((referenciaId, experienciaId) => {
+    const experienciaSeleccionada = experiencias.find(exp => exp.id === experienciaId);
+    
+    const nuevasReferencias = referencias.map(ref => {
+      if (ref.id === referenciaId) {
+        if (experienciaId && experienciaSeleccionada) {
+          // Auto-completar empresa si está vacía o si quiere cambiar
+          return {
+            ...ref,
+            experienciaId: experienciaId,
+            empresa: experienciaSeleccionada.empresa
+          };
+        } else {
+          // Desvincular
+          return {
+            ...ref,
+            experienciaId: ""
+          };
+        }
+      }
+      return ref;
+    });
+    
+    handleChange({
+      target: {
+        name: 'referencias',
+        value: nuevasReferencias
+      }
+    });
+  }, [referencias, experiencias, handleChange]);
 
   return (
     <>
@@ -161,6 +198,26 @@ export const ReferencesForm = memo(({ newCv, handleChange }) => {
               </Grid>
               
               <Grid item xs={12} sm={6}>
+                <FormControl fullWidth>
+                  <InputLabel>🔗 Relacionado con (opcional)</InputLabel>
+                  <Select
+                    value={referencia.experienciaId || ""}
+                    onChange={(e) => vincularExperiencia(referencia.id, e.target.value)}
+                    label="🔗 Relacionado con (opcional)"
+                  >
+                    <MenuItem value="">
+                      <em>Ninguna / Otra</em>
+                    </MenuItem>
+                    {experiencias.map((exp) => (
+                      <MenuItem key={exp.id} value={exp.id}>
+                        {exp.cargo} en {exp.empresa}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+              
+              <Grid item xs={12} sm={6}>
                 <TextField 
                   variant="outlined" 
                   label="Cargo/Posición" 
@@ -223,29 +280,7 @@ export const ReferencesForm = memo(({ newCv, handleChange }) => {
         </Card>
       )}
 
-      {/* Información sobre referencias */}
-      <Box sx={{ mt: 3, p: 2, backgroundColor: '#f0f8ff', borderRadius: 1 }}>
-        <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
-          💡 Consejos para las referencias:
-        </Typography>
-        <Box component="ul" sx={{ pl: 2, m: 0 }}>
-          <Typography component="li" variant="body2" sx={{ mb: 0.5 }}>
-            <strong>Solicita permiso:</strong> Siempre pide autorización antes de incluir a alguien como referencia
-          </Typography>
-          <Typography component="li" variant="body2" sx={{ mb: 0.5 }}>
-            <strong>Personas relevantes:</strong> Elige supervisores, colegas o clientes que conozcan tu trabajo
-          </Typography>
-          <Typography component="li" variant="body2" sx={{ mb: 0.5 }}>
-            <strong>Datos actualizados:</strong> Verifica que la información de contacto esté actualizada
-          </Typography>
-          <Typography component="li" variant="body2" sx={{ mb: 0.5 }}>
-            <strong>Variedad:</strong> Incluye referencias de diferentes contextos profesionales si es posible
-          </Typography>
-          <Typography component="li" variant="body2">
-            <strong>Opcional:</strong> Las referencias no son obligatorias, pero pueden ser muy valiosas
-          </Typography>
-        </Box>
-      </Box>
+      
     </>
   );
 });
