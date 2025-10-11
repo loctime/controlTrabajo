@@ -281,7 +281,7 @@ export const generateModernTemplate = async (cvData) => {
     doc.setFont('helvetica', 'bold');
     const fullName = `${cvData.Nombre || ''} ${cvData.Apellido || ''}`;
     const splitHeaderName = doc.splitTextToSize(fullName, pageWidth - 50);
-    doc.text(splitHeaderName, 10, 12);
+    doc.text(splitHeaderName, 10, 18); // Bajado de 15 a 18
     
     // Título profesional - debajo del nombre
     doc.setFontSize(9);
@@ -290,13 +290,13 @@ export const generateModernTemplate = async (cvData) => {
     const professionalTitle = buildProfessionalTitle(cvData);
     if (professionalTitle) {
       const splitTitle = doc.splitTextToSize(professionalTitle, pageWidth - 50);
-      doc.text(splitTitle, 10, 25);
+      doc.text(splitTitle, 10, 31); // Bajado de 28 a 31
     }
     
     // Número de página (opcional)
     if (pageNumber > 1) {
       doc.setFontSize(8);
-      doc.text(`Página ${pageNumber}`, pageWidth - 25, 23);
+      doc.text(`Página ${pageNumber}`, pageWidth - 25, 29); // Bajado de 26 a 29
     }
     
     return 55; // Retornar Y inicial para el contenido (más separado del header)
