@@ -1,17 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Modal,
   Box,
   Typography,
   Button,
-  Paper,
-  Grid,
-  Chip,
-  Divider,
   IconButton,
   CircularProgress
 } from '@mui/material';
-import { Close, Download, Visibility } from '@mui/icons-material';
+import { Close, Download, Visibility, Refresh } from '@mui/icons-material';
 import { pdfGeneratorService } from '../services/pdfGeneratorService';
 
 const CVPreview = ({ 
@@ -22,6 +18,53 @@ const CVPreview = ({
   onTemplateChange 
 }) => {
   const [isGenerating, setIsGenerating] = useState(false);
+  const [pdfUrl, setPdfUrl] = useState(null);
+  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
+
+  // Generar vista previa del PDF cuando se abre el modal o cambia la plantilla
+  useEffect(() => {
+    if (open) {
+      generatePreview();
+    } else {
+      // Limpiar URL cuando se cierra el modal
+      if (pdfUrl) {
+        URL.revokeObjectURL(pdfUrl);
+        setPdfUrl(null);
+      }
+    }
+  }, [open, selectedTemplate]);
+
+  const generatePreview = async () => {
+    try {
+      setIsLoadingPreview(true);
+      
+      // Validar datos antes de generar
+      const validation = pdfGeneratorService.validateCVData(cvData);
+      if (!validation.isValid) {
+        console.warn('Datos incompletos para vista previa:', validation.errors);
+        // No bloqueamos la vista previa, solo mostramos lo que hay
+      }
+
+      // Generar PDF en memoria (sin descargar)
+      const pdfBlob = await pdfGeneratorService.generatePDF(cvData, selectedTemplate);
+      
+      // Crear URL temporal para el blob
+      const url = URL.createObjectURL(pdfBlob);
+      
+      // Limpiar URL anterior si existe
+      if (pdfUrl) {
+        URL.revokeObjectURL(pdfUrl);
+      }
+      
+      setPdfUrl(url);
+      
+    } catch (error) {
+      console.error('Error al generar vista previa:', error);
+      alert(`Error al generar vista previa: ${error.message}`);
+    } finally {
+      setIsLoadingPreview(false);
+    }
+  };
 
   const handleGenerateAndDownload = async () => {
     try {
@@ -50,246 +93,7 @@ const CVPreview = ({
 
   const handleTemplateChange = (newTemplate) => {
     onTemplateChange(newTemplate);
-  };
-
-  const PreviewContent = ({ template }) => {
-    if (template === 'moderna') {
-      return (
-        <Paper sx={{ p: 3, backgroundColor: '#f0f8ff', minHeight: 400 }}>
-          {/* Header Moderno */}
-          <Box sx={{ 
-            backgroundColor: '#1976d2', 
-            color: 'white', 
-            p: 2, 
-            borderRadius: 1,
-            mb: 2,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 2
-          }}>
-            <Box sx={{ 
-              width: 60, 
-              height: 60, 
-              backgroundColor: 'white', 
-              borderRadius: '50%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#1976d2',
-              fontSize: '24px'
-            }}>
-              👤
-            </Box>
-            <Box>
-              <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
-                {cvData.Nombre} {cvData.Apellido}
-              </Typography>
-              <Typography variant="h6">
-                {cvData.categoriaGeneral}
-              </Typography>
-              <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                {cvData.Email} • {cvData.telefono} • {cvData.ciudad}
-              </Typography>
-            </Box>
-          </Box>
-
-          <Grid container spacing={3}>
-            {/* Columna Izquierda */}
-            <Grid item xs={12} md={6}>
-              {/* Perfil Profesional */}
-              {cvData.perfilProfesional && (
-                <Box sx={{ mb: 3 }}>
-                  <Typography variant="h6" sx={{ color: '#1976d2', mb: 1 }}>
-                    💼 Perfil Profesional
-                  </Typography>
-                  <Typography variant="body2">
-                    {cvData.perfilProfesional}
-                  </Typography>
-                </Box>
-              )}
-
-              {/* Experiencia */}
-              {cvData.experiencias && cvData.experiencias.length > 0 && (
-                <Box sx={{ mb: 3 }}>
-                  <Typography variant="h6" sx={{ color: '#1976d2', mb: 1 }}>
-                    💼 Experiencia Laboral
-                  </Typography>
-                  {cvData.experiencias.slice(0, 2).map((exp, index) => (
-                    <Box key={index} sx={{ mb: 2 }}>
-                      <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                        {exp.cargo}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {exp.empresa} | {exp.fechaInicio} - {exp.fechaFin}
-                      </Typography>
-                      <Typography variant="body2" sx={{ mt: 1 }}>
-                        {exp.descripcion?.substring(0, 100)}...
-                      </Typography>
-                    </Box>
-                  ))}
-                </Box>
-              )}
-
-              {/* Educación */}
-              {cvData.educacion && cvData.educacion.length > 0 && (
-                <Box sx={{ mb: 3 }}>
-                  <Typography variant="h6" sx={{ color: '#1976d2', mb: 1 }}>
-                    🎓 Educación
-                  </Typography>
-                  {cvData.educacion.slice(0, 2).map((edu, index) => (
-                    <Box key={index} sx={{ mb: 1 }}>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
-                        {edu.titulo}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {edu.institucion}
-                      </Typography>
-                    </Box>
-                  ))}
-                </Box>
-              )}
-            </Grid>
-
-            {/* Columna Derecha */}
-            <Grid item xs={12} md={6}>
-              {/* Habilidades */}
-              {cvData.habilidades && cvData.habilidades.length > 0 && (
-                <Box sx={{ mb: 3 }}>
-                  <Typography variant="h6" sx={{ color: '#1976d2', mb: 1 }}>
-                    🛠️ Habilidades
-                  </Typography>
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                    {cvData.habilidades.slice(0, 8).map((skill, index) => (
-                      <Chip 
-                        key={index} 
-                        label={`${skill.nombre} (${skill.nivel})`} 
-                        size="small" 
-                        variant="outlined"
-                      />
-                    ))}
-                  </Box>
-                </Box>
-              )}
-
-              {/* Idiomas */}
-              {cvData.idiomas && cvData.idiomas.length > 0 && (
-                <Box sx={{ mb: 3 }}>
-                  <Typography variant="h6" sx={{ color: '#1976d2', mb: 1 }}>
-                    🌍 Idiomas
-                  </Typography>
-                  {cvData.idiomas.map((idioma, index) => (
-                    <Box key={index} sx={{ mb: 1 }}>
-                      <Typography variant="body2">
-                        <strong>{idioma.idioma}:</strong> {idioma.nivel}
-                      </Typography>
-                    </Box>
-                  ))}
-                </Box>
-              )}
-
-              {/* Certificaciones */}
-              {cvData.certificaciones && cvData.certificaciones.length > 0 && (
-                <Box sx={{ mb: 3 }}>
-                  <Typography variant="h6" sx={{ color: '#1976d2', mb: 1 }}>
-                    🏆 Certificaciones
-                  </Typography>
-                  {cvData.certificaciones.slice(0, 3).map((cert, index) => (
-                    <Box key={index} sx={{ mb: 1 }}>
-                      <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-                        {cert.nombre}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {cert.institucion} | {cert.fecha}
-                      </Typography>
-                    </Box>
-                  ))}
-                </Box>
-              )}
-            </Grid>
-          </Grid>
-        </Paper>
-      );
-    } else {
-      // Template Clásico
-      return (
-        <Paper sx={{ p: 3, backgroundColor: 'white', minHeight: 400 }}>
-          {/* Header Clásico */}
-          <Box sx={{ borderBottom: '2px solid #424242', pb: 2, mb: 3 }}>
-            <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#424242', mb: 1 }}>
-              {cvData.Nombre} {cvData.Apellido}
-            </Typography>
-            <Typography variant="body1" color="text.secondary">
-              {cvData.Email} • {cvData.telefono} • {cvData.ciudad}
-            </Typography>
-          </Box>
-
-          {/* Perfil Profesional */}
-          {cvData.perfilProfesional && (
-            <Box sx={{ mb: 3 }}>
-              <Typography variant="h6" sx={{ fontWeight: 'bold', textTransform: 'uppercase', mb: 1 }}>
-                Perfil Profesional
-              </Typography>
-              <Divider sx={{ mb: 1 }} />
-              <Typography variant="body2">
-                {cvData.perfilProfesional}
-              </Typography>
-            </Box>
-          )}
-
-          {/* Experiencia */}
-          {cvData.experiencias && cvData.experiencias.length > 0 && (
-            <Box sx={{ mb: 3 }}>
-              <Typography variant="h6" sx={{ fontWeight: 'bold', textTransform: 'uppercase', mb: 1 }}>
-                Experiencia Laboral
-              </Typography>
-              <Divider sx={{ mb: 2 }} />
-              {cvData.experiencias.slice(0, 2).map((exp, index) => (
-                <Box key={index} sx={{ mb: 2 }}>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                    {exp.cargo}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {exp.empresa} | {exp.fechaInicio} - {exp.fechaFin}
-                  </Typography>
-                  <Typography variant="body2" sx={{ mt: 1 }}>
-                    {exp.descripcion?.substring(0, 150)}...
-                  </Typography>
-                  {index < cvData.experiencias.length - 1 && <Divider sx={{ mt: 2 }} />}
-                </Box>
-              ))}
-            </Box>
-          )}
-
-          {/* Habilidades */}
-          {cvData.habilidades && cvData.habilidades.length > 0 && (
-            <Box sx={{ mb: 3 }}>
-              <Typography variant="h6" sx={{ fontWeight: 'bold', textTransform: 'uppercase', mb: 1 }}>
-                Competencias Técnicas
-              </Typography>
-              <Divider sx={{ mb: 1 }} />
-              <Typography variant="body2">
-                {cvData.habilidades.slice(0, 6).map(skill => skill.nombre).join(' • ')}
-              </Typography>
-            </Box>
-          )}
-
-          {/* Idiomas */}
-          {cvData.idiomas && cvData.idiomas.length > 0 && (
-            <Box sx={{ mb: 3 }}>
-              <Typography variant="h6" sx={{ fontWeight: 'bold', textTransform: 'uppercase', mb: 1 }}>
-                Idiomas
-              </Typography>
-              <Divider sx={{ mb: 1 }} />
-              {cvData.idiomas.map((idioma, index) => (
-                <Typography key={index} variant="body2">
-                  <strong>{idioma.idioma}:</strong> {idioma.nivel}
-                </Typography>
-              ))}
-            </Box>
-          )}
-        </Paper>
-      );
-    }
+    // La vista previa se regenerará automáticamente por el useEffect
   };
 
   return (
@@ -352,8 +156,55 @@ const CVPreview = ({
         </Box>
 
         {/* Contenido de la vista previa */}
-        <Box sx={{ p: 2 }}>
-          <PreviewContent template={selectedTemplate} />
+        <Box sx={{ p: 2, minHeight: 600 }}>
+          {isLoadingPreview ? (
+            <Box sx={{ 
+              display: 'flex', 
+              flexDirection: 'column',
+              justifyContent: 'center', 
+              alignItems: 'center', 
+              minHeight: 600,
+              gap: 2
+            }}>
+              <CircularProgress size={60} />
+              <Typography variant="h6" color="text.secondary">
+                Generando vista previa del PDF...
+              </Typography>
+            </Box>
+          ) : pdfUrl ? (
+            <Box sx={{ width: '100%', height: 600, border: '1px solid #e0e0e0', borderRadius: 1 }}>
+              <iframe
+                src={pdfUrl}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  border: 'none',
+                  borderRadius: '4px'
+                }}
+                title="Vista previa del CV"
+              />
+            </Box>
+          ) : (
+            <Box sx={{ 
+              display: 'flex', 
+              flexDirection: 'column',
+              justifyContent: 'center', 
+              alignItems: 'center', 
+              minHeight: 600,
+              gap: 2
+            }}>
+              <Typography variant="h6" color="text.secondary">
+                No se pudo generar la vista previa
+              </Typography>
+              <Button
+                variant="outlined"
+                startIcon={<Refresh />}
+                onClick={generatePreview}
+              >
+                Reintentar
+              </Button>
+            </Box>
+          )}
         </Box>
 
         {/* Footer con botones */}

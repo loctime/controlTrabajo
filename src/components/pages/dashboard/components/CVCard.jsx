@@ -419,6 +419,27 @@ export const CVCard = ({
                       {cert.fecha}
                     </Typography>
                   )}
+                  {cert.url && (
+                    <Link 
+                      href={cert.url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      sx={{ 
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 0.5,
+                        mt: 0.5,
+                        fontSize: '0.75rem',
+                        textDecoration: 'none',
+                        color: 'primary.main',
+                        '&:hover': {
+                          textDecoration: 'underline'
+                        }
+                      }}
+                    >
+                      🔗 Ver certificado
+                    </Link>
+                  )}
                 </Box>
               ))}
             </Box>

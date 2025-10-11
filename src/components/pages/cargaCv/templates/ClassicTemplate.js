@@ -57,7 +57,7 @@ export const generateClassicTemplate = (cvData) => {
     doc.setFont('helvetica', 'normal');
     const splitPerfil = doc.splitTextToSize(cvData.perfilProfesional, pageWidth - 30);
     doc.text(splitPerfil, 15, currentY);
-    currentY += splitPerfil.length * 4 + 15;
+    currentY += splitPerfil.length * 5 + 15; // Aumentar espaciado
   }
 
   // === EXPERIENCIA LABORAL ===
@@ -215,6 +215,17 @@ export const generateClassicTemplate = (cvData) => {
       currentY += 5;
       doc.setFont('helvetica', 'normal');
       doc.text(`${cert.institucion || ''} | ${cert.fecha || ''}`, 15, currentY);
+      
+      // Agregar enlace si existe URL
+      if (cert.url) {
+        currentY += 4;
+        doc.setTextColor(primaryColor);
+        doc.setFont('helvetica', 'italic');
+        doc.textWithLink('Ver certificado', 15, currentY, { url: cert.url, target: '_blank' });
+        doc.setTextColor(textColor);
+        doc.setFont('helvetica', 'normal');
+      }
+      
       currentY += 8;
     });
     currentY += 5;
@@ -252,7 +263,7 @@ export const generateClassicTemplate = (cvData) => {
       
       if (proyecto.url) {
         doc.setTextColor(primaryColor);
-        doc.text(`🔗 Ver proyecto: ${proyecto.url}`, 15, currentY);
+        doc.textWithLink(`Ver proyecto: ${proyecto.url}`, 15, currentY, { url: proyecto.url, target: '_blank' });
         doc.setTextColor(primaryColor);
         currentY += 5;
       }

@@ -149,27 +149,27 @@ export const generateElegantTemplate = async (cvData) => {
   doc.setFont('helvetica', 'normal');
   
   if (cvData.direccion) {
-    doc.text(`📍 ${cvData.direccion}`, 10, leftY);
+    doc.text(`Dirección: ${cvData.direccion}`, 10, leftY);
     leftY += 5;
   }
   
   if (cvData.telefono) {
-    doc.text(`📞 ${cvData.telefono}`, 10, leftY);
+    doc.text(`Tel: ${cvData.telefono}`, 10, leftY);
     leftY += 5;
   }
   
   if (cvData.Email) {
-    doc.text(`✉️ ${cvData.Email}`, 10, leftY);
+    doc.text(`Email: ${cvData.Email}`, 10, leftY);
     leftY += 5;
   }
   
   if (cvData.linkedin) {
-    doc.text(`💼 LinkedIn`, 10, leftY);
+    doc.text(`LinkedIn`, 10, leftY);
     leftY += 5;
   }
   
   if (cvData.sitioWeb) {
-    doc.text(`🌐 ${cvData.sitioWeb}`, 10, leftY);
+    doc.text(`Web: ${cvData.sitioWeb}`, 10, leftY);
     leftY += 5;
   }
   
@@ -206,7 +206,7 @@ export const generateElegantTemplate = async (cvData) => {
     doc.setFont('helvetica', 'normal');
     const splitPerfil = doc.splitTextToSize(cvData.perfilProfesional, leftColumnWidth - 20);
     doc.text(splitPerfil, 10, leftY);
-    leftY += splitPerfil.length * 3 + 10;
+    leftY += splitPerfil.length * 4 + 15; // Aumentar espaciado
   }
 
   // === RIGHT COLUMN (White Background) ===
@@ -299,6 +299,15 @@ export const generateElegantTemplate = async (cvData) => {
         doc.text(`  ${cert.institucion}`, rightColumnX, rightY);
         rightY += 4;
       }
+      // Agregar enlace si existe URL
+      if (cert.url) {
+        doc.setTextColor(secondaryColor);
+        doc.setFont('helvetica', 'italic');
+        doc.textWithLink('  Ver certificado', rightColumnX, rightY, { url: cert.url, target: '_blank' });
+        rightY += 4;
+        doc.setTextColor(textColor);
+        doc.setFont('helvetica', 'normal');
+      }
       rightY += 5;
     });
     rightY += 10;
@@ -341,7 +350,7 @@ export const generateElegantTemplate = async (cvData) => {
       if (proyecto.url) {
         doc.setFontSize(9);
         doc.setTextColor(primaryColor);
-        doc.text(`🔗 ${proyecto.url}`, rightColumnX, rightY);
+        doc.textWithLink(`Link: ${proyecto.url}`, rightColumnX, rightY, { url: proyecto.url, target: '_blank' });
         doc.setTextColor(textColor);
         rightY += 5;
       }
@@ -465,12 +474,12 @@ export const generateElegantTemplate = async (cvData) => {
       rightY += 4;
       
       if (ref.telefono) {
-        doc.text(`📞 ${ref.telefono}`, rightColumnX, rightY);
+        doc.text(`Tel: ${ref.telefono}`, rightColumnX, rightY);
         rightY += 4;
       }
       
       if (ref.email) {
-        doc.text(`✉️ ${ref.email}`, rightColumnX, rightY);
+        doc.text(`Email: ${ref.email}`, rightColumnX, rightY);
         rightY += 4;
       }
       

@@ -153,7 +153,7 @@ export const generateModernTemplate = async (cvData) => {
     doc.setFont('helvetica', 'normal');
     const splitPerfil = doc.splitTextToSize(cvData.perfilProfesional, pageWidth - 30);
     doc.text(splitPerfil, 15, currentY);
-    currentY += splitPerfil.length * 4 + 10;
+    currentY += splitPerfil.length * 5 + 15; // Aumentar espaciado
   }
 
   // === MAIN CONTENT (Two columns) ===
@@ -183,14 +183,14 @@ export const generateModernTemplate = async (cvData) => {
       
       currentY += 4;
       if (exp.ubicacion) {
-        doc.text(`📍 ${exp.ubicacion}`, leftColumnX, currentY);
+        doc.text(`Ubicación: ${exp.ubicacion}`, leftColumnX, currentY);
         currentY += 4;
       }
       
       if (exp.descripcion) {
         const splitDesc = doc.splitTextToSize(exp.descripcion, columnWidth);
         doc.text(splitDesc, leftColumnX, currentY);
-        currentY += splitDesc.length * 3.5;
+        currentY += splitDesc.length * 4.5; // Aumentar espaciado
       }
       currentY += 5;
     });
@@ -234,7 +234,7 @@ export const generateModernTemplate = async (cvData) => {
       doc.setFontSize(9);
       doc.setFont('helvetica', 'normal');
       doc.text(`${skill.nombre} (${skill.nivel})`, rightColumnX, rightY);
-      rightY += 4;
+      rightY += 5; // Aumentar espaciado para evitar superposición
     });
     rightY += 5;
   }
@@ -275,6 +275,14 @@ export const generateModernTemplate = async (cvData) => {
       doc.setFont('helvetica', 'normal');
       doc.text(`${cert.institucion || ''} | ${cert.fecha || ''}`, rightColumnX, rightY);
       
+      // Agregar enlace si existe URL
+      if (cert.url) {
+        rightY += 4;
+        doc.setTextColor(secondaryColor);
+        doc.setFont('helvetica', 'italic');
+        doc.textWithLink('Ver certificado', rightColumnX, rightY, { url: cert.url, target: '_blank' });
+      }
+      
       rightY += 6;
     });
   }
@@ -308,7 +316,7 @@ export const generateModernTemplate = async (cvData) => {
       
       if (proyecto.url) {
         doc.setTextColor(primaryColor);
-        doc.text(`🔗 Ver proyecto: ${proyecto.url}`, rightColumnX, rightY);
+        doc.textWithLink(`Ver proyecto: ${proyecto.url}`, rightColumnX, rightY, { url: proyecto.url, target: '_blank' });
         doc.setTextColor(textColor);
         rightY += 4;
       }

@@ -90,6 +90,22 @@ export const pdfGeneratorService = {
   },
 
   /**
+   * Genera el PDF y lo retorna como Blob (sin descargar)
+   * @param {Object} cvData - Datos del CV
+   * @param {string} template - Plantilla a usar
+   * @returns {Promise<Blob>} Blob del PDF
+   */
+  generatePDF: async (cvData, template = 'moderna') => {
+    try {
+      const pdfDoc = await pdfGeneratorService.generateCVPdf(cvData, template);
+      return pdfGeneratorService.getPDFAsBlob(pdfDoc);
+    } catch (error) {
+      console.error('Error en generatePDF:', error);
+      throw error;
+    }
+  },
+
+  /**
    * Obtiene el PDF como blob para envío o almacenamiento
    * @param {jsPDF} pdfDoc - Documento PDF
    * @returns {Blob} Blob del PDF
