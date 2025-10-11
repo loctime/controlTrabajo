@@ -248,16 +248,21 @@ export const generateModernTemplate = async (cvData) => {
       doc.setTextColor(textColor);
       doc.setFontSize(10);
       doc.setFont('helvetica', 'bold');
-      doc.text(exp.cargo || '', leftColumnX, currentY);
+      const splitCargo = doc.splitTextToSize(exp.cargo || '', leftColumnWidth);
+      doc.text(splitCargo, leftColumnX, currentY);
+      currentY += splitCargo.length * 4;
       
       currentY += 4;
       doc.setFont('helvetica', 'normal');
-      doc.text(`${exp.empresa || ''} | ${exp.fechaInicio || ''} - ${exp.fechaFin || ''}`, leftColumnX, currentY);
+      const splitEmpresaInfo = doc.splitTextToSize(`${exp.empresa || ''} | ${exp.fechaInicio || ''} - ${exp.fechaFin || ''}`, leftColumnWidth);
+      doc.text(splitEmpresaInfo, leftColumnX, currentY);
+      currentY += splitEmpresaInfo.length * 4;
       
       currentY += 4;
       if (exp.ubicacion) {
-        doc.text(`Ubicación: ${exp.ubicacion}`, leftColumnX, currentY);
-        currentY += 4;
+        const splitUbicacion = doc.splitTextToSize(`Ubicación: ${exp.ubicacion}`, leftColumnWidth);
+        doc.text(splitUbicacion, leftColumnX, currentY);
+        currentY += splitUbicacion.length * 4;
       }
       
       if (exp.descripcion) {
