@@ -62,29 +62,36 @@ export const generateModernTemplate = async (cvData) => {
   doc.setFont('helvetica');
 
   // === HEADER SECTION ===
-  // Fondo con gradiente simulado usando múltiples rectángulos (reducido)
-  doc.setFillColor('#1e3a8a'); // Azul más oscuro
+  // Fondo con gradiente simulado usando múltiples rectángulos (más altura para todo el contenido)
+  doc.setFillColor('#1e3a8a'); // Azul más oscuro - base
+  doc.rect(0, 0, pageWidth, 65, 'F');
+  doc.setFillColor('#2563eb'); // Azul medio - más vibrante
+  doc.rect(0, 0, pageWidth, 55, 'F');
+  doc.setFillColor('#3b82f6'); // Azul medio-claro - mejor contraste
   doc.rect(0, 0, pageWidth, 45, 'F');
-  doc.setFillColor('#3b82f6'); // Azul medio
+  doc.setFillColor('#60a5fa'); // Azul claro - para el gradiente superior
   doc.rect(0, 0, pageWidth, 35, 'F');
-  doc.setFillColor('#60a5fa'); // Azul más claro
-  doc.rect(0, 0, pageWidth, 25, 'F');
 
-  // Línea decorativa en la parte inferior del header
+  // Línea decorativa en la parte inferior del header (más sutil)
   doc.setDrawColor('#ffffff');
-  doc.setLineWidth(1);
-  doc.line(0, 44, pageWidth, 44);
+  doc.setLineWidth(0.8);
+  doc.line(0, 64, pageWidth, 64);
+  
+  // Línea adicional sutil para mejor separación
+  doc.setDrawColor('#e2e8f0');
+  doc.setLineWidth(0.5);
+  doc.line(0, 63.5, pageWidth, 63.5);
 
   // Foto de perfil (si existe)
   if (cvData.Foto) {
     try {
       console.log('📸 Cargando imagen de perfil:', cvData.Foto);
       
-      // Crear círculo de fondo con sombra (ajustado para márgenes más estrechos)
+      // Crear círculo de fondo con sombra (ajustado para header más grande)
       doc.setFillColor('#ffffff');
-      doc.circle(20, 22, 18, 'F');
+      doc.circle(20, 30, 18, 'F');
       doc.setFillColor('#f8fafc');
-      doc.circle(20, 22, 16, 'F');
+      doc.circle(20, 30, 16, 'F');
       
       // Cargar imagen desde URL
       const img = await loadImageFromUrl(cvData.Foto);
@@ -122,23 +129,23 @@ export const generateModernTemplate = async (cvData) => {
       ctx.clip();
       ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
       
-      // Convertir canvas a base64 y agregar al PDF (ajustado para márgenes más estrechos)
+      // Convertir canvas a base64 y agregar al PDF (ajustado para header más grande)
       const imgData = canvas.toDataURL('image/jpeg', 0.8);
-      doc.addImage(imgData, 'JPEG', 4, 6, 32, 32);
+      doc.addImage(imgData, 'JPEG', 4, 14, 32, 32);
       
       console.log('✅ Imagen de perfil cargada correctamente');
     } catch (error) {
       console.log('⚠️ Error al cargar imagen de perfil:', error);
       
-      // Fallback: mostrar placeholder con mejor diseño (ajustado para márgenes más estrechos)
+      // Fallback: mostrar placeholder con mejor diseño (ajustado para header más grande)
       doc.setFillColor('#ffffff');
-      doc.circle(20, 22, 16, 'F');
+      doc.circle(20, 30, 16, 'F');
       doc.setFillColor('#e5e7eb');
-      doc.circle(20, 22, 14, 'F');
+      doc.circle(20, 30, 14, 'F');
       
       doc.setTextColor('#6b7280');
       doc.setFontSize(8);
-      doc.text('FOTO', 20, 25, { align: 'center' });
+      doc.text('FOTO', 20, 33, { align: 'center' });
     }
   }
 
@@ -146,39 +153,39 @@ export const generateModernTemplate = async (cvData) => {
   
   // NOMBRE PRINCIPAL - Usando todo el ancho disponible (márgenes más estrechos)
   doc.setTextColor('#ffffff');
-  doc.setFontSize(28); // Ligeramente más pequeño para mejor ajuste
+  doc.setFontSize(32); // Más grande para mejor legibilidad
   doc.setFont('helvetica', 'bold');
   const fullName = `${cvData.Nombre || ''} ${cvData.Apellido || ''}`;
   const splitName = doc.splitTextToSize(fullName, pageWidth - 45); // Usar casi todo el ancho
-  doc.text(splitName, 15, 12); // Más cerca del borde superior
+  doc.text(splitName, 15, 18); // Ajustado para el header más grande
   
   // Calcular posición Y después del nombre (ajustado para márgenes más estrechos)
-  let currentHeaderY = 12 + (splitName.length * 7);
+  let currentHeaderY = 18 + (splitName.length * 8); // Más espacio para fuente más grande
   
   // SIN LÍNEA DECORATIVA - Para evitar que tape el texto
-  currentHeaderY += 3;
+  currentHeaderY += 5;
 
   // EDAD - A la derecha, en la misma línea del nombre si cabe
   if (cvData.Edad) {
-    doc.setFontSize(11);
+    doc.setFontSize(13);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor('#e2e8f0');
-    doc.text(`${cvData.Edad} años`, pageWidth - 25, 17);
+    doc.text(`${cvData.Edad} años`, pageWidth - 25, 25);
   }
 
   // TÍTULO PROFESIONAL - Usando todo el ancho
   const professionalTitle = buildProfessionalTitle(cvData);
   if (professionalTitle) {
-    doc.setFontSize(12);
+    doc.setFontSize(14);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor('#f1f5f9');
     const splitTitle = doc.splitTextToSize(professionalTitle, pageWidth - 45);
     doc.text(splitTitle, 15, currentHeaderY);
-    currentHeaderY += (splitTitle.length * 5) + 6;
+    currentHeaderY += (splitTitle.length * 6) + 8;
   }
 
-  // INFORMACIÓN DE CONTACTO - Usando todo el ancho
-  doc.setFontSize(8);
+  // INFORMACIÓN DE CONTACTO - Usando todo el ancho (más grande y mejor espaciado)
+  doc.setFontSize(10);
   doc.setTextColor('#e2e8f0');
   const contactInfo = buildContactInfo(cvData);
   const contactText = contactInfo.join(' • ');
@@ -186,7 +193,7 @@ export const generateModernTemplate = async (cvData) => {
   doc.text(splitContact, 15, currentHeaderY);
 
   // === PERFIL PROFESIONAL ===
-  let currentY = 55; // Reducido para aprovechar mejor el espacio
+  let currentY = 75; // Ajustado para el header más grande con más espacio
   if (cvData.perfilProfesional) {
     // Fondo gris claro para la sección (márgenes más estrechos)
     doc.setFillColor('#f8fafc');
@@ -258,8 +265,8 @@ export const generateModernTemplate = async (cvData) => {
     addConsistentHeader(doc, pageCounter);
     
     // Resetear posiciones Y pero mantener la columna actual (márgenes más estrechos)
-    leftY = 40;
-    rightY = 40;
+    leftY = 50;
+    rightY = 50;
     
     return currentColumn === 'left' ? leftY : rightY;
   };
@@ -297,42 +304,49 @@ export const generateModernTemplate = async (cvData) => {
   const addConsistentHeader = (doc, pageNumber) => {
     // Header con gradiente simulado (reducido para páginas adicionales)
     doc.setFillColor('#1e3a8a');
-    doc.rect(0, 0, pageWidth, 35, 'F');
+    doc.rect(0, 0, pageWidth, 45, 'F');
+    doc.setFillColor('#2563eb');
+    doc.rect(0, 0, pageWidth, 38, 'F');
     doc.setFillColor('#3b82f6');
-    doc.rect(0, 0, pageWidth, 25, 'F');
+    doc.rect(0, 0, pageWidth, 32, 'F');
     
     // Línea decorativa
     doc.setDrawColor('#ffffff');
-    doc.setLineWidth(1);
-    doc.line(0, 34, pageWidth, 34);
+    doc.setLineWidth(0.8);
+    doc.line(0, 44, pageWidth, 44);
+    
+    // Línea adicional sutil
+    doc.setDrawColor('#e2e8f0');
+    doc.setLineWidth(0.5);
+    doc.line(0, 43.5, pageWidth, 43.5);
     
     // HEADER CONSISTENTE SIMPLE
     
     // Nombre principal - simple y limpio (márgenes más estrechos)
     doc.setTextColor('#ffffff');
-    doc.setFontSize(14);
+    doc.setFontSize(16);
     doc.setFont('helvetica', 'bold');
     const fullName = `${cvData.Nombre || ''} ${cvData.Apellido || ''}`;
     const splitHeaderName = doc.splitTextToSize(fullName, pageWidth - 50);
-    doc.text(splitHeaderName, 10, 12);
+    doc.text(splitHeaderName, 10, 15);
     
     // Título profesional - debajo del nombre
-    doc.setFontSize(9);
+    doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor('#f1f5f9');
     const professionalTitle = buildProfessionalTitle(cvData);
     if (professionalTitle) {
       const splitTitle = doc.splitTextToSize(professionalTitle, pageWidth - 50);
-      doc.text(splitTitle, 10, 22);
+      doc.text(splitTitle, 10, 28);
     }
     
     // Número de página (opcional)
     if (pageNumber > 1) {
       doc.setFontSize(9);
-      doc.text(`Página ${pageNumber}`, pageWidth - 25, 20);
+      doc.text(`Página ${pageNumber}`, pageWidth - 25, 26);
     }
     
-    return 40; // Retornar Y inicial para el contenido (más cerca del header)
+    return 50; // Retornar Y inicial para el contenido (más cerca del header)
   };
 
   // Función personalizada para agregar nueva página con header consistente
