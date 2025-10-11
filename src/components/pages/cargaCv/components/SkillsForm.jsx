@@ -16,8 +16,8 @@ import { Add } from '@mui/icons-material';
 import { v4 as uuidv4 } from 'uuid';
 import skillsData from './skills.json';
 
-// Extraer todas las habilidades en una lista plana
-const SKILLS_SUGERIDAS = skillsData.flatMap(categoria => categoria.habilidades).sort();
+// Extraer todas las habilidades en una lista plana, eliminando duplicados
+const SKILLS_SUGERIDAS = [...new Set(skillsData.flatMap(categoria => categoria.habilidades))].sort();
 
 // Obtener todas las categorías disponibles
 const CATEGORIAS = skillsData.map(item => item.categoria);
@@ -227,15 +227,18 @@ export const SkillsForm = memo(({ newCv, handleChange }) => {
         </Box>
       )}
 
-      {/* Sugerencias rápidas */}
+      {/* Habilidades disponibles para selección rápida */}
       <Box sx={{ mt: 3 }}>
         <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold' }}>
           {categoriaFiltro !== 'Todas' 
-            ? `✨ Sugerencias de ${categoriaFiltro}:` 
-            : '✨ Sugerencias populares:'}
+            ? `✨ Habilidades en ${categoriaFiltro} (${habilidadesFiltradas.length} disponibles):` 
+            : `✨ Habilidades disponibles (${habilidadesFiltradas.length} total):`}
+        </Typography>
+        <Typography variant="caption" sx={{ mb: 2, color: 'text.secondary', display: 'block' }}>
+          Haz clic en cualquier habilidad para agregarla rápidamente
         </Typography>
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-          {habilidadesFiltradas.slice(0, 15).map((skill) => (
+          {habilidadesFiltradas.slice(0, 20).map((skill) => (
             <Chip
               key={skill}
               label={skill}
@@ -247,6 +250,18 @@ export const SkillsForm = memo(({ newCv, handleChange }) => {
               sx={{ cursor: 'pointer', '&:hover': { backgroundColor: 'primary.light', color: 'white' } }}
             />
           ))}
+          {habilidadesFiltradas.length > 20 && (
+            <Chip
+              label={`+${habilidadesFiltradas.length - 20} más...`}
+              variant="outlined"
+              size="small"
+              sx={{ 
+                backgroundColor: '#f5f5f5', 
+                color: 'text.secondary',
+                fontStyle: 'italic'
+              }}
+            />
+          )}
         </Box>
       </Box>
     </>

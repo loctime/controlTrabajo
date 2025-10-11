@@ -57,12 +57,9 @@ export const ProjectsForm = memo(({ newCv, handleChange }) => {
   return (
     <>
       <Box sx={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center', 
-        mt: 4, 
-        mb: 3,
-        p: 3,
+        mt: 1, 
+        mb: 1,
+        p: 1,
         background: 'linear-gradient(135deg, #e8eaf6 0%, #c5cae9 100%)',
         borderRadius: '12px',
         border: '2px solid #3f51b5',
@@ -76,6 +73,9 @@ export const ProjectsForm = memo(({ newCv, handleChange }) => {
         }}>
           🚀 Proyectos
         </Typography>
+      </Box>
+      
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
         <Button 
           variant="contained" 
           startIcon={<Add />} 

@@ -5,9 +5,9 @@ export const PersonalDataForm = memo(({ newCv, handleChange }) => {
   return (
     <>
       <Box sx={{ 
-        mt: 4, 
-        mb: 3,
-        p: 3,
+        mt: 1, 
+        mb: 1,
+        p: 1,
         background: 'linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%)',
         borderRadius: '12px',
         border: '2px solid #ff9800',
@@ -24,7 +24,7 @@ export const PersonalDataForm = memo(({ newCv, handleChange }) => {
       </Box>
       
       <Box sx={{ 
-        p: 3,
+        p: 1,
         backgroundColor: '#fafafa',
         borderRadius: '12px',
         border: '1px solid #e0e0e0',

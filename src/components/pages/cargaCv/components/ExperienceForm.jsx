@@ -63,25 +63,25 @@ export const ExperienceForm = memo(({ newCv, handleChange }) => {
   return (
     <>
       <Box sx={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center', 
-        mt: 4, 
-        mb: 3,
-        p: 3,
-        background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)',
+        mt: 1, 
+        mb: 1,
+        p: 1,
+        background: 'linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%)',
         borderRadius: '12px',
-        border: '2px solid #66bb6a',
-        boxShadow: '0 4px 12px rgba(102, 187, 106, 0.15)'
+        border: '2px solid #4caf50',
+        boxShadow: '0 4px 12px rgba(76, 175, 80, 0.15)'
       }}>
         <Typography variant="h4" sx={{ 
-          color: '#2e7d32',
+          color: '#1b5e20',
           fontWeight: 'bold',
           fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' },
           textShadow: '0 1px 2px rgba(0,0,0,0.1)'
         }}>
           💼 Experiencia Laboral
         </Typography>
+      </Box>
+      
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
         <Button 
           variant="contained" 
           startIcon={<Add />} 

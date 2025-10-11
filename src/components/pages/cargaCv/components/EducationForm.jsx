@@ -59,12 +59,9 @@ export const EducationForm = memo(({ newCv, handleChange }) => {
   return (
     <>
       <Box sx={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center', 
-        mt: 4, 
-        mb: 3,
-        p: 3,
+        mt: 1, 
+        mb: 1,
+        p: 1,
         background: 'linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)',
         borderRadius: '12px',
         border: '2px solid #2196f3',
@@ -78,6 +75,9 @@ export const EducationForm = memo(({ newCv, handleChange }) => {
         }}>
           🎓 Educación
         </Typography>
+      </Box>
+      
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
         <Button 
           variant="contained" 
           startIcon={<Add />} 

@@ -82,9 +82,9 @@ export const LanguagesForm = memo(({ newCv, handleChange }) => {
   return (
     <>
       <Box sx={{ 
-        mt: 4, 
-        mb: 3,
-        p: 3,
+        mt: 1, 
+        mb: 1,
+        p: 1,
         background: 'linear-gradient(135deg, #fce4ec 0%, #f8bbd9 100%)',
         borderRadius: '12px',
         border: '2px solid #e91e63',

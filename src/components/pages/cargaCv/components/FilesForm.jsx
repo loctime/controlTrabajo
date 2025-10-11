@@ -30,8 +30,11 @@ export const FilesForm = memo(({
             <Typography variant="h6" sx={{ mb: 2, color: 'primary.main', fontWeight: 'bold' }}>
               📸 Foto de Perfil
             </Typography>
-            <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>
+            <Typography variant="body2" sx={{ mb: 1, color: 'text.secondary' }}>
               (Opcional - Puedes tomar una foto o subir una imagen)
+            </Typography>
+            <Typography variant="caption" sx={{ mb: 2, color: 'warning.main', display: 'block', fontWeight: 500 }}>
+              ⚠️ Máximo 5MB • Recomendado: 400x400px a 1920x1920px
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
               {/* Inputs ocultos */}
@@ -80,8 +83,11 @@ export const FilesForm = memo(({
             <Typography variant="h6" sx={{ mb: 2, color: 'primary.main', fontWeight: 'bold' }}>
               📄 Curriculum Vitae
             </Typography>
-            <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>
+            <Typography variant="body2" sx={{ mb: 1, color: 'text.secondary' }}>
               (Obligatorio - Formato PDF, DOC o DOCX)
+            </Typography>
+            <Typography variant="caption" sx={{ mb: 2, color: 'warning.main', display: 'block', fontWeight: 500 }}>
+              ⚠️ Máximo 10MB • Solo PDF, DOC, DOCX
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
               <TextField 

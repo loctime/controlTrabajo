@@ -9,9 +9,9 @@ export const LocationForm = memo(({
   return (
     <>
       <Box sx={{ 
-        mt: 4, 
-        mb: 3,
-        p: 3,
+        mt: 1, 
+        mb: 1,
+        p: 1,
         background: 'linear-gradient(135deg, #e1f5fe 0%, #b3e5fc 100%)',
         borderRadius: '12px',
         border: '2px solid #03a9f4',
@@ -24,14 +24,6 @@ export const LocationForm = memo(({
           textShadow: '0 1px 2px rgba(0,0,0,0.1)'
         }}>
           📍 Ubicación
-        </Typography>
-        <Typography variant="body1" sx={{ 
-          color: '#424242',
-          fontSize: '1rem',
-          fontWeight: 500,
-          mt: 1
-        }}>
-          Completa tu información de ubicación
         </Typography>
       </Box>
       
