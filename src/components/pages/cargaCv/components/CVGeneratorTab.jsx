@@ -1,5 +1,6 @@
-import React from 'react';
-import { Box, Typography, Button, Divider } from '@mui/material';
+import React, { useState } from 'react';
+import { Box, Typography, Button, Divider, CircularProgress } from '@mui/material';
+import { Description, Download } from '@mui/icons-material';
 import { PersonalDataForm } from './PersonalDataForm';
 import { ProfessionalDataForm } from './ProfessionalDataForm';
 import { LocationForm } from './LocationForm';
@@ -11,6 +12,7 @@ import { CertificationsForm } from './CertificationsForm';
 import { ProjectsForm } from './ProjectsForm';
 import { ReferencesForm } from './ReferencesForm';
 import { TemplateSelector } from './TemplateSelector';
+import { generateModernCVWord } from '../templates/ModernTemplateWord';
 
 export const CVGeneratorTab = ({
   newCv,
@@ -24,6 +26,22 @@ export const CVGeneratorTab = ({
   onPreview,
   onSubmit
 }) => {
+  const [isGeneratingWord, setIsGeneratingWord] = useState(false);
+
+  const handleDownloadWord = async () => {
+    try {
+      setIsGeneratingWord(true);
+      const success = await generateModernCVWord(newCv);
+      if (!success) {
+        alert('Error al generar el documento Word');
+      }
+    } catch (error) {
+      console.error('Error al generar Word:', error);
+      alert(`Error al generar el documento Word: ${error.message}`);
+    } finally {
+      setIsGeneratingWord(false);
+    }
+  };
   return (
     <>
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 3 }}>
@@ -117,7 +135,7 @@ export const CVGeneratorTab = ({
       </Box>
       
       {!isLoading && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 4 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 4, flexWrap: 'wrap' }}>
           <Button 
             variant="outlined" 
             size="large"
@@ -126,11 +144,41 @@ export const CVGeneratorTab = ({
           >
             Vista Previa
           </Button>
+          
+          <Button 
+            variant="outlined"
+            color="secondary"
+            size="large"
+            onClick={handleDownloadWord}
+            disabled={isGeneratingWord}
+            startIcon={isGeneratingWord ? <CircularProgress size={16} /> : <Description />}
+            sx={{ 
+              px: 4, 
+              py: 1.5,
+              borderColor: '#3b82f6',
+              color: '#3b82f6',
+              '&:hover': {
+                borderColor: '#2563eb',
+                backgroundColor: '#eff6ff'
+              }
+            }}
+          >
+            {isGeneratingWord ? 'Generando...' : 'Descargar Word'}
+          </Button>
+          
           <Button 
             variant="contained" 
             type="submit" 
             size="large"
-            sx={{ px: 6, py: 1.5 }}
+            startIcon={<Download />}
+            sx={{ 
+              px: 6, 
+              py: 1.5,
+              backgroundColor: '#1e3a8a',
+              '&:hover': {
+                backgroundColor: '#1e40af'
+              }
+            }}
           >
             Generar CV Profesional
           </Button>

@@ -44,6 +44,48 @@ export const generateModernCVWord = async (cvData) => {
       return parts.join(' • ');
     };
 
+    // Helper para dividir texto en párrafos
+    const createParagraphsFromText = (text, options = {}) => {
+      if (!text) return [];
+      
+      // Dividir por puntos seguidos de espacio o por dobles saltos de línea
+      const paragraphs = text
+        .split(/(?<=\.)\s+(?=[A-ZÁÉÍÓÚÑ])|(?:\n\s*\n)/)
+        .filter(p => p.trim().length > 0)
+        .map(p => p.trim());
+      
+      return paragraphs.map((paragraph, index) => 
+        createStyledParagraph(paragraph, {
+          size: options.size || 24,
+          color: options.color || textColor,
+          font: options.font || "Calibri",
+          spacing: { 
+            before: index === 0 ? 100 : 0,
+            after: options.spacing || 200 
+          },
+        })
+      );
+    };
+
+    // Función para crear párrafo con formato mejorado
+    const createFormattedParagraph = (text, options = {}) => {
+      return new Paragraph({
+        children: [
+          new TextRun({
+            text: text,
+            bold: options.bold || false,
+            italic: options.italic || false,
+            color: options.color || textColor,
+            size: options.size || 24,
+            font: options.font || "Calibri",
+          }),
+        ],
+        alignment: options.alignment || AlignmentType.LEFT,
+        spacing: options.spacing || { before: 120, after: 240 },
+        indent: options.indent || undefined,
+      });
+    };
+
     // Función para crear párrafo con estilo
     const createStyledParagraph = (text, options = {}) => {
       return new Paragraph({
@@ -72,7 +114,7 @@ export const generateModernCVWord = async (cvData) => {
             text: title,
             bold: true,
             color: primaryColor,
-            size: 32,
+            size: 36,
             font: "Calibri",
             underline: {
               type: UnderlineType.SINGLE,
@@ -80,13 +122,13 @@ export const generateModernCVWord = async (cvData) => {
             },
           }),
         ],
-        spacing: { before: 600, after: 300 },
+        spacing: { before: 800, after: 400 },
         border: {
           bottom: {
             color: primaryColor,
             space: 1,
             style: BorderStyle.SINGLE,
-            size: 6,
+            size: 8,
           },
         },
       });
@@ -130,81 +172,90 @@ export const generateModernCVWord = async (cvData) => {
           createStyledParagraphWithBackground(`${cvData.Nombre || ''} ${cvData.Apellido || ''}`, {
             bold: true,
             color: "FFFFFF",
-            size: 52,
+            size: 60,
             font: "Calibri",
             alignment: AlignmentType.CENTER,
-            spacing: { before: 0, after: 100 },
+            spacing: { before: 300, after: 150 },
           }),
 
           // Título profesional
           createStyledParagraphWithBackground(buildProfessionalTitle(cvData), {
             color: "E0F2FE",
-            size: 30,
+            size: 36,
             font: "Calibri",
             alignment: AlignmentType.CENTER,
-            spacing: { before: 0, after: 100 },
+            spacing: { before: 0, after: 150 },
           }),
 
-          // Información de contacto
+          // Información de contacto en el header
           createStyledParagraphWithBackground(buildContactInfo(cvData).join(' • '), {
             color: "F1F5F9",
-            size: 24,
+            size: 28,
             font: "Calibri",
             alignment: AlignmentType.CENTER,
-            spacing: { before: 0, after: 0 },
+            spacing: { before: 0, after: 300 },
           }),
 
           // Edad (párrafo separado alineado a la derecha)
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: `${cvData.Edad} años`,
-                color: primaryColor,
-                size: 28,
-                font: "Calibri",
-                bold: true,
-              }),
-            ],
+          createFormattedParagraph(`${cvData.Edad} años`, {
+            color: primaryColor,
+            size: 32,
+            font: "Calibri",
+            bold: true,
             alignment: AlignmentType.RIGHT,
-            spacing: { before: 200, after: 400 },
+            spacing: { before: 200, after: 600 },
           }),
 
           // === PERFIL PROFESIONAL ===
           createSectionHeader('PERFIL PROFESIONAL'),
-          createStyledParagraph(cvData.perfilProfesional || '', {
-            size: 24,
-            spacing: { after: 400 },
+          ...createParagraphsFromText(cvData.perfilProfesional || '', {
+            size: 28,
+            color: textColor,
             font: "Calibri",
+            spacing: 300,
           }),
 
           // === EXPERIENCIA LABORAL ===
           ...(cvData.experiencias && cvData.experiencias.length > 0 ? [
             createSectionHeader('EXPERIENCIA LABORAL'),
             ...cvData.experiencias.flatMap(exp => [
-              createStyledParagraph(exp.cargo || '', { 
+              createFormattedParagraph(exp.cargo || '', { 
                 bold: true, 
-                size: 26, 
+                size: 32, 
                 color: primaryColor,
                 font: "Calibri",
-                spacing: { after: 100 }
+                spacing: { before: 200, after: 150 }
               }),
-              createStyledParagraph(`${exp.empresa || ''} | ${exp.fechaInicio || ''} - ${exp.fechaFin || ''}`, {
-                size: 22,
+              createFormattedParagraph(`${exp.empresa || ''} | ${exp.fechaInicio || ''} - ${exp.fechaFin || ''}`, {
+                size: 26,
                 color: secondaryColor,
                 font: "Calibri",
-                spacing: { after: 100 },
+                bold: true,
+                spacing: { before: 0, after: 150 },
               }),
-              ...(exp.ubicacion ? [createStyledParagraph(`📍 Ubicación: ${exp.ubicacion}`, { 
-                size: 20, 
+              ...(exp.ubicacion ? [createFormattedParagraph(`📍 Ubicación: ${exp.ubicacion}`, { 
+                size: 24, 
                 color: textColor,
                 font: "Calibri",
-                spacing: { after: 150 }
+                spacing: { before: 0, after: 200 }
               })] : []),
-              createStyledParagraph(exp.descripcion || '', {
-                size: 22,
+              ...createParagraphsFromText(exp.descripcion || '', {
+                size: 26,
                 color: textColor,
                 font: "Calibri",
-                spacing: { after: 400 },
+                spacing: 250,
+              }),
+              // Separador entre experiencias
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: "─".repeat(50),
+                    color: "#E5E7EB",
+                    size: 24,
+                  }),
+                ],
+                alignment: AlignmentType.CENTER,
+                spacing: { before: 300, after: 300 },
               }),
             ]),
           ] : []),
@@ -213,30 +264,43 @@ export const generateModernCVWord = async (cvData) => {
           ...(cvData.educacion && cvData.educacion.length > 0 ? [
             createSectionHeader('EDUCACIÓN'),
             ...cvData.educacion.flatMap(edu => [
-              createStyledParagraph(edu.titulo || '', { 
+              createFormattedParagraph(edu.titulo || '', { 
                 bold: true, 
-                size: 26, 
+                size: 32, 
                 color: primaryColor,
                 font: "Calibri",
-                spacing: { after: 100 }
+                spacing: { before: 200, after: 150 }
               }),
-              createStyledParagraph(`${edu.institucion || ''} | ${edu.fechaInicio || ''} - ${edu.fechaFin || ''}`, {
-                size: 22,
+              createFormattedParagraph(`${edu.institucion || ''} | ${edu.fechaInicio || ''} - ${edu.fechaFin || ''}`, {
+                size: 26,
                 color: secondaryColor,
                 font: "Calibri",
-                spacing: { after: 100 },
+                bold: true,
+                spacing: { before: 0, after: 150 },
               }),
-              ...(edu.ubicacion ? [createStyledParagraph(`🎓 Ubicación: ${edu.ubicacion}`, { 
-                size: 20, 
+              ...(edu.ubicacion ? [createFormattedParagraph(`🎓 Ubicación: ${edu.ubicacion}`, { 
+                size: 24, 
                 color: textColor,
                 font: "Calibri",
-                spacing: { after: 150 }
+                spacing: { before: 0, after: 200 }
               })] : []),
-              createStyledParagraph(edu.descripcion || '', {
-                size: 22,
+              ...createParagraphsFromText(edu.descripcion || '', {
+                size: 26,
                 color: textColor,
                 font: "Calibri",
-                spacing: { after: 400 },
+                spacing: 250,
+              }),
+              // Separador entre educaciones
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: "─".repeat(50),
+                    color: "#E5E7EB",
+                    size: 24,
+                  }),
+                ],
+                alignment: AlignmentType.CENTER,
+                spacing: { before: 300, after: 300 },
               }),
             ]),
           ] : []),
@@ -244,13 +308,13 @@ export const generateModernCVWord = async (cvData) => {
           // === HABILIDADES ===
           ...(cvData.habilidades && cvData.habilidades.length > 0 ? [
             createSectionHeader('HABILIDADES'),
-            createStyledParagraph(
+            createFormattedParagraph(
               `💼 ${cvData.habilidades.map(h => h.nombre || h).join(' • ')}`,
               { 
-                size: 24, 
+                size: 28, 
                 color: textColor,
                 font: "Calibri",
-                spacing: { after: 400 } 
+                spacing: { before: 200, after: 600 } 
               }
             ),
           ] : []),
@@ -258,7 +322,7 @@ export const generateModernCVWord = async (cvData) => {
           // === IDIOMAS ===
           ...(cvData.idiomas && cvData.idiomas.length > 0 ? [
             createSectionHeader('IDIOMAS'),
-            createStyledParagraph(
+            createFormattedParagraph(
               `🌍 ${cvData.idiomas.map(i => {
                 if (typeof i === 'object' && i.idioma) {
                   return `${i.idioma} (${i.nivel})`;
@@ -266,10 +330,10 @@ export const generateModernCVWord = async (cvData) => {
                 return i;
               }).join(' • ')}`,
               { 
-                size: 24, 
+                size: 28, 
                 color: textColor,
                 font: "Calibri",
-                spacing: { after: 400 } 
+                spacing: { before: 200, after: 600 } 
               }
             ),
           ] : []),
@@ -278,28 +342,29 @@ export const generateModernCVWord = async (cvData) => {
           ...(cvData.certificaciones && cvData.certificaciones.length > 0 ? [
             createSectionHeader('CERTIFICACIONES'),
             ...cvData.certificaciones.flatMap(cert => [
-              createStyledParagraph(`🏆 ${cert.nombre || ''}`, { 
+              createFormattedParagraph(`🏆 ${cert.nombre || ''}`, { 
                 bold: true, 
-                size: 24, 
+                size: 30, 
                 color: primaryColor,
                 font: "Calibri",
-                spacing: { after: 100 }
+                spacing: { before: 200, after: 150 }
               }),
-              createStyledParagraph(`${cert.institucion || ''} | ${cert.fecha || ''}`, {
-                size: 22,
+              createFormattedParagraph(`${cert.institucion || ''} | ${cert.fecha || ''}`, {
+                size: 26,
                 color: secondaryColor,
                 font: "Calibri",
-                spacing: { after: 100 },
+                bold: true,
+                spacing: { before: 0, after: 150 },
               }),
               ...(cert.url ? [
-                createStyledParagraph(`🔗 Ver certificado: ${cert.url}`, {
+                createFormattedParagraph(`🔗 Ver certificado: ${cert.url}`, {
                   color: secondaryColor,
                   italic: true,
-                  size: 20,
+                  size: 24,
                   font: "Calibri",
-                  spacing: { after: 200 },
+                  spacing: { before: 0, after: 300 },
                 }),
-              ] : [new Paragraph({ spacing: { after: 200 } })]),
+              ] : [new Paragraph({ spacing: { after: 300 } })]),
             ]),
           ] : []),
 
@@ -307,35 +372,36 @@ export const generateModernCVWord = async (cvData) => {
           ...(cvData.referencias && cvData.referencias.length > 0 ? [
             createSectionHeader('REFERENCIAS'),
             ...cvData.referencias.slice(0, 3).filter(ref => ref && (ref.nombre || ref.cargo || ref.empresa)).flatMap(ref => [
-              ...(ref.nombre ? [createStyledParagraph(`👤 ${ref.nombre}`, { 
+              ...(ref.nombre ? [createFormattedParagraph(`👤 ${ref.nombre}`, { 
                 bold: true, 
-                size: 24, 
+                size: 30, 
                 color: primaryColor,
                 font: "Calibri",
-                spacing: { after: 100 }
+                spacing: { before: 200, after: 150 }
               })] : []),
-              createStyledParagraph(
+              createFormattedParagraph(
                 ref.cargo && ref.empresa ? `${ref.cargo} en ${ref.empresa}` :
                 ref.cargo ? ref.cargo :
                 ref.empresa ? ref.empresa : '',
                 { 
-                  size: 22, 
+                  size: 26, 
                   color: secondaryColor,
                   font: "Calibri",
-                  spacing: { after: 100 } 
+                  bold: true,
+                  spacing: { before: 0, after: 150 } 
                 }
               ),
               ...(ref.telefono || ref.email ? [
-                createStyledParagraph(
+                createFormattedParagraph(
                   `${ref.telefono ? `📞 Tel: ${ref.telefono}` : ''}${ref.telefono && ref.email ? ' • ' : ''}${ref.email ? `📧 Email: ${ref.email}` : ''}`,
                   { 
-                    size: 20, 
+                    size: 24, 
                     color: textColor,
                     font: "Calibri",
-                    spacing: { after: 200 } 
+                    spacing: { before: 0, after: 300 } 
                   }
                 ),
-              ] : [new Paragraph({ spacing: { after: 200 } })]),
+              ] : [new Paragraph({ spacing: { after: 300 } })]),
             ]),
           ] : []),
 
@@ -343,36 +409,37 @@ export const generateModernCVWord = async (cvData) => {
           ...(cvData.proyectos && cvData.proyectos.length > 0 ? [
             createSectionHeader('PROYECTOS'),
             ...cvData.proyectos.flatMap(proyecto => [
-              createStyledParagraph(`🚀 ${proyecto.nombre || ''}`, { 
+              createFormattedParagraph(`🚀 ${proyecto.nombre || ''}`, { 
                 bold: true, 
-                size: 24, 
+                size: 30, 
                 color: primaryColor,
                 font: "Calibri",
-                spacing: { after: 100 }
+                spacing: { before: 200, after: 150 }
               }),
-              createStyledParagraph(proyecto.descripcion || '', {
-                size: 22,
+              ...createParagraphsFromText(proyecto.descripcion || '', {
+                size: 26,
                 color: textColor,
                 font: "Calibri",
-                spacing: { after: 100 },
+                spacing: 200,
               }),
               ...(proyecto.tecnologias ? [
-                createStyledParagraph(`💻 Tecnologías: ${proyecto.tecnologias}`, { 
-                  size: 20, 
+                createFormattedParagraph(`💻 Tecnologías: ${proyecto.tecnologias}`, { 
+                  size: 24, 
                   color: secondaryColor,
                   font: "Calibri",
-                  spacing: { after: 100 }
+                  bold: true,
+                  spacing: { before: 0, after: 150 }
                 }),
               ] : []),
               ...(proyecto.url ? [
-                createStyledParagraph(`🔗 Ver proyecto: ${proyecto.url}`, {
+                createFormattedParagraph(`🔗 Ver proyecto: ${proyecto.url}`, {
                   color: secondaryColor,
                   italic: true,
-                  size: 20,
+                  size: 24,
                   font: "Calibri",
-                  spacing: { after: 200 },
+                  spacing: { before: 0, after: 300 },
                 }),
-              ] : [new Paragraph({ spacing: { after: 200 } })]),
+              ] : [new Paragraph({ spacing: { after: 300 } })]),
             ]),
           ] : []),
         ],
