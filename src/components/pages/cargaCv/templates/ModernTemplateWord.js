@@ -92,32 +92,31 @@ export const generateModernCVWord = async (cvData) => {
       });
     };
 
-    // Función para crear header con fondo azul
-    const createHeaderWithBackground = (elements) => {
-      return new Table({
-        width: {
-          size: 100,
-          type: WidthType.PERCENTAGE,
-        },
-        rows: [
-          new TableRow({
-            children: [
-              new TableCell({
-                children: elements,
-                shading: {
-                  type: ShadingType.SOLID,
-                  color: primaryColor,
-                },
-                margins: {
-                  top: 400,
-                  bottom: 400,
-                  left: 400,
-                  right: 400,
-                },
-              }),
-            ],
+    // Función para crear header con fondo azul usando párrafos con fondo
+    const createStyledParagraphWithBackground = (text, options = {}) => {
+      return new Paragraph({
+        children: [
+          new TextRun({
+            text: text,
+            bold: options.bold || false,
+            italic: options.italic || false,
+            color: options.color || "FFFFFF",
+            size: options.size || 52,
+            font: options.font || "Calibri",
           }),
         ],
+        alignment: options.alignment || AlignmentType.CENTER,
+        spacing: options.spacing || { before: 200, after: 200 },
+        shading: {
+          type: ShadingType.SOLID,
+          color: primaryColor,
+        },
+        border: {
+          top: { color: primaryColor, space: 1, style: BorderStyle.SINGLE, size: 6 },
+          bottom: { color: primaryColor, space: 1, style: BorderStyle.SINGLE, size: 6 },
+          left: { color: primaryColor, space: 1, style: BorderStyle.SINGLE, size: 6 },
+          right: { color: primaryColor, space: 1, style: BorderStyle.SINGLE, size: 6 },
+        },
       });
     };
 
@@ -127,64 +126,48 @@ export const generateModernCVWord = async (cvData) => {
         properties: {},
         children: [
           // === HEADER PRINCIPAL CON FONDO AZUL ===
-          createHeaderWithBackground([
-            // Nombre principal
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: `${cvData.Nombre || ''} ${cvData.Apellido || ''}`,
-                  bold: true,
-                  color: "FFFFFF",
-                  size: 52,
-                  font: "Calibri",
-                }),
-              ],
-              alignment: AlignmentType.CENTER,
-              spacing: { after: 200 },
-            }),
+          // Nombre principal
+          createStyledParagraphWithBackground(`${cvData.Nombre || ''} ${cvData.Apellido || ''}`, {
+            bold: true,
+            color: "FFFFFF",
+            size: 52,
+            font: "Calibri",
+            alignment: AlignmentType.CENTER,
+            spacing: { before: 0, after: 100 },
+          }),
 
-            // Edad (esquina superior derecha)
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: `${cvData.Edad} años`,
-                  color: "FFFFFF",
-                  size: 28,
-                  font: "Calibri",
-                }),
-              ],
-              alignment: AlignmentType.RIGHT,
-              spacing: { before: -800, after: 100 },
-            }),
+          // Título profesional
+          createStyledParagraphWithBackground(buildProfessionalTitle(cvData), {
+            color: "E0F2FE",
+            size: 30,
+            font: "Calibri",
+            alignment: AlignmentType.CENTER,
+            spacing: { before: 0, after: 100 },
+          }),
 
-            // Título profesional
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: buildProfessionalTitle(cvData),
-                  color: "E0F2FE",
-                  size: 30,
-                  font: "Calibri",
-                }),
-              ],
-              alignment: AlignmentType.CENTER,
-              spacing: { after: 300 },
-            }),
+          // Información de contacto
+          createStyledParagraphWithBackground(buildContactInfo(cvData).join(' • '), {
+            color: "F1F5F9",
+            size: 24,
+            font: "Calibri",
+            alignment: AlignmentType.CENTER,
+            spacing: { before: 0, after: 0 },
+          }),
 
-            // Información de contacto
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: buildContactInfo(cvData).join(' • '),
-                  color: "F1F5F9",
-                  size: 24,
-                  font: "Calibri",
-                }),
-              ],
-              alignment: AlignmentType.CENTER,
-              spacing: { after: 0 },
-            }),
-          ]),
+          // Edad (párrafo separado alineado a la derecha)
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `${cvData.Edad} años`,
+                color: primaryColor,
+                size: 28,
+                font: "Calibri",
+                bold: true,
+              }),
+            ],
+            alignment: AlignmentType.RIGHT,
+            spacing: { before: 200, after: 400 },
+          }),
 
           // === PERFIL PROFESIONAL ===
           createSectionHeader('PERFIL PROFESIONAL'),
