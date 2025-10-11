@@ -38,7 +38,7 @@ export const generateClassicTemplate = (cvData) => {
     doc.setFont('helvetica', 'bold');
     const fullName = `${cvData.Nombre || ''} ${cvData.Apellido || ''}`;
     const splitHeaderName = doc.splitTextToSize(fullName, pageWidth - 60);
-    doc.text(splitHeaderName, 15, 20);
+    doc.text(splitHeaderName, 15, 22); // Aumentar espaciado desde el top
     
     // Título profesional
     doc.setFontSize(12);
@@ -46,7 +46,7 @@ export const generateClassicTemplate = (cvData) => {
     const professionalTitle = buildProfessionalTitle(cvData);
     if (professionalTitle) {
       const splitTitle = doc.splitTextToSize(professionalTitle, pageWidth - 60);
-      doc.text(splitTitle, 15, 30);
+      doc.text(splitTitle, 15, 32); // Ajustar también el título
     }
     
     // Número de página (opcional)
@@ -74,14 +74,14 @@ export const generateClassicTemplate = (cvData) => {
   doc.setLineWidth(2);
   doc.line(15, 15, pageWidth - 15, 15);
 
-  // Nombre completo
+  // Nombre completo (con más espaciado después de la barra)
   doc.setTextColor(primaryColor);
   doc.setFontSize(18);
   doc.setFont('helvetica', 'bold');
   const fullName = `${cvData.Nombre || ''} ${cvData.Apellido || ''}`;
   const splitName = doc.splitTextToSize(fullName, pageWidth - 30);
-  doc.text(splitName, 15, currentY);
-  currentY += splitName.length * 6;
+  doc.text(splitName, 15, currentY + 5); // Aumentar espaciado después de la barra
+  currentY += splitName.length * 6 + 5; // Ajustar currentY también
 
   // Edad (opcional, solo si está completada)
   if (cvData.Edad) {

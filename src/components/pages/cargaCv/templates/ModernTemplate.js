@@ -51,28 +51,39 @@ export const generateModernTemplate = async (cvData) => {
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
   
-  // Colores del tema moderno
-  const primaryColor = '#1976d2';
-  const secondaryColor = '#42a5f5';
-  const accentColor = '#bbdefb';
-  const textColor = '#424242';
-  const lightGray = '#f5f5f5';
+  // Colores del tema moderno mejorado
+  const primaryColor = '#1e40af';
+  const secondaryColor = '#475569';
+  const accentColor = '#3b82f6';
+  const textColor = '#0f172a';
+  const lightGray = '#f1f5f9';
 
   // Configuración de fuentes
   doc.setFont('helvetica');
 
   // === HEADER SECTION ===
-  // Fondo azul del header
-  doc.setFillColor(primaryColor);
+  // Fondo con gradiente simulado usando múltiples rectángulos
+  doc.setFillColor('#1e3a8a'); // Azul más oscuro
   doc.rect(0, 0, pageWidth, 60, 'F');
+  doc.setFillColor('#3b82f6'); // Azul medio
+  doc.rect(0, 0, pageWidth, 45, 'F');
+  doc.setFillColor('#60a5fa'); // Azul más claro
+  doc.rect(0, 0, pageWidth, 30, 'F');
+
+  // Línea decorativa en la parte inferior del header
+  doc.setDrawColor('#ffffff');
+  doc.setLineWidth(1);
+  doc.line(0, 59, pageWidth, 59);
 
   // Foto de perfil (si existe)
   if (cvData.Foto) {
     try {
       console.log('📸 Cargando imagen de perfil:', cvData.Foto);
       
-      // Crear círculo de fondo blanco
+      // Crear círculo de fondo con sombra
       doc.setFillColor('#ffffff');
+      doc.circle(25, 30, 22, 'F');
+      doc.setFillColor('#f8fafc');
       doc.circle(25, 30, 20, 'F');
       
       // Cargar imagen desde URL
@@ -119,53 +130,72 @@ export const generateModernTemplate = async (cvData) => {
     } catch (error) {
       console.log('⚠️ Error al cargar imagen de perfil:', error);
       
-      // Fallback: mostrar placeholder
-      doc.setFillColor(primaryColor);
+      // Fallback: mostrar placeholder con mejor diseño
+      doc.setFillColor('#ffffff');
+      doc.circle(25, 30, 20, 'F');
+      doc.setFillColor('#e5e7eb');
       doc.circle(25, 30, 18, 'F');
       
-      doc.setTextColor('#ffffff');
-      doc.setFontSize(10);
+      doc.setTextColor('#6b7280');
+      doc.setFontSize(9);
       doc.text('FOTO', 25, 33, { align: 'center' });
     }
   }
 
-  // Nombre y apellidos
+  // === HEADER CON TODO EL ANCHO ===
+  
+  // NOMBRE PRINCIPAL - Usando todo el ancho disponible
   doc.setTextColor('#ffffff');
-  doc.setFontSize(24);
+  doc.setFontSize(30); // Más grande
   doc.setFont('helvetica', 'bold');
   const fullName = `${cvData.Nombre || ''} ${cvData.Apellido || ''}`;
-  const splitName = doc.splitTextToSize(fullName, pageWidth - 120);
-  doc.text(splitName, 60, 25);
+  const splitName = doc.splitTextToSize(fullName, pageWidth - 40); // Usar casi todo el ancho
+  doc.text(splitName, 20, 20); // Empezar más a la izquierda
+  
+  // Calcular posición Y después del nombre
+  let currentHeaderY = 20 + (splitName.length * 7);
+  
+  // SIN LÍNEA DECORATIVA - Para evitar que tape el texto
+  currentHeaderY += 5;
 
-  // Edad (opcional, solo si está completada)
+  // EDAD - A la derecha, en la misma línea del nombre si cabe
   if (cvData.Edad) {
     doc.setFontSize(12);
     doc.setFont('helvetica', 'normal');
-    doc.text(`${cvData.Edad} años`, 60, 32);
+    doc.setTextColor('#e2e8f0');
+    doc.text(`${cvData.Edad} años`, pageWidth - 30, 25);
   }
 
-  // Título profesional completo
-  doc.setFontSize(14);
-  doc.setFont('helvetica', 'normal');
+  // TÍTULO PROFESIONAL - Usando todo el ancho
   const professionalTitle = buildProfessionalTitle(cvData);
   if (professionalTitle) {
-    const splitTitle = doc.splitTextToSize(professionalTitle, pageWidth - 120);
-    doc.text(splitTitle, 60, cvData.Edad ? 39 : 35);
+    doc.setFontSize(13);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor('#f1f5f9');
+    const splitTitle = doc.splitTextToSize(professionalTitle, pageWidth - 40);
+    doc.text(splitTitle, 20, currentHeaderY);
+    currentHeaderY += (splitTitle.length * 5) + 8;
   }
 
-  // Información de contacto completa
-  doc.setFontSize(10);
+  // INFORMACIÓN DE CONTACTO - Usando todo el ancho
+  doc.setFontSize(9);
+  doc.setTextColor('#e2e8f0');
   const contactInfo = buildContactInfo(cvData);
   const contactText = contactInfo.join(' • ');
-  const contactY = cvData.Edad ? 46 : 42;
-  const splitContact = doc.splitTextToSize(contactText, pageWidth - 120);
-  doc.text(splitContact, 60, contactY);
+  const splitContact = doc.splitTextToSize(contactText, pageWidth - 40);
+  doc.text(splitContact, 20, currentHeaderY);
 
   // === PERFIL PROFESIONAL ===
   let currentY = 75;
   if (cvData.perfilProfesional) {
+    // Fondo gris claro para la sección
+    doc.setFillColor('#f8fafc');
+    doc.rect(15, currentY - 5, pageWidth - 30, 8, 'F');
+    
     currentY = addSectionTitle(doc, 'PERFIL PROFESIONAL', 15, currentY, primaryColor);
     
+    // Establecer color oscuro para el texto del perfil profesional
+    doc.setTextColor(textColor);
     const result = renderTextWithOverflow(doc, cvData.perfilProfesional, 15, currentY, pageWidth - 30, 10, false);
     if (result !== null) {
       currentY = result;
@@ -173,6 +203,8 @@ export const generateModernTemplate = async (cvData) => {
       // Necesita nueva página
       currentY = addNewPageWithHeader(doc);
       currentY = addSectionTitle(doc, 'PERFIL PROFESIONAL (cont.)', 15, currentY, primaryColor);
+      // Establecer color oscuro para la continuación del texto
+      doc.setTextColor(textColor);
       const result2 = renderTextWithOverflow(doc, cvData.perfilProfesional, 15, currentY, pageWidth - 30, 10, false);
       currentY = result2 !== null ? result2 : currentY + 50;
     }
@@ -188,25 +220,35 @@ export const generateModernTemplate = async (cvData) => {
 
   // Función helper para agregar header consistente en páginas adicionales
   const addConsistentHeader = (doc, pageNumber) => {
-    // Header con color de marca
-    doc.setFillColor(primaryColor);
+    // Header con gradiente simulado
+    doc.setFillColor('#1e3a8a');
     doc.rect(0, 0, pageWidth, 40, 'F');
+    doc.setFillColor('#3b82f6');
+    doc.rect(0, 0, pageWidth, 30, 'F');
     
-    // Nombre y apellidos
+    // Línea decorativa
+    doc.setDrawColor('#ffffff');
+    doc.setLineWidth(1);
+    doc.line(0, 39, pageWidth, 39);
+    
+    // HEADER CONSISTENTE SIMPLE
+    
+    // Nombre principal - simple y limpio
     doc.setTextColor('#ffffff');
     doc.setFontSize(16);
     doc.setFont('helvetica', 'bold');
     const fullName = `${cvData.Nombre || ''} ${cvData.Apellido || ''}`;
     const splitHeaderName = doc.splitTextToSize(fullName, pageWidth - 60);
-    doc.text(splitHeaderName, 15, 20);
+    doc.text(splitHeaderName, 15, 18);
     
-    // Título profesional
-    doc.setFontSize(12);
+    // Título profesional - debajo del nombre
+    doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
+    doc.setTextColor('#f1f5f9');
     const professionalTitle = buildProfessionalTitle(cvData);
     if (professionalTitle) {
       const splitTitle = doc.splitTextToSize(professionalTitle, pageWidth - 60);
-      doc.text(splitTitle, 15, 30);
+      doc.text(splitTitle, 15, 28);
     }
     
     // Número de página (opcional)
