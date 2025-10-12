@@ -1,4 +1,4 @@
-import React, { memo, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { 
   Grid, 
   TextField, 
@@ -14,8 +14,9 @@ import {
 } from '@mui/material';
 import { Add, Delete } from '@mui/icons-material';
 import { v4 as uuidv4 } from 'uuid';
+import { withFormMemo } from './FormMemoHelper';
 
-export const ExperienceForm = memo(({ newCv, handleChange }) => {
+const ExperienceFormComponent = ({ newCv, handleChange }) => {
   const experiencias = newCv.experiencias || [];
 
   const addExperiencia = useCallback(() => {
@@ -288,6 +289,12 @@ export const ExperienceForm = memo(({ newCv, handleChange }) => {
       )}
     </>
   );
-});
+};
 
-ExperienceForm.displayName = 'ExperienceForm';
+ExperienceFormComponent.displayName = 'ExperienceFormComponent';
+
+// Memorizar con solo el campo experiencias
+export const ExperienceForm = withFormMemo(
+  ExperienceFormComponent,
+  ['experiencias']
+);

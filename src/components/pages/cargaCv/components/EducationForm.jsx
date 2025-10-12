@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useRef } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { 
   Grid, 
   TextField, 
@@ -12,8 +12,9 @@ import {
 import { Add, Delete, CloudUpload } from '@mui/icons-material';
 import { v4 as uuidv4 } from 'uuid';
 import { uploadFile, ensureAppFolder, createPublicShareLink, getDirectDownloadUrl } from '../../../../lib/controlFileStorage';
+import { withFormMemo } from './FormMemoHelper';
 
-export const EducationForm = memo(({ newCv, handleChange }) => {
+const EducationFormComponent = ({ newCv, handleChange }) => {
   const educacion = newCv.educacion || [];
   const fileInputRefs = useRef({});
   
@@ -371,6 +372,12 @@ export const EducationForm = memo(({ newCv, handleChange }) => {
       )}
     </>
   );
-});
+};
 
-EducationForm.displayName = 'EducationForm';
+EducationFormComponent.displayName = 'EducationFormComponent';
+
+// Memorizar con solo el campo educacion
+export const EducationForm = withFormMemo(
+  EducationFormComponent,
+  ['educacion']
+);

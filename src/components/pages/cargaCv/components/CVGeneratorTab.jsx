@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 import { Box, Typography, Button, Divider, CircularProgress } from '@mui/material';
 import { Description, Download } from '@mui/icons-material';
 import { PersonalDataForm } from './PersonalDataForm';
@@ -15,7 +15,7 @@ import { TemplateSelector } from './TemplateSelector';
 import { generateModernCVWord } from '../templates/ModernTemplateWord';
 import { generateModernCVWord as generateClassicCVWord } from '../templates/ClassicTemplateWord';
 
-export const CVGeneratorTab = ({
+const CVGeneratorTabComponent = ({
   newCv,
   handleChange,
   selectedTemplate,
@@ -226,3 +226,22 @@ export const CVGeneratorTab = ({
     </>
   );
 };
+
+CVGeneratorTabComponent.displayName = 'CVGeneratorTabComponent';
+
+// Memorizar el tab completo con una comparación personalizada
+export const CVGeneratorTab = memo(CVGeneratorTabComponent, (prevProps, nextProps) => {
+  // Solo re-renderizar si cambió algo relevante
+  return (
+    prevProps.selectedTemplate === nextProps.selectedTemplate &&
+    prevProps.loadingImage === nextProps.loadingImage &&
+    prevProps.isLoading === nextProps.isLoading &&
+    prevProps.currentCv === nextProps.currentCv &&
+    prevProps.handleChange === nextProps.handleChange &&
+    prevProps.onTemplateChange === nextProps.onTemplateChange &&
+    prevProps.onImageChange === nextProps.onImageChange &&
+    prevProps.onPreview === nextProps.onPreview &&
+    prevProps.onSubmit === nextProps.onSubmit &&
+    prevProps.newCv === nextProps.newCv
+  );
+});

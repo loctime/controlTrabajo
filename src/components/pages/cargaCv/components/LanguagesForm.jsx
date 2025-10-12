@@ -1,4 +1,4 @@
-import React, { useState, memo, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { 
   Grid, 
   TextField, 
@@ -14,6 +14,7 @@ import {
 } from '@mui/material';
 import { Add } from '@mui/icons-material';
 import { v4 as uuidv4 } from 'uuid';
+import { withFormMemo } from './FormMemoHelper';
 
 // Lista de idiomas comunes
 const IDIOMAS_DISPONIBLES = [
@@ -24,7 +25,7 @@ const IDIOMAS_DISPONIBLES = [
   'Turco', 'Hebreo', 'Hindi', 'Bengalí', 'Tailandés', 'Vietnamita'
 ];
 
-export const LanguagesForm = memo(({ newCv, handleChange }) => {
+const LanguagesFormComponent = ({ newCv, handleChange }) => {
   const [nuevoIdioma, setNuevoIdioma] = useState('');
   const [nivelIdioma, setNivelIdioma] = useState('Intermedio');
   
@@ -314,6 +315,12 @@ export const LanguagesForm = memo(({ newCv, handleChange }) => {
      
     </>
   );
-});
+};
 
-LanguagesForm.displayName = 'LanguagesForm';
+LanguagesFormComponent.displayName = 'LanguagesFormComponent';
+
+// Memorizar con solo el campo idiomas
+export const LanguagesForm = withFormMemo(
+  LanguagesFormComponent,
+  ['idiomas']
+);

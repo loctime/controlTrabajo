@@ -1,4 +1,4 @@
-import React, { useState, useMemo, memo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { 
   Grid, 
   TextField, 
@@ -15,8 +15,9 @@ import {
 } from '@mui/material';
 import { ArrowBack } from '@mui/icons-material';
 import { CATEGORIAS_GENERALES } from '../../../../constants/categories';
+import { withFormMemo } from './FormMemoHelper';
 
-export const ProfessionalDataForm = memo(({ newCv, handleChange }) => {
+const ProfessionalDataFormComponent = ({ newCv, handleChange }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showCustomInput, setShowCustomInput] = useState(false);
 
@@ -222,7 +223,12 @@ export const ProfessionalDataForm = memo(({ newCv, handleChange }) => {
       
     </>
   );
-});
+};
 
-ProfessionalDataForm.displayName = 'ProfessionalDataForm';
+ProfessionalDataFormComponent.displayName = 'ProfessionalDataFormComponent';
 
+// Memorizar con solo los campos relevantes
+export const ProfessionalDataForm = withFormMemo(
+  ProfessionalDataFormComponent,
+  ['categoriaGeneral', 'categoriaEspecifica', 'linkedin', 'sitioWeb', 'perfilProfesional']
+);

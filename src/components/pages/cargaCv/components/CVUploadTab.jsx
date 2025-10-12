@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Box, Typography, Button } from '@mui/material';
 import { PersonalDataForm } from './PersonalDataForm';
 import { ProfessionalDataForm } from './ProfessionalDataForm';
 import { LocationForm } from './LocationForm';
 import { FilesForm } from './FilesForm';
 
-export const CVUploadTab = ({
+const CVUploadTabComponent = ({
   newCv,
   handleChange,
   onImageChange,
@@ -53,3 +53,20 @@ export const CVUploadTab = ({
     </>
   );
 };
+
+CVUploadTabComponent.displayName = 'CVUploadTabComponent';
+
+// Memorizar el tab de subida
+export const CVUploadTab = memo(CVUploadTabComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.loadingImage === nextProps.loadingImage &&
+    prevProps.loadingCv === nextProps.loadingCv &&
+    prevProps.isImageLoaded === nextProps.isImageLoaded &&
+    prevProps.isCvLoaded === nextProps.isCvLoaded &&
+    prevProps.isLoading === nextProps.isLoading &&
+    prevProps.handleChange === nextProps.handleChange &&
+    prevProps.onImageChange === nextProps.onImageChange &&
+    prevProps.onCvChange === nextProps.onCvChange &&
+    prevProps.newCv === nextProps.newCv
+  );
+});

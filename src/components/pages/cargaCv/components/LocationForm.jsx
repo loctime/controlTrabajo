@@ -1,8 +1,9 @@
-import React, { memo } from 'react';
+import React from 'react';
 import { Box, Grid, TextField, FormControl, InputLabel, Select, MenuItem, Typography } from '@mui/material';
 import { CIUDADES_DISPONIBLES } from '../../../../constants/locations';
+import { withFormMemo } from './FormMemoHelper';
 
-export const LocationForm = memo(({ 
+const LocationFormComponent = ({ 
   newCv, 
   handleChange
 }) => {
@@ -67,8 +68,12 @@ export const LocationForm = memo(({
       </Box>
     </>
   );
-});
+};
 
-LocationForm.displayName = 'LocationForm';
+LocationFormComponent.displayName = 'LocationFormComponent';
 
-
+// Memorizar con solo los campos relevantes
+export const LocationForm = withFormMemo(
+  LocationFormComponent,
+  ['ciudad', 'localidad']
+);

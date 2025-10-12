@@ -1,7 +1,8 @@
-import React, { memo } from 'react';
+import React from 'react';
 import { Grid, TextField, Typography, Box } from '@mui/material';
+import { withFormMemo } from './FormMemoHelper';
 
-export const PersonalDataForm = memo(({ newCv, handleChange }) => {
+const PersonalDataFormComponent = ({ newCv, handleChange }) => {
   return (
     <>
       <Box sx={{ 
@@ -105,7 +106,12 @@ export const PersonalDataForm = memo(({ newCv, handleChange }) => {
       </Box>
     </>
   );
-});
+};
 
-PersonalDataForm.displayName = 'PersonalDataForm';
+PersonalDataFormComponent.displayName = 'PersonalDataFormComponent';
 
+// Memorizar con solo los campos relevantes para este formulario
+export const PersonalDataForm = withFormMemo(
+  PersonalDataFormComponent,
+  ['Nombre', 'Apellido', 'Edad', 'Email', 'telefono', 'direccion']
+);

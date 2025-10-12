@@ -1,4 +1,4 @@
-import React, { memo, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { 
   Grid, 
   TextField, 
@@ -11,8 +11,9 @@ import {
 } from '@mui/material';
 import { Add, Delete } from '@mui/icons-material';
 import { v4 as uuidv4 } from 'uuid';
+import { withFormMemo } from './FormMemoHelper';
 
-export const ProjectsForm = memo(({ newCv, handleChange }) => {
+const ProjectsFormComponent = ({ newCv, handleChange }) => {
   const proyectos = newCv.proyectos || [];
 
   const addProyecto = useCallback(() => {
@@ -239,6 +240,12 @@ export const ProjectsForm = memo(({ newCv, handleChange }) => {
       </Box>
     </>
   );
-});
+};
 
-ProjectsForm.displayName = 'ProjectsForm';
+ProjectsFormComponent.displayName = 'ProjectsFormComponent';
+
+// Memorizar con solo el campo proyectos
+export const ProjectsForm = withFormMemo(
+  ProjectsFormComponent,
+  ['proyectos']
+);

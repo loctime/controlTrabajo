@@ -1,4 +1,4 @@
-import React, { useState, memo, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { 
   Grid, 
   TextField, 
@@ -15,6 +15,7 @@ import {
 import { Add } from '@mui/icons-material';
 import { v4 as uuidv4 } from 'uuid';
 import skillsData from './skills.json';
+import { withFormMemo } from './FormMemoHelper';
 
 // Extraer todas las habilidades en una lista plana, eliminando duplicados
 const SKILLS_SUGERIDAS = [...new Set(skillsData.flatMap(categoria => categoria.habilidades))].sort();
@@ -22,7 +23,7 @@ const SKILLS_SUGERIDAS = [...new Set(skillsData.flatMap(categoria => categoria.h
 // Obtener todas las categorías disponibles
 const CATEGORIAS = skillsData.map(item => item.categoria);
 
-export const SkillsForm = memo(({ newCv, handleChange }) => {
+const SkillsFormComponent = ({ newCv, handleChange }) => {
   const [nuevaHabilidad, setNuevaHabilidad] = useState('');
   const [nivelHabilidad, setNivelHabilidad] = useState('Intermedio');
   const [categoriaFiltro, setCategoriaFiltro] = useState('Todas');
@@ -350,6 +351,12 @@ export const SkillsForm = memo(({ newCv, handleChange }) => {
 
     </>
   );
-});
+};
 
-SkillsForm.displayName = 'SkillsForm';
+SkillsFormComponent.displayName = 'SkillsFormComponent';
+
+// Memorizar con solo el campo habilidades
+export const SkillsForm = withFormMemo(
+  SkillsFormComponent,
+  ['habilidades']
+);

@@ -1,4 +1,4 @@
-import React, { memo, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { 
   Grid, 
   TextField, 
@@ -15,8 +15,9 @@ import {
 } from '@mui/material';
 import { Add, Delete } from '@mui/icons-material';
 import { v4 as uuidv4 } from 'uuid';
+import { withFormMemo } from './FormMemoHelper';
 
-export const ReferencesForm = memo(({ newCv, handleChange }) => {
+const ReferencesFormComponent = ({ newCv, handleChange }) => {
   const referencias = newCv.referencias || [];
   const experiencias = newCv.experiencias || [];
 
@@ -283,6 +284,12 @@ export const ReferencesForm = memo(({ newCv, handleChange }) => {
       
     </>
   );
-});
+};
 
-ReferencesForm.displayName = 'ReferencesForm';
+ReferencesFormComponent.displayName = 'ReferencesFormComponent';
+
+// Memorizar con referencias y experiencias (necesita experiencias para popular el selector)
+export const ReferencesForm = withFormMemo(
+  ReferencesFormComponent,
+  ['referencias', 'experiencias']
+);
