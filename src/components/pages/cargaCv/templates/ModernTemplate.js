@@ -128,7 +128,7 @@ export const generateModernTemplate = async (cvData) => {
       
       // Convertir canvas a base64 con transparencia y agregar al PDF
       const imgData = canvas.toDataURL('image/png'); // PNG para transparencia
-      doc.addImage(imgData, 'PNG', -10, 0, 60, 60); // Posición en el círculo de la plantilla (20, 30)
+      doc.addImage(imgData, 'PNG', 5, 5, 60, 60); // Posición ajustada para que se vea completa
       
       console.log('✅ Imagen de perfil cargada correctamente');
     } catch (error) {
@@ -136,11 +136,11 @@ export const generateModernTemplate = async (cvData) => {
       
       // Fallback: mostrar placeholder circular simple
       doc.setFillColor('#e5e7eb');
-      doc.circle(20, 30, 30, 'F');
+      doc.circle(35, 35, 30, 'F');
       
       doc.setTextColor('#6b7280');
       doc.setFontSize(8);
-      doc.text('FOTO', 20, 33, { align: 'center' });
+      doc.text('FOTO', 35, 38, { align: 'center' });
     }
   }
 
@@ -151,12 +151,12 @@ export const generateModernTemplate = async (cvData) => {
   doc.setFontSize(32); // Más grande para mejor legibilidad
   doc.setFont('helvetica', 'bold');
   const fullName = `${cvData.Nombre || ''} ${cvData.Apellido || ''}`;
-  // Ajustar ancho para dejar espacio a la foto (que está en x=4, ancho=32, más margen)
-  const splitName = doc.splitTextToSize(fullName, pageWidth - 55); 
-  doc.text(splitName, 50, 15); // Un poco más abajo para quedar en el color claro
+  // Ajustar ancho para dejar espacio a la foto (que está en x=5, ancho=60, más margen)
+  const splitName = doc.splitTextToSize(fullName, pageWidth - 75); 
+  doc.text(splitName, 75, 20); // Separación optimizada de la imagen circular
   
   // Calcular posición Y después del nombre (ajustado para márgenes más estrechos)
-  let currentHeaderY = 15 + (splitName.length * 8); // Más espacio para fuente más grande
+  let currentHeaderY = 20 + (splitName.length * 8); // Más espacio para fuente más grande
   
   // SIN LÍNEA DECORATIVA - Para evitar que tape el texto
   currentHeaderY += 5;
@@ -166,7 +166,7 @@ export const generateModernTemplate = async (cvData) => {
     doc.setFontSize(13);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor('#e2e8f0');
-    doc.text(`${cvData.Edad} años`, pageWidth - 25, 21);
+    doc.text(`${cvData.Edad} años`, pageWidth - 25, 26);
   }
 
   // TÍTULO PROFESIONAL - Posicionado en el color medio (después de y=30)
@@ -175,25 +175,25 @@ export const generateModernTemplate = async (cvData) => {
     doc.setFontSize(14);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor('#f1f5f9');
-    const splitTitle = doc.splitTextToSize(professionalTitle, pageWidth - 55);
-    // Asegurar que esté en el color medio (después de y=30)
-    const titleY = Math.max(currentHeaderY, 32);
-    doc.text(splitTitle, 50, titleY);
+    const splitTitle = doc.splitTextToSize(professionalTitle, pageWidth - 75);
+    // Asegurar que esté en el color medio (después de y=37)
+    const titleY = Math.max(currentHeaderY, 37);
+    doc.text(splitTitle, 75, titleY);
     currentHeaderY = titleY + (splitTitle.length * 6) + 8;
   }
 
-  // INFORMACIÓN DE CONTACTO - Posicionado en el color oscuro (después de y=45)
+  // INFORMACIÓN DE CONTACTO - Posicionado en el color oscuro (después de y=52)
   doc.setFontSize(10);
   doc.setTextColor('#e2e8f0');
   const contactInfo = buildContactInfo(cvData);
   const contactText = contactInfo.join(' • ');
-  const splitContact = doc.splitTextToSize(contactText, pageWidth - 55);
-  // Asegurar que esté en el color oscuro (después de y=45)
-  const contactY = Math.max(currentHeaderY, 47);
-  doc.text(splitContact, 50, contactY);
+  const splitContact = doc.splitTextToSize(contactText, pageWidth - 75);
+  // Asegurar que esté en el color oscuro (después de y=52)
+  const contactY = Math.max(currentHeaderY, 52);
+  doc.text(splitContact, 75, contactY);
 
   // === PERFIL PROFESIONAL ===
-  let currentY = 75; // Ajustado para el header más grande con más espacio
+  let currentY = 80; // Ajustado para el header más grande con más espacio
   if (cvData.perfilProfesional) {
     // Fondo gris claro para la sección (márgenes más estrechos)
     doc.setFillColor('#f8fafc');
