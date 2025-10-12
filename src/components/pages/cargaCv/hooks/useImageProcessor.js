@@ -103,7 +103,7 @@ export const useImageProcessor = () => {
             sourceHeight = cropHeight;
           }
 
-          // Crear imagen circular sin fondo blanco
+          // Crear imagen completamente circular sin bordes
           ctx.save();
           
           // Crear máscara circular perfecta
@@ -115,20 +115,13 @@ export const useImageProcessor = () => {
           ctx.drawImage(img, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, size, size);
           
           ctx.restore();
-          
-          // Crear borde circular sutil
-          ctx.beginPath();
-          ctx.arc(size / 2, size / 2, size / 2, 0, 2 * Math.PI);
-          ctx.strokeStyle = '#d1d5db';
-          ctx.lineWidth = 1;
-          ctx.stroke();
 
-          // Convertir a blob
+          // Convertir a blob con transparencia
           canvas.toBlob(
             (blob) => {
               if (blob) {
                 const circularFile = new File([blob], file.name, {
-                  type: 'image/jpeg',
+                  type: 'image/png',
                   lastModified: Date.now()
                 });
                 resolve(circularFile);
@@ -136,8 +129,7 @@ export const useImageProcessor = () => {
                 reject(new Error('Error al crear imagen circular'));
               }
             },
-            'image/jpeg',
-            0.95
+            'image/png'
           );
         } catch (error) {
           reject(error);

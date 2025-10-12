@@ -103,7 +103,7 @@ export const generateElegantTemplate = async (cvData) => {
         sourceHeight = cropHeight;
       }
       
-      // Crear imagen circular sin fondo blanco
+      // Crear imagen completamente circular sin bordes
       ctx.save();
       
       // Crear máscara circular perfecta
@@ -116,16 +116,9 @@ export const generateElegantTemplate = async (cvData) => {
       
       ctx.restore();
       
-      // Crear borde circular sutil
-      ctx.beginPath();
-      ctx.arc(size/2, size/2, size/2, 0, 2 * Math.PI);
-      ctx.strokeStyle = '#d1d5db';
-      ctx.lineWidth = 1;
-      ctx.stroke();
-      
-      // Convertir canvas a base64 y agregar al PDF (posición ajustada)
-      const imgData = canvas.toDataURL('image/jpeg', 0.95); // Mejorar calidad de 0.8 a 0.95
-      doc.addImage(imgData, 'JPEG', leftColumnWidth/2 - 20, leftY - 5, 40, 40);
+      // Convertir canvas a base64 con transparencia y agregar al PDF
+      const imgData = canvas.toDataURL('image/png'); // PNG para transparencia
+      doc.addImage(imgData, 'PNG', leftColumnWidth/2 - 20, leftY - 5, 40, 40);
       
       console.log('✅ Imagen de perfil cargada correctamente');
     } catch (error) {
