@@ -14,7 +14,11 @@ const CVUploadTabComponent = ({
   loadingCv,
   isImageLoaded,
   isCvLoaded,
-  isLoading
+  isLoading,
+  showPreview,
+  selectedFile,
+  onImageProcessed,
+  onCancelPreview
 }) => {
   return (
     <>
@@ -36,6 +40,10 @@ const CVUploadTabComponent = ({
         onCvChange={onCvChange}
         loadingImage={loadingImage}
         loadingCv={loadingCv}
+        showPreview={showPreview}
+        selectedFile={selectedFile}
+        onImageProcessed={onImageProcessed}
+        onCancelPreview={onCancelPreview}
       />
       
       {!isLoading && isImageLoaded && isCvLoaded && (
@@ -67,6 +75,10 @@ export const CVUploadTab = memo(CVUploadTabComponent, (prevProps, nextProps) => 
     prevProps.handleChange === nextProps.handleChange &&
     prevProps.onImageChange === nextProps.onImageChange &&
     prevProps.onCvChange === nextProps.onCvChange &&
-    prevProps.newCv === nextProps.newCv
+    prevProps.newCv === nextProps.newCv &&
+    prevProps.showPreview === nextProps.showPreview &&
+    prevProps.selectedFile === nextProps.selectedFile &&
+    prevProps.onImageProcessed === nextProps.onImageProcessed &&
+    prevProps.onCancelPreview === nextProps.onCancelPreview
   );
 });

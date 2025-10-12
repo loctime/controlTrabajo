@@ -75,9 +75,7 @@ export const generateElegantTemplate = async (cvData) => {
     try {
       console.log('📸 Cargando imagen de perfil:', cvData.Foto);
       
-      // Crear círculo de fondo blanco
-      doc.setFillColor('#ffffff');
-      doc.circle(leftColumnWidth/2, leftY + 20, 18, 'F');
+      // La imagen ya será circular, no necesitamos círculo de fondo
       
       // Intentar cargar imagen desde URL
       const img = await loadImageFromUrl(cvData.Foto);
@@ -85,39 +83,49 @@ export const generateElegantTemplate = async (cvData) => {
       // Crear canvas para procesar la imagen como círculo
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
-      const size = 36; // Tamaño reducido de la imagen
+      const size = 144; // Aumentar resolución para mejor calidad (4x más resolución)
       canvas.width = size;
       canvas.height = size;
       
-      // Calcular dimensiones manteniendo aspecto ratio
+      // Calcular dimensiones con recorte inteligente centrado (crop to fill)
       const imgAspect = img.width / img.height;
-      const canvasAspect = size / size; // 1:1 para círculo
+      let sourceX = 0, sourceY = 0, sourceWidth = img.width, sourceHeight = img.height;
       
-      let drawWidth, drawHeight, offsetX, offsetY;
-      
-      if (imgAspect > canvasAspect) {
-        // Imagen más ancha que alta
-        drawHeight = size;
-        drawWidth = size * imgAspect;
-        offsetX = (size - drawWidth) / 2;
-        offsetY = 0;
+      if (imgAspect > 1) {
+        // Imagen más ancha que alta - recortar los lados para centrar
+        const cropWidth = img.height; // Hacer cuadrada
+        sourceX = (img.width - cropWidth) / 2;
+        sourceWidth = cropWidth;
       } else {
-        // Imagen más alta que ancha
-        drawWidth = size;
-        drawHeight = size / imgAspect;
-        offsetX = 0;
-        offsetY = (size - drawHeight) / 2;
+        // Imagen más alta que ancha - recortar arriba y abajo para centrar
+        const cropHeight = img.width; // Hacer cuadrada
+        sourceY = (img.height - cropHeight) / 2;
+        sourceHeight = cropHeight;
       }
       
-      // Dibujar imagen circular manteniendo proporciones
+      // Crear imagen circular sin fondo blanco
+      ctx.save();
+      
+      // Crear máscara circular perfecta
       ctx.beginPath();
       ctx.arc(size/2, size/2, size/2, 0, 2 * Math.PI);
       ctx.clip();
-      ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
       
-      // Convertir canvas a base64 y agregar al PDF
-      const imgData = canvas.toDataURL('image/jpeg', 0.8);
-      doc.addImage(imgData, 'JPEG', leftColumnWidth/2 - 25, leftY, 50, 50);
+      // Dibujar imagen dentro del círculo
+      ctx.drawImage(img, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, size, size);
+      
+      ctx.restore();
+      
+      // Crear borde circular sutil
+      ctx.beginPath();
+      ctx.arc(size/2, size/2, size/2, 0, 2 * Math.PI);
+      ctx.strokeStyle = '#d1d5db';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      
+      // Convertir canvas a base64 y agregar al PDF (posición ajustada)
+      const imgData = canvas.toDataURL('image/jpeg', 0.95); // Mejorar calidad de 0.8 a 0.95
+      doc.addImage(imgData, 'JPEG', leftColumnWidth/2 - 20, leftY - 5, 40, 40);
       
       console.log('✅ Imagen de perfil cargada correctamente');
     } catch (error) {

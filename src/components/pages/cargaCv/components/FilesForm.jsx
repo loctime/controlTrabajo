@@ -1,16 +1,23 @@
-import React, { useRef, memo, useCallback } from 'react';
-import { Grid, TextField, Box, Typography, Paper, Button, IconButton } from '@mui/material';
-import { CameraAlt, Upload } from '@mui/icons-material';
+import React, { useRef, memo, useCallback, useState } from 'react';
+import { Grid, TextField, Box, Typography, Paper, Button, IconButton, Modal } from '@mui/material';
+import { CameraAlt, Upload, Visibility } from '@mui/icons-material';
 import { RingLoader as Spinner } from 'react-spinners';
+import ImagePreview from './ImagePreview';
 
 export const FilesForm = memo(({ 
   onImageChange, 
   onCvChange, 
   loadingImage, 
-  loadingCv 
+  loadingCv,
+  showPreview,
+  selectedFile,
+  onImageProcessed,
+  onCancelPreview
 }) => {
   const photoInputRef = useRef(null);
   const uploadInputRef = useRef(null);
+  const [previewFile, setPreviewFile] = useState(null);
+  const [showImagePreview, setShowImagePreview] = useState(false);
 
   const handleCameraClick = useCallback(() => {
     photoInputRef.current?.click();
@@ -19,6 +26,30 @@ export const FilesForm = memo(({
   const handleUploadClick = useCallback(() => {
     uploadInputRef.current?.click();
   }, []);
+
+  const handleImageFileSelect = useCallback((e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setPreviewFile(file);
+      setShowImagePreview(true);
+    }
+  }, []);
+
+  const handleImageProcessed = useCallback((processedFile) => {
+    setShowImagePreview(false);
+    setPreviewFile(null);
+    if (onImageProcessed) {
+      onImageProcessed(processedFile);
+    }
+  }, [onImageProcessed]);
+
+  const handleCancelPreview = useCallback(() => {
+    setShowImagePreview(false);
+    setPreviewFile(null);
+    if (onCancelPreview) {
+      onCancelPreview();
+    }
+  }, [onCancelPreview]);
   
   return (
     <>
@@ -43,14 +74,14 @@ export const FilesForm = memo(({
                 type="file"
                 accept="image/*"
                 capture="user"
-                onChange={onImageChange}
+                onChange={handleImageFileSelect}
                 style={{ display: 'none' }}
               />
               <input
                 ref={uploadInputRef}
                 type="file"
                 accept="image/*"
-                onChange={onImageChange}
+                onChange={handleImageFileSelect}
                 style={{ display: 'none' }}
               />
               
@@ -71,6 +102,15 @@ export const FilesForm = memo(({
                   sx={{ minWidth: 140 }}
                 >
                   Subir Imagen
+                </Button>
+                <Button
+                  variant="text"
+                  startIcon={<Visibility />}
+                  onClick={() => setShowImagePreview(true)}
+                  disabled={!previewFile}
+                  sx={{ minWidth: 140 }}
+                >
+                  Vista Previa
                 </Button>
               </Box>
               
@@ -102,6 +142,36 @@ export const FilesForm = memo(({
           </Paper>
         </Grid>
       </Grid>
+
+      {/* Modal de Vista Previa de Imagen */}
+      <Modal
+        open={showImagePreview}
+        onClose={handleCancelPreview}
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          p: 2
+        }}
+      >
+        <Box sx={{
+          width: '90%',
+          maxWidth: 900,
+          maxHeight: '90vh',
+          overflow: 'auto'
+        }}>
+          {previewFile && (
+            <ImagePreview
+              file={previewFile}
+              onImageProcessed={handleImageProcessed}
+              onCancel={handleCancelPreview}
+              maxWidth={800}
+              maxHeight={800}
+              targetSize={400}
+            />
+          )}
+        </Box>
+      </Modal>
     </>
   );
 });

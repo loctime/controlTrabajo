@@ -80,7 +80,13 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
     isCvLoaded, 
     loadingImage, 
     loadingCv, 
-    handleFileChange 
+    handleFileChange,
+    isProcessing,
+    showImagePreview,
+    selectedImageFile,
+    setShowImagePreview,
+    setSelectedImageFile,
+    processAndConfirmImage
   } = useFileUpload();
   const { autoFillData } = useAutoFillUserData(user, currentCv);
   const { validateForm, getValidationSummary } = useFormValidation();
@@ -151,6 +157,24 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
       setNewCv(prevCv => ({ ...prevCv, Foto: url }));
     });
   }, [handleFileChange]);
+
+  const handleImageProcessed = useCallback(async (processedFile) => {
+    try {
+      const url = await handleFileChange({ target: { files: [processedFile] } }, "Foto", (url) => {
+        setNewCv(prev => ({ ...prev, Foto: url }));
+      });
+      if (url) {
+        setNewCv(prev => ({ ...prev, Foto: url }));
+      }
+    } catch (error) {
+      console.error('Error al procesar imagen:', error);
+    }
+  }, [handleFileChange]);
+
+  const handleCancelPreview = useCallback(() => {
+    setShowImagePreview(false);
+    setSelectedImageFile(null);
+  }, [setShowImagePreview, setSelectedImageFile]);
 
   const handleCvChange = useCallback((e) => {
     handleFileChange(e, "cv", (url) => {
@@ -279,6 +303,10 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
               isImageLoaded={isImageLoaded}
               isCvLoaded={isCvLoaded}
               isLoading={isLoading}
+              showPreview={showImagePreview}
+              selectedFile={selectedImageFile}
+              onImageProcessed={handleImageProcessed}
+              onCancelPreview={handleCancelPreview}
             />
           </TabPanel>
         </Box>

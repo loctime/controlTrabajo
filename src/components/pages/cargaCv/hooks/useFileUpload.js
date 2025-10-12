@@ -1,52 +1,40 @@
 import { useState } from 'react';
 import Swal from 'sweetalert2';
 import { uploadFile, ensureAppFolder, createPublicShareLink } from '../../../../lib/controlFileStorage';
+import { useImageProcessor } from './useImageProcessor';
 
 export const useFileUpload = () => {
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const [isCvLoaded, setIsCvLoaded] = useState(false);
   const [loadingImage, setLoadingImage] = useState(false);
   const [loadingCv, setLoadingCv] = useState(false);
+  
+  // Integrar el procesador de imágenes
+  const {
+    isProcessing,
+    showPreview: showImagePreview,
+    selectedFile: selectedImageFile,
+    validateImageFile,
+    processAndConfirmImage,
+    setShowPreview: setShowImagePreview,
+    setSelectedFile: setSelectedImageFile
+  } = useImageProcessor();
 
   const validateFile = (file, type) => {
     // Validaciones para imágenes
     if (type === "Foto") {
-      // Tamaño máximo: 5MB
-      const maxSize = 5 * 1024 * 1024; // 5MB en bytes
-      if (file.size > maxSize) {
+      // Usar el validador del procesador de imágenes
+      const validation = validateImageFile(file);
+      if (!validation.isValid) {
         Swal.fire({
-          title: "Imagen muy grande",
-          text: "La imagen debe ser menor a 5MB. Por favor, redimensiona o comprime la imagen.",
+          title: "Imagen no válida",
+          text: validation.error,
           icon: "warning",
           confirmButtonText: "Entendido"
         });
         return false;
       }
-
-      // Dimensiones recomendadas (opcional, pero útil)
-      return new Promise((resolve) => {
-        const img = new Image();
-        img.onload = () => {
-          const maxWidth = 1920;
-          const maxHeight = 1920;
-          
-          if (img.width > maxWidth || img.height > maxHeight) {
-            Swal.fire({
-              title: "Imagen muy grande",
-              text: `Dimensiones recomendadas: máximo ${maxWidth}x${maxHeight}px. Tu imagen es ${img.width}x${img.height}px.`,
-              icon: "warning",
-              showCancelButton: true,
-              confirmButtonText: "Subir igual",
-              cancelButtonText: "Cancelar"
-            }).then((result) => {
-              resolve(result.isConfirmed);
-            });
-          } else {
-            resolve(true);
-          }
-        };
-        img.src = URL.createObjectURL(file);
-      });
+      return true;
     }
 
     // Validaciones para CV
@@ -94,6 +82,24 @@ export const useFileUpload = () => {
     if (type === "cv") setLoadingCv(true);
 
     try {
+      let fileToUpload = file;
+      
+      // Procesar imagen si es una foto
+      if (type === "Foto") {
+        console.log('🖼️ Procesando imagen de perfil...');
+        try {
+          fileToUpload = await processAndConfirmImage(file, {
+            maxWidth: 800,
+            maxHeight: 800,
+            quality: 0.95
+          });
+          console.log('✅ Imagen procesada y optimizada');
+        } catch (processError) {
+          console.warn('⚠️ Error al procesar imagen, subiendo original:', processError);
+          // Si falla el procesamiento, usar archivo original
+        }
+      }
+
       // 1. Crear/obtener carpeta principal "BolsaTrabajo"
       console.log('📁 Obteniendo carpeta BolsaTrabajo...');
       const folderId = await ensureAppFolder();
@@ -101,7 +107,7 @@ export const useFileUpload = () => {
       
       // 2. Subir archivo directamente a la carpeta BolsaTrabajo
       console.log(`📤 Subiendo ${type} a BolsaTrabajo...`);
-      let fileId = await uploadFile(file, folderId, (progress) => {
+      let fileId = await uploadFile(fileToUpload, folderId, (progress) => {
         console.log(`Progreso de ${type}: ${progress}%`);
       });
       
@@ -157,7 +163,14 @@ export const useFileUpload = () => {
     loadingImage,
     loadingCv,
     handleFileUpload,
-    handleFileChange
+    handleFileChange,
+    // Exponer funcionalidades del procesador de imágenes
+    isProcessing,
+    showPreview: showImagePreview,
+    selectedFile: selectedImageFile,
+    setShowPreview: setShowImagePreview,
+    setSelectedFile: setSelectedImageFile,
+    processAndConfirmImage
   };
 };
 
