@@ -37,6 +37,39 @@ export const generateModernCVWord = async (cvData) => {
       return contact;
     };
 
+    // Helper para construir información adicional
+    const buildAdditionalInfo = (data) => {
+      const info = [];
+      if (data.Edad) info.push(`Edad: ${data.Edad} años`);
+      if (data.categoriaGeneral) info.push(`Categoría: ${data.categoriaGeneral}`);
+      if (data.ciudad && data.localidad) {
+        info.push(`Ubicación: ${data.localidad}, ${data.ciudad}`);
+      } else if (data.ciudad) {
+        info.push(`Ciudad: ${data.ciudad}`);
+      }
+      return info;
+    };
+
+    // Helper para calcular años de experiencia
+    const calculateExperienceYears = (experiences) => {
+      if (!experiences || experiences.length === 0) return 0;
+      
+      const currentYear = new Date().getFullYear();
+      let totalYears = 0;
+      
+      experiences.forEach(exp => {
+        const startYear = exp.fechaInicio ? parseInt(exp.fechaInicio.split('/')[1] || exp.fechaInicio.split('-')[0]) : currentYear;
+        const endYear = exp.fechaFin && exp.fechaFin !== 'Actualidad' ? 
+          parseInt(exp.fechaFin.split('/')[1] || exp.fechaFin.split('-')[0]) : currentYear;
+        
+        if (startYear && endYear) {
+          totalYears += Math.max(0, endYear - startYear);
+        }
+      });
+      
+      return Math.min(totalYears, 50); // Máximo 50 años para evitar valores irreales
+    };
+
     // Helper para construir título profesional
     const buildProfessionalTitle = (data) => {
       const parts = [];
@@ -71,11 +104,11 @@ export const generateModernCVWord = async (cvData) => {
             text: title,
             bold: true,
             color: isSidebar ? whiteColor : primaryColor,
-            size: 28,
+            size: isSidebar ? 24 : 28,
             font: "Calibri",
           }),
         ],
-        spacing: { before: 100, after: 50 },
+        spacing: { before: isSidebar ? 150 : 100, after: isSidebar ? 80 : 50 },
         alignment: isSidebar ? AlignmentType.CENTER : AlignmentType.LEFT,
       });
     };
@@ -104,16 +137,38 @@ export const generateModernCVWord = async (cvData) => {
                       }),
                     ],
                     alignment: AlignmentType.CENTER,
-                    spacing: { before: 200, after: 300 },
+                    spacing: { before: 200, after: 200 },
                   }),
+
+                  // INFORMACIÓN PERSONAL
+                  createSectionTitle('INFORMACIÓN', true),
+                  ...buildAdditionalInfo(cvData).map(info => 
+                    createStyledParagraph(info, {
+                      color: whiteColor,
+                      size: 18,
+                      spacing: { before: 0, after: 80 },
+                    })
+                  ),
+
+                  // AÑOS DE EXPERIENCIA
+                  ...(cvData.experiencias && cvData.experiencias.length > 0 ? [
+                    createStyledParagraph(
+                      `Experiencia: ${calculateExperienceYears(cvData.experiencias)} años`,
+                      {
+                        color: whiteColor,
+                        size: 18,
+                        spacing: { before: 0, after: 200 },
+                      }
+                    ),
+                  ] : []),
 
                   // CONTACTO
                   createSectionTitle('CONTACTO', true),
                   ...buildContactInfo(cvData).map(info => 
                     createStyledParagraph(info, {
                       color: whiteColor,
-                      size: 20,
-                      spacing: { before: 0, after: 100 },
+                      size: 18,
+                      spacing: { before: 0, after: 80 },
                     })
                   ),
 
@@ -123,7 +178,7 @@ export const generateModernCVWord = async (cvData) => {
                     cvData.habilidades ? cvData.habilidades.map(h => h.nombre || h).join(' • ') : '',
                     {
                       color: whiteColor,
-                      size: 20,
+                      size: 18,
                       spacing: { before: 0, after: 200 },
                     }
                   ),
@@ -140,10 +195,58 @@ export const generateModernCVWord = async (cvData) => {
                       }).join(' • '),
                       {
                         color: whiteColor,
-                        size: 20,
+                        size: 18,
                         spacing: { before: 0, after: 200 },
                       }
                     ),
+                  ] : []),
+
+                  // CERTIFICACIONES (movidas desde contenido principal)
+                  ...(cvData.certificaciones && cvData.certificaciones.length > 0 ? [
+                    createSectionTitle('CERTIFICACIONES', true),
+                    ...cvData.certificaciones.slice(0, 4).flatMap(cert => [
+                      createStyledParagraph(`🏆 ${cert.nombre || ''}`, {
+                        color: whiteColor,
+                        size: 18,
+                        bold: true,
+                        spacing: { before: 0, after: 50 },
+                      }),
+                      createStyledParagraph(`${cert.institucion || ''}`, {
+                        color: whiteColor,
+                        size: 16,
+                        spacing: { before: 0, after: 30 },
+                      }),
+                      createStyledParagraph(`${cert.fecha || ''}`, {
+                        color: whiteColor,
+                        size: 16,
+                        spacing: { before: 0, after: 100 },
+                      }),
+                    ]),
+                  ] : []),
+
+                  // REFERENCIAS (movidas desde contenido principal)
+                  ...(cvData.referencias && cvData.referencias.length > 0 ? [
+                    createSectionTitle('REFERENCIAS', true),
+                    ...cvData.referencias.slice(0, 2).filter(ref => ref && (ref.nombre || ref.cargo || ref.empresa)).flatMap(ref => [
+                      ...(ref.nombre ? [
+                        createStyledParagraph(`👤 ${ref.nombre}`, {
+                          color: whiteColor,
+                          size: 18,
+                          bold: true,
+                          spacing: { before: 0, after: 30 },
+                        }),
+                      ] : []),
+                      createStyledParagraph(
+                        ref.cargo && ref.empresa ? `${ref.cargo} en ${ref.empresa}` :
+                        ref.cargo ? ref.cargo :
+                        ref.empresa ? ref.empresa : '',
+                        {
+                          color: whiteColor,
+                          size: 16,
+                          spacing: { before: 0, after: 100 },
+                        }
+                      ),
+                    ]),
                   ] : []),
                 ],
                 shading: {
@@ -167,13 +270,6 @@ export const generateModernCVWord = async (cvData) => {
                     size: 48,
                     color: primaryColor,
                     spacing: { before: 50, after: 25 },
-                  }),
-
-                  // EDAD
-                  createStyledParagraph(`${cvData.Edad} años`, {
-                    size: 24,
-                    color: secondaryColor,
-                    spacing: { before: 0, after: 50 },
                   }),
 
                   // TÍTULO PROFESIONAL
@@ -252,31 +348,6 @@ export const generateModernCVWord = async (cvData) => {
                     ]),
                   ] : []),
 
-                  // CERTIFICACIONES
-                  ...(cvData.certificaciones && cvData.certificaciones.length > 0 ? [
-                    createSectionTitle('CERTIFICACIONES'),
-                    ...cvData.certificaciones.flatMap(cert => [
-                      createStyledParagraph(`🏆 ${cert.nombre || ''}`, {
-                        bold: true,
-                        size: 24,
-                        color: primaryColor,
-                        spacing: { before: 100, after: 50 },
-                      }),
-                      createStyledParagraph(`${cert.institucion || ''} | ${cert.fecha || ''}`, {
-                        size: 22,
-                        color: secondaryColor,
-                        spacing: { before: 0, after: 100 },
-                      }),
-                      ...(cert.url ? [
-                        createStyledParagraph(`🔗 Ver certificado`, {
-                          color: secondaryColor,
-                          italic: true,
-                          size: 20,
-                          spacing: { before: 0, after: 150 },
-                        }),
-                      ] : []),
-                    ]),
-                  ] : []),
 
                   // PROYECTOS
                   ...(cvData.proyectos && cvData.proyectos.length > 0 ? [
@@ -302,40 +373,6 @@ export const generateModernCVWord = async (cvData) => {
                     ]),
                   ] : []),
 
-                  // REFERENCIAS
-                  ...(cvData.referencias && cvData.referencias.length > 0 ? [
-                    createSectionTitle('REFERENCIAS'),
-                    ...cvData.referencias.slice(0, 3).filter(ref => ref && (ref.nombre || ref.cargo || ref.empresa)).flatMap(ref => [
-                      ...(ref.nombre ? [
-                        createStyledParagraph(`👤 ${ref.nombre}`, {
-                          bold: true,
-                          size: 24,
-                          color: primaryColor,
-                          spacing: { before: 100, after: 50 },
-                        }),
-                      ] : []),
-                      createStyledParagraph(
-                        ref.cargo && ref.empresa ? `${ref.cargo} en ${ref.empresa}` :
-                        ref.cargo ? ref.cargo :
-                        ref.empresa ? ref.empresa : '',
-                        {
-                          size: 22,
-                          color: secondaryColor,
-                          spacing: { before: 0, after: 100 },
-                        }
-                      ),
-                      ...(ref.telefono || ref.email ? [
-                        createStyledParagraph(
-                          `${ref.telefono ? `📞 ${ref.telefono}` : ''}${ref.telefono && ref.email ? ' • ' : ''}${ref.email ? `📧 ${ref.email}` : ''}`,
-                          {
-                            size: 20,
-                            color: textColor,
-                            spacing: { before: 0, after: 150 },
-                          }
-                        ),
-                      ] : []),
-                    ]),
-                  ] : []),
                 ],
                 margins: {
                   top: 50,
