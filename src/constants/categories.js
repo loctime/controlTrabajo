@@ -20,6 +20,16 @@ export const CATEGORIAS_GENERALES = [
   "Seguridad",
   "Servicios Domésticos y Cuidado",
   "Ventas y Comercio",
+  "Energía y Petróleo",
+  "Medio Ambiente y Sustentabilidad",
+  "Deportes y Fitness",
+  "Turismo y Viajes",
+  "Bienes Raíces e Inmobiliaria",
+  "Periodismo y Medios",
+  "Investigación y Desarrollo",
+  "Consultoría",
+  "Servicios Financieros",
+  "Tiempo Libre y Recreación",
   "Otros"
 ];
 
@@ -167,6 +177,86 @@ export const CATEGORIAS_ESPECIFICAS = {
     "Representante de Ventas",
     "Asesor Comercial",
     "Vendedor Minorista"
+  ],
+  "Energía y Petróleo": [
+    "Ingeniero en Petróleo",
+    "Técnico en Energía Renovable",
+    "Operador de Planta",
+    "Especialista en Energía Solar",
+    "Técnico en Energía Eólica",
+    "Especialista en Petróleo y Gas"
+  ],
+  "Medio Ambiente y Sustentabilidad": [
+    "Ingeniero Ambiental",
+    "Especialista en Reciclaje",
+    "Consultor Ambiental",
+    "Técnico en Calidad Ambiental",
+    "Especialista en Gestión de Residuos",
+    "Auditor Ambiental"
+  ],
+  "Deportes y Fitness": [
+    "Entrenador Personal",
+    "Instructor de Fitness",
+    "Preparador Físico",
+    "Deportista Profesional",
+    "Fisioterapeuta Deportivo",
+    "Coordinador Deportivo"
+  ],
+  "Turismo y Viajes": [
+    "Guía de Turismo",
+    "Agente de Viajes",
+    "Coordinador de Eventos",
+    "Recepcionista de Hotel",
+    "Especialista en Turismo",
+    "Consultor de Viajes"
+  ],
+  "Bienes Raíces e Inmobiliaria": [
+    "Corredor de Bienes Raíces",
+    "Agente Inmobiliario",
+    "Asesor Inmobiliario",
+    "Tasador de Propiedades",
+    "Administrador de Propiedades",
+    "Desarrollador Inmobiliario"
+  ],
+  "Periodismo y Medios": [
+    "Periodista",
+    "Redactor",
+    "Editor",
+    "Locutor",
+    "Productor Audiovisual",
+    "Reportero",
+    "Conductor de Radio/TV"
+  ],
+  "Investigación y Desarrollo": [
+    "Investigador Científico",
+    "Especialista en I+D",
+    "Analista de Investigación",
+    "Coordinador de Proyectos de Investigación",
+    "Técnico de Laboratorio"
+  ],
+  "Consultoría": [
+    "Consultor de Negocios",
+    "Consultor de Estrategia",
+    "Consultor de Procesos",
+    "Consultor de Gestión",
+    "Consultor Freelance",
+    "Asesor Externo"
+  ],
+  "Servicios Financieros": [
+    "Asesor Financiero",
+    "Corredor de Bolsa",
+    "Especialista en Inversiones",
+    "Analista de Riesgos",
+    "Asesor Bancario",
+    "Gestor de Fondos"
+  ],
+  "Tiempo Libre y Recreación": [
+    "Animador",
+    "Coordinador de Actividades",
+    "Monitor de Campamentos",
+    "Organizador de Eventos",
+    "Guía de Aventura",
+    "Instructor de Actividades Recreativas"
   ],
   "Otros": [
     "Estilista",

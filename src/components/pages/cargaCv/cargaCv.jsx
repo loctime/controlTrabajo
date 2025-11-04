@@ -192,7 +192,7 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
     if (!user) return;
 
     // Validar formulario completo
-    const mode = tabValue === 0 ? 'generator' : 'upload';
+    const mode = tabValue === 0 ? 'upload' : 'generator';
     const validation = validateForm(newCv, mode);
     
     if (!validation.isValid) {
@@ -256,7 +256,7 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
         <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
           <Tabs value={tabValue} onChange={handleTabChange} centered>
             <Tab 
-              label="🎨 Generar CV Profesional" 
+              label="📄 Subir mi propio CV" 
               sx={{ 
                 fontSize: '16px', 
                 fontWeight: 'bold',
@@ -264,7 +264,7 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
               }} 
             />
             <Tab 
-              label="📄 Subir mi propio CV" 
+              label="🎨 Generar CV Profesional" 
               sx={{ 
                 fontSize: '16px', 
                 fontWeight: 'bold',
@@ -275,24 +275,8 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
         </Box>
 
         <Box component="form" onSubmit={handleSubmit}>
-          {/* Pestaña 1: Generador de CV */}
+          {/* Pestaña 1: Subida tradicional */}
           <TabPanel value={tabValue} index={0}>
-            <CVGeneratorTab
-              newCv={newCv}
-              handleChange={handleChange}
-              selectedTemplate={selectedTemplate}
-              onTemplateChange={handleTemplateChange}
-              onImageChange={handleImageChange}
-              loadingImage={loadingImage}
-              currentCv={currentCv}
-              isLoading={isLoading}
-              onPreview={() => setShowPreview(true)}
-              onSubmit={handleSubmit}
-            />
-          </TabPanel>
-
-          {/* Pestaña 2: Subida tradicional */}
-          <TabPanel value={tabValue} index={1}>
             <CVUploadTab
               newCv={newCv}
               handleChange={handleChange}
@@ -307,6 +291,22 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
               selectedFile={selectedImageFile}
               onImageProcessed={handleImageProcessed}
               onCancelPreview={handleCancelPreview}
+            />
+          </TabPanel>
+
+          {/* Pestaña 2: Generador de CV */}
+          <TabPanel value={tabValue} index={1}>
+            <CVGeneratorTab
+              newCv={newCv}
+              handleChange={handleChange}
+              selectedTemplate={selectedTemplate}
+              onTemplateChange={handleTemplateChange}
+              onImageChange={handleImageChange}
+              loadingImage={loadingImage}
+              currentCv={currentCv}
+              isLoading={isLoading}
+              onPreview={() => setShowPreview(true)}
+              onSubmit={handleSubmit}
             />
           </TabPanel>
         </Box>

@@ -164,21 +164,22 @@ export const useFormValidation = () => {
       // Validar certificaciones si existen
       if (cvData.certificaciones && cvData.certificaciones.length > 0) {
         cvData.certificaciones.forEach((cert, index) => {
-          // Validar que cada certificación tenga al menos una forma de verificación
-          if (!cert.url && !cert.archivoUrl) {
-            newErrors[`certificaciones_${index}_certificado`] = ['Debes proporcionar una URL o subir un archivo del certificado'];
-          }
-          
           // Validar campos obligatorios de certificación
           const certFields = {
             nombre: { required: true, minLength: 2, maxLength: 100 },
             institucion: { required: true, minLength: 2, maxLength: 100 },
-            fechaObtencion: { required: true, date: true }
+            fecha: { required: true, date: true }
           };
 
           Object.entries(certFields).forEach(([field, rules]) => {
+            // Crear nombres de campo más descriptivos para los mensajes
+            let fieldName = field;
+            if (field === 'nombre') fieldName = 'Nombre de la certificación';
+            else if (field === 'institucion') fieldName = 'Institución';
+            else if (field === 'fecha') fieldName = 'Fecha de obtención';
+            
             const result = validateField(
-              `${field} (Certificación ${index + 1})`,
+              `${fieldName} (Certificación ${index + 1})`,
               cert[field],
               rules
             );
@@ -186,6 +187,11 @@ export const useFormValidation = () => {
               newErrors[`certificaciones_${index}_${field}`] = result.errors;
             }
           });
+          
+          // Validar que cada certificación tenga al menos una forma de verificación (OPCIONAL - solo warning)
+          if (!cert.url && !cert.archivoUrl) {
+            newWarnings[`certificaciones_${index}_certificado`] = ['Se recomienda proporcionar una URL o subir un archivo del certificado para verificación'];
+          }
         });
       }
     }
