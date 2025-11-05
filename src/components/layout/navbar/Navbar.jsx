@@ -15,7 +15,7 @@ import FileUploadIcon from "@mui/icons-material/FileUpload";
 import { AuthContext } from "../../../context/AuthContext";
 import { logout } from "../../../firebaseAuthControlFile";
 import { db } from "../../../firebaseConfig";
-import { deleteFile } from "../../../lib/controlFileStorage";
+import { deleteFile, isFirebaseStorageUrl } from "../../../lib/controlFileStorage";
 import { collection, query, where, getDocs, deleteDoc, doc } from "firebase/firestore";
 import { showAlert } from "../../../utils/swalConfig";
 import { menuItems } from "../../../router/navigation";
@@ -85,12 +85,15 @@ function Navbar() {
           
           // 1. Eliminar la foto de perfil de ControlFile Storage si existe
           if (data.Foto) {
+            // Usar fileId de metadatos si está disponible, sino usar el campo directo
+            const fotoFileId = data.Foto_metadata?.fileId || data.Foto;
+            
             // Si es URL antigua de Firebase Storage
-            if (data.Foto.startsWith('https://firebasestorage.googleapis.com')) {
-              console.warn("Archivo antiguo de Firebase Storage, no se eliminará automáticamente:", data.Foto);
+            if (isFirebaseStorageUrl(fotoFileId)) {
+              console.warn("Archivo antiguo de Firebase Storage, no se eliminará automáticamente:", fotoFileId);
             } else {
               // Es un fileId de ControlFile
-              deletePromises.push(deleteFile(data.Foto).catch(err => {
+              deletePromises.push(deleteFile(fotoFileId).catch(err => {
                 console.error("Error al eliminar la foto de perfil:", err);
                 // Continuar con el proceso aunque falle la eliminación de la foto
               }));
@@ -99,12 +102,15 @@ function Navbar() {
           
           // 2. Eliminar el archivo CV de ControlFile Storage si existe
           if (data.cv) {
+            // Usar fileId de metadatos si está disponible, sino usar el campo directo
+            const cvFileId = data.cv_metadata?.fileId || data.cv;
+            
             // Si es URL antigua de Firebase Storage
-            if (data.cv.startsWith('https://firebasestorage.googleapis.com')) {
-              console.warn("Archivo antiguo de Firebase Storage, no se eliminará automáticamente:", data.cv);
+            if (isFirebaseStorageUrl(cvFileId)) {
+              console.warn("Archivo antiguo de Firebase Storage, no se eliminará automáticamente:", cvFileId);
             } else {
               // Es un fileId de ControlFile
-              deletePromises.push(deleteFile(data.cv).catch(err => {
+              deletePromises.push(deleteFile(cvFileId).catch(err => {
                 console.error("Error al eliminar el CV:", err);
                 // Continuar con el proceso aunque falle la eliminación del CV
               }));

@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { showAlert as showAlertUtil } from '../../../../utils/swalConfig';
 import { db } from '../../../../firebaseConfig';
-import { collection, query, where, getDocs, updateDoc, doc, deleteDoc } from 'firebase/firestore';
-import { getDownloadUrl } from '../../../../lib/controlFileStorage';
+import { collection, query, where, getDocs, updateDoc, doc, deleteDoc, getDoc } from 'firebase/firestore';
+import { getDownloadUrl, deleteFile } from '../../../../lib/controlFileStorage';
 import { preloadCriticalImages } from '../../../../utils/imagePreloader';
 import { precacheUrls, clearCache, getCacheStats } from '../../../../utils/imageCache';
 import { shareUrlToImageUrl, isControlFileShareUrl } from '../../../../utils/shareUrl';
@@ -62,9 +62,41 @@ export const useCVManagement = () => {
       'No podrás revertir esto'
     ).then(async (result) => {
       if (result.isConfirmed) {
-        await deleteDoc(doc(db, 'cv', cv.id));
-        fetchData();
-        showAlert('Eliminado', 'El CV ha sido eliminado.', 'success');
+        try {
+          // Obtener datos del CV antes de eliminar
+          const cvDoc = await getDoc(doc(db, 'cv', cv.id));
+          const cvData = cvDoc.data();
+          
+          // Eliminar archivos de ControlFile si existen
+          // Usar fileId de metadatos si está disponible, sino usar el campo directo
+          if (cvData.Foto) {
+            try {
+              const fotoFileId = cvData.Foto_metadata?.fileId || cvData.Foto;
+              await deleteFile(fotoFileId);
+              console.log('✅ Foto eliminada de ControlFile');
+            } catch (error) {
+              console.warn('⚠️ No se pudo eliminar foto:', error);
+            }
+          }
+          
+          if (cvData.cv) {
+            try {
+              const cvFileId = cvData.cv_metadata?.fileId || cvData.cv;
+              await deleteFile(cvFileId);
+              console.log('✅ CV eliminado de ControlFile');
+            } catch (error) {
+              console.warn('⚠️ No se pudo eliminar CV:', error);
+            }
+          }
+          
+          // Eliminar documento de Firestore
+          await deleteDoc(doc(db, 'cv', cv.id));
+          fetchData();
+          showAlert('Eliminado', 'El CV ha sido eliminado.', 'success');
+        } catch (error) {
+          console.error('Error al eliminar CV:', error);
+          showAlert('Error', 'No se pudo eliminar el CV completamente.', 'error');
+        }
       }
     });
   };

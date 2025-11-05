@@ -107,22 +107,22 @@ export const useFileUpload = () => {
       
       // 2. Subir archivo directamente a la carpeta BolsaTrabajo
       console.log(`📤 Subiendo ${type} a BolsaTrabajo...`);
-      let fileId = await uploadFile(fileToUpload, folderId, (progress) => {
+      const uploadResult = await uploadFile(fileToUpload, folderId, (progress) => {
         console.log(`Progreso de ${type}: ${progress}%`);
       });
-      
-      console.log(`✅ ${type} subido con ID:`, fileId);
-      
+
+      const { fileId, name, size } = uploadResult;
+      console.log(`✅ ${type} subido:`, { fileId, name, size });
+
       // 3. Crear enlace público para que el admin pueda verlo
-      console.log(`🔗 Creando enlace público para ${type} con fileId:`, fileId);
+      console.log(`🔗 Creando enlace público para ${type}...`);
       let shareUrl;
       
       try {
         shareUrl = await createPublicShareLink(fileId, 8760); // 1 año
         console.log(`✅ Enlace público creado:`, shareUrl);
       } catch (shareError) {
-        console.error(`❌ Error creando share link para ${type}:`, shareError);
-        console.log(`⚠️ Guardando fileId directamente como fallback`);
+        console.error(`❌ Error creando share link:`, shareError);
         shareUrl = fileId;
       }
       
@@ -137,7 +137,11 @@ export const useFileUpload = () => {
         setLoadingCv(false);
       }
 
-      return shareUrl;
+      // Retornar objeto completo con metadatos
+      return {
+        url: shareUrl,
+        metadata: { fileId, name, size }
+      };
     } catch (error) {
       console.error(`Error al cargar ${type}:`, error);
       Swal.fire("Error", `Error al cargar ${type}. Inténtalo nuevamente.`, "error");

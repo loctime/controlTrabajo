@@ -152,11 +152,24 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
     setNewCv(prev => ({ ...prev, plantillaSeleccionada: template }));
   }, []);
 
-  const handleImageChange = useCallback((e) => {
-    handleFileChange(e, "Foto", (url) => {
-      setNewCv(prevCv => ({ ...prevCv, Foto: url }));
-    });
-  }, [handleFileChange]);
+    const handleImageChange = useCallback((e) => {
+      handleFileChange(e, "Foto", (result) => {
+        const url = result && result.url ? result.url : result; // Fallback para compatibilidad
+        const metadata = result && result.metadata ? result.metadata : null;
+        setNewCv(prevCv => ({
+          ...prevCv,
+          Foto: url,
+          ...(metadata && {
+            Foto_metadata: {
+              fileId: metadata.fileId,
+              name: metadata.name,
+              size: metadata.size,
+              syncedAt: new Date().toISOString()
+            }
+          })
+        }));
+      });
+    }, [handleFileChange]);
 
   const handleImageProcessed = useCallback(async (processedFile) => {
     try {
@@ -176,11 +189,24 @@ const CargaCv = ({ handleClose, setIsChange, updateDashboard }) => {
     setSelectedImageFile(null);
   }, [setShowImagePreview, setSelectedImageFile]);
 
-  const handleCvChange = useCallback((e) => {
-    handleFileChange(e, "cv", (url) => {
-      setNewCv(prevCv => ({ ...prevCv, cv: url }));
-    });
-  }, [handleFileChange]);
+    const handleCvChange = useCallback((e) => {
+      handleFileChange(e, "cv", (result) => {
+        const url = result && result.url ? result.url : result; // Fallback para compatibilidad
+        const metadata = result && result.metadata ? result.metadata : null;
+        setNewCv(prevCv => ({
+          ...prevCv,
+          cv: url,
+          ...(metadata && {
+            cv_metadata: {
+              fileId: metadata.fileId,
+              name: metadata.name,
+              size: metadata.size,
+              syncedAt: new Date().toISOString()
+            }
+          })
+        }));
+      });
+    }, [handleFileChange]);
 
   // Handlers para botones de utilidad
   const handleFillTestData = useCallback(() => fillWithTestData(setNewCv), [fillWithTestData]);

@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { collection, getDocs, deleteDoc, doc, updateDoc } from "firebase/firestore";
 import { db } from "../../../firebaseConfig";
-import { getDownloadUrl } from "../../../lib/controlFileStorage";
+import { getDownloadUrl, deleteFile, isFirebaseStorageUrl } from "../../../lib/controlFileStorage";
+import { getDoc } from "firebase/firestore";
 import ControlFileAvatar from "../../common/ControlFileAvatar";
 
 const BACKEND = import.meta.env.VITE_CONTROLFILE_BACKEND;
@@ -84,8 +85,43 @@ const NoAprobado = () => {
   };
 
   const deleteCV = async (id) => {
-    await deleteDoc(doc(db, "cv", id));
-    setIsChange(!isChange);
+    try {
+      // Obtener datos del CV antes de eliminar
+      const cvDoc = await getDoc(doc(db, "cv", id));
+      const cvData = cvDoc.data();
+      
+      // Eliminar archivos de ControlFile si existen
+      if (cvData.Foto) {
+        try {
+          const fotoFileId = cvData.Foto_metadata?.fileId || cvData.Foto;
+          if (!isFirebaseStorageUrl(fotoFileId)) {
+            await deleteFile(fotoFileId);
+            console.log('✅ Foto eliminada de ControlFile');
+          }
+        } catch (error) {
+          console.warn('⚠️ No se pudo eliminar foto:', error);
+        }
+      }
+      
+      if (cvData.cv) {
+        try {
+          const cvFileId = cvData.cv_metadata?.fileId || cvData.cv;
+          if (!isFirebaseStorageUrl(cvFileId)) {
+            await deleteFile(cvFileId);
+            console.log('✅ CV eliminado de ControlFile');
+          }
+        } catch (error) {
+          console.warn('⚠️ No se pudo eliminar CV:', error);
+        }
+      }
+      
+      // Eliminar documento de Firestore
+      await deleteDoc(doc(db, "cv", id));
+      setIsChange(!isChange);
+    } catch (error) {
+      console.error('Error al eliminar CV:', error);
+      Swal.fire('Error', 'No se pudo eliminar el CV completamente.', 'error');
+    }
   };
 
   const handleClose = () => {

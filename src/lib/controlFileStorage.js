@@ -65,7 +65,45 @@ export async function uploadFile(file, parentId = null, onProgress) {
     body: JSON.stringify({ uploadSessionId: presign.uploadSessionId }),
   }).then(r => r.json());
   
-  return confirm.fileId;
+  // Obtener información básica del archivo
+  const fileInfo = await getFileInfoFromControlFile(confirm.fileId);
+  
+  // Retornar objeto con metadatos básicos
+  return {
+    fileId: confirm.fileId,
+    name: fileInfo.name,
+    size: fileInfo.size,
+  };
+}
+
+/**
+ * Obtiene información completa de un archivo desde ControlFile
+ * @param {string} fileId - ID del archivo
+ * @returns {Promise<Object>} Información completa del archivo
+ */
+export async function getFileInfoFromControlFile(fileId) {
+  const token = await getToken();
+  
+  const res = await fetch(`${BACKEND}/api/files/${fileId}`, {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+  
+  if (!res.ok) {
+    throw new Error(`Error al obtener información del archivo: ${res.status}`);
+  }
+  
+  const fileInfo = await res.json();
+  
+  return {
+    fileId: fileInfo.id || fileId,
+    name: fileInfo.name,
+    size: fileInfo.size,
+    mime: fileInfo.mime,
+    bucketKey: fileInfo.bucketKey,
+  };
 }
 
 /**
@@ -130,21 +168,57 @@ function isUrl(str) {
 }
 
 /**
+ * Detecta si una URL es de Firebase Storage
+ */
+export function isFirebaseStorageUrl(url) {
+  if (!url) return false;
+  return url.includes('firebasestorage.googleapis.com') || 
+         url.includes('firebaseio.com');
+}
+
+/**
+ * Detecta si es un fileId de ControlFile
+ */
+export function isControlFileId(id) {
+  if (!id) return false;
+  // Los fileId de ControlFile no tienen / ni .
+  return !id.includes('/') && !id.includes('.') && !id.startsWith('http');
+}
+
+/**
  * Elimina un archivo de ControlFile Storage
- * @param {string} fileId - ID del archivo a eliminar
+ * @param {string} fileIdOrUrl - ID del archivo a eliminar o URL
  * @returns {Promise<void>}
  */
-export async function deleteFile(fileId) {
+export async function deleteFile(fileIdOrUrl) {
+  // Si es URL de Firebase Storage antigua, no intentar eliminar
+  if (isFirebaseStorageUrl(fileIdOrUrl)) {
+    console.log('⚠️ URL de Firebase Storage antigua, no se eliminara de ControlFile');
+    return;
+  }
+  
+  // Si no es un fileId valido, salir
+  if (!isControlFileId(fileIdOrUrl)) {
+    console.log('⚠️ No es un fileId valido de ControlFile');
+    return;
+  }
+  
   const token = await getToken();
   
-  await fetch(`${BACKEND}/api/files/delete`, {
+  const res = await fetch(`${BACKEND}/api/files/delete`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ fileId }),
+    body: JSON.stringify({ fileId: fileIdOrUrl }),
   });
+  
+  if (!res.ok) {
+    throw new Error(`Error al eliminar archivo: ${res.status}`);
+  }
+  
+  console.log('✅ Archivo eliminado de ControlFile:', fileIdOrUrl);
 }
 
 /**

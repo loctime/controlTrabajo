@@ -43,13 +43,19 @@ export const cvSubmissionService = {
         
         // Subir PDF usando el hook de subida de archivos
         console.log("📤 Subiendo PDF generado...");
+        let cvMetadata = null;
         await new Promise((resolve, reject) => {
           handleFileChange(
             { target: { files: [pdfFile] } }, 
             "cv", 
-            (url) => {
-              cvPdfUrl = url;
-              console.log("✅ PDF generado y subido:", url);
+            (result) => {
+              if (result && result.url) {
+                cvPdfUrl = result.url;
+                cvMetadata = result.metadata;
+                console.log("✅ PDF generado y subido:", { url: cvPdfUrl, metadata: cvMetadata });
+              } else {
+                cvPdfUrl = result; // Fallback para compatibilidad
+              }
               resolve();
             }
           );
@@ -59,10 +65,16 @@ export const cvSubmissionService = {
       // Preparar datos según el modo
       const finalCvUrl = tabValue === 0 ? cvPdfUrl : newCv.cv;
       
+      // Si es CV subido manualmente, usar metadatos del estado si existen
+      if (tabValue !== 0 && newCv.cv_metadata) {
+        cvMetadata = newCv.cv_metadata;
+      }
+      
       console.log("📋 Datos del CV a guardar:", {
         modo: tabValue === 0 ? "Generado" : "Subido manualmente",
         cvUrl: finalCvUrl,
-        plantilla: tabValue === 0 ? selectedTemplate : "N/A"
+        plantilla: tabValue === 0 ? selectedTemplate : "N/A",
+        tieneMetadatos: !!cvMetadata
       });
       
       const cvData = {
@@ -74,7 +86,20 @@ export const cvSubmissionService = {
         plantillaSeleccionada: tabValue === 0 ? selectedTemplate : null,
         cvPdfUrl: finalCvUrl, // URL del PDF (compatibilidad futura)
         fechaCreacion: new Date().toISOString(),
-        versionCV: currentCv ? (currentCv.versionCV || 1) + 1 : 1
+        versionCV: currentCv ? (currentCv.versionCV || 1) + 1 : 1,
+        
+        // Metadatos de archivos (hibrida)
+        ...(cvMetadata && {
+          cv_metadata: {
+            fileId: cvMetadata.fileId,
+            name: cvMetadata.name,
+            size: cvMetadata.size,
+            syncedAt: cvMetadata.syncedAt || new Date().toISOString()
+          }
+        }),
+        ...(newCv.Foto_metadata && {
+          Foto_metadata: newCv.Foto_metadata
+        })
       };
       
       // Guardar en Firestore
